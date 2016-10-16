@@ -1,4 +1,4 @@
-package at.ac.tuwien.ac.heuoptws15;
+package at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.impl;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -7,8 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
-
-import sun.security.provider.certpath.AdjacencyList;
 
 public class KPMPInstance {
 	private int K;

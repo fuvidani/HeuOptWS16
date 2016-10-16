@@ -1,4 +1,4 @@
-package at.ac.tuwien.ac.heuoptws15;
+package at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.impl;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class KPMPSolutionWriter {
-	private class PageEntry {
+	public static class PageEntry {
 		public int a, b;
 		public int page;
 		
