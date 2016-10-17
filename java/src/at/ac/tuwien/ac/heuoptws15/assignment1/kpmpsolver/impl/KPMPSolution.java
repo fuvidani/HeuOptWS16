@@ -10,6 +10,16 @@ public class KPMPSolution {
     private List<KPMPSolutionWriter.PageEntry> edgePartition;
     private int numberOfPages;
 
+    public KPMPSolution() {
+
+    }
+
+    public KPMPSolution(List<Integer> spineOrder, List<KPMPSolutionWriter.PageEntry> edgePartition, int numberOfPages) {
+        this.spineOrder = spineOrder;
+        this.edgePartition = edgePartition;
+        this.numberOfPages = numberOfPages;
+    }
+
     public List<Integer> getSpineOrder() {
         return spineOrder;
     }

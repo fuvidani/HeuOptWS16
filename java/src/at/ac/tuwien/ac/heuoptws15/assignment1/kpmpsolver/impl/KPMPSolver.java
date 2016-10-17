@@ -23,8 +23,8 @@ public class KPMPSolver {
         this.instance = instance;
 
         // set default heuristics
-        this.spineOrderHeuristic = new KPMPSpineOrderDFSHeuristic(instance);
-        // TODO set default edge partition heuristic
+        this.spineOrderHeuristic = new KPMPSpineOrderDFSHeuristic();
+        this.edgePartitionHeuristic = new KPMPEdgePartitionCFLHeuristic();
     }
 
     public void registerSpineOrderHeuristic(KPMPSpineOrderHeuristic spineOrderHeuristic) {
@@ -39,7 +39,7 @@ public class KPMPSolver {
         KPMPSolution solution = new KPMPSolution();
 
         if (heuristicType == HeuristicType.SEPARATED) {
-            List<Integer> calculatedSpineOrder = spineOrderHeuristic.calculateSpineOrder();
+            List<Integer> calculatedSpineOrder = spineOrderHeuristic.calculateSpineOrder(instance);
             solution.setSpineOrder(calculatedSpineOrder);
             solution.setEdgePartition(edgePartitionHeuristic.calculateEdgePartition(instance,calculatedSpineOrder));
             solution.setNumberOfPages(instance.getK());
