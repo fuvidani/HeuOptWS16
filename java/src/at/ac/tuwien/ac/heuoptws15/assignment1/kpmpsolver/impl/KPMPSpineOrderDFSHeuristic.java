@@ -16,13 +16,11 @@ public class KPMPSpineOrderDFSHeuristic implements KPMPSpineOrderHeuristic {
     private int rootNodeIndex;
     private List<Integer> discoveredNodes = new ArrayList<>();
 
-    public KPMPSpineOrderDFSHeuristic(KPMPInstance instance) {
+    @Override
+    public List<Integer> calculateSpineOrder(KPMPInstance instance) {
         this.instance = instance;
         this.rootNodeIndex = instance.getNumVertices()/2;
-    }
 
-    @Override
-    public List<Integer> calculateSpineOrder() {
         DFS(rootNodeIndex);
 
         return spineOrder;

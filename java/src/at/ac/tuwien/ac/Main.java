@@ -5,6 +5,7 @@ import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.impl.*;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.SynchronousQueue;
 
 /**
  * <h4>About this class</h4>
@@ -18,7 +19,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            KPMPInstance instance = KPMPInstance.readInstance("C:\\Development\\workspaces\\TU\\HOT\\assignment1\\instances\\automatic-8.txt");
+            KPMPInstance instance = KPMPInstance.readInstance("C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\automatic-6.txt");
             System.out.println("K: " + instance.getK() + "\nVertices: " + instance.getNumVertices());
 
             /*List<List<Integer>> adjacencyList1 = instance.getAdjacencyList();
@@ -44,21 +45,13 @@ public class Main {
                 }
             }
 
-            //edgePart.get(8).page = 1;
+            System.out.println("crossing number before: " + new KPMPSolutionChecker().getCrossingNumber(new KPMPSolution(spineOrder, edgePart, instance.getK())));
 
+            long start = System.nanoTime();
+            KPMPSolution solution = new KPMPSolver(instance).solve();
 
-            System.out.println("crossing number: " + new KPMPSolutionChecker().getCrossingNumber(spineOrder, edgePart, instance.getK()));
-
-            KPMPSpineOrderDFSHeuristic heuristic = new KPMPSpineOrderDFSHeuristic(instance);
-
-            List<Integer> newSpineOrder = heuristic.calculateSpineOrder();
-            for (Integer i: newSpineOrder) {
-                System.out.print(i + " ");
-            }
-
-            KPMPEdgePartitionCFLHeuristic edgePartitionCFLHeuristic = new KPMPEdgePartitionCFLHeuristic();
-
-            edgePartitionCFLHeuristic.calculateEdgePartition(instance,newSpineOrder);
+            System.out.println("new number of crossings: " + new KPMPSolutionChecker().getCrossingNumber(solution));
+            System.out.println((System.nanoTime() - start) / 1000000000 + " seconds runtime");
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
