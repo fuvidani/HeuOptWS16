@@ -19,6 +19,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
+            // /Users/daniefuvesi/University/Masterstudium/1.\ Semester/Heuristic\ Optimization\ Techniques/Assignment\ 1/HeuOptWS16/instances/
             KPMPInstance instance = KPMPInstance.readInstance("C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\automatic-6.txt");
             System.out.println("K: " + instance.getK() + "\nVertices: " + instance.getNumVertices());
 
