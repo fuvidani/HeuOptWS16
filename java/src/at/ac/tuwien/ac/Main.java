@@ -2,10 +2,9 @@ package at.ac.tuwien.ac;
 
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.impl.*;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.SynchronousQueue;
 
 /**
  * <h4>About this class</h4>
@@ -17,44 +16,58 @@ import java.util.concurrent.SynchronousQueue;
  */
 public class Main {
 
+    private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
+    private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
+    //private static String inputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\";
+    //private static String outputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\solutions\\";
+
+
     public static void main(String[] args) {
         try {
-            // /Users/daniefuvesi/University/Masterstudium/1.\ Semester/Heuristic\ Optimization\ Techniques/Assignment\ 1/HeuOptWS16/instances/
-            KPMPInstance instance = KPMPInstance.readInstance("C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\automatic-6.txt");
-            System.out.println("K: " + instance.getK() + "\nVertices: " + instance.getNumVertices());
+            int instanceCounter = 1;
+            while (instanceCounter != 6) {
+                KPMPInstance instance = KPMPInstance.readInstance(inputPath +"automatic-"+instanceCounter+".txt");
+                System.out.println("Test Instance "+instanceCounter+ " - K: " + instance.getK() + ", Vertices: " + instance.getNumVertices());
 
-            /*List<List<Integer>> adjacencyList1 = instance.getAdjacencyList();
-            for (List<Integer> list : adjacencyList1) {
-                for (int i : list) {
-                    System.out.print(i + "\t");
+                List<Integer> spineOrder = new ArrayList<>();
+                for (int i = 0; i < instance.getNumVertices(); i++) {
+                    spineOrder.add(i);
                 }
-                System.out.println();
-            }*/
 
-            List<Integer> spineOrder = new ArrayList<>();
-            for (int i = 0; i < instance.getNumVertices(); i++) {
-                spineOrder.add(i);
-            }
-
-            List<List<Integer>> adjacencyList = instance.getAdjacencyList();
-            List<KPMPSolutionWriter.PageEntry> edgePart = new ArrayList<>();
-            for (int row = 0; row < adjacencyList.size(); row++) {
-                for (int j = 0; j < adjacencyList.get(row).size(); j++) {
-                    if (adjacencyList.get(row).get(j) > row) {
-                        edgePart.add(new KPMPSolutionWriter.PageEntry(row, adjacencyList.get(row).get(j), 0));
+                List<List<Integer>> adjacencyList = instance.getAdjacencyList();
+                List<KPMPSolutionWriter.PageEntry> edgePart = new ArrayList<>();
+                for (int row = 0; row < adjacencyList.size(); row++) {
+                    for (int j = 0; j < adjacencyList.get(row).size(); j++) {
+                        if (adjacencyList.get(row).get(j) > row) {
+                            edgePart.add(new KPMPSolutionWriter.PageEntry(row, adjacencyList.get(row).get(j), 0));
+                        }
                     }
                 }
+
+                int originalNumberOfCrossings = new KPMPSolutionChecker().getCrossingNumber(new KPMPSolution(spineOrder, edgePart, instance.getK()));
+                System.out.println("Number of crossings before: " + originalNumberOfCrossings);
+
+                KPMPSolver kpmpSolver = new KPMPSolver(instance, edgePart, originalNumberOfCrossings);
+                //kpmpSolver.registerSpineOrderHeuristic(new KPMPSpineOrderDFSHeuristic());                   // deterministic
+                //kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionCFLHeuristic());             // deterministic
+                kpmpSolver.registerSpineOrderHeuristic(new KPMPSpineOrderRandomDFSHeuristic());           // pseudo-random
+                kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomCFLHeuristic());       // pseudo-random
+                long start = System.nanoTime();
+                KPMPSolution solution = kpmpSolver.solve();
+
+                System.out.println("Number of crossings after: " + new KPMPSolutionChecker().getCrossingNumber(solution));
+                System.out.println("Runtime: " + (System.nanoTime() - start) / 1000000000 + " seconds\n\n\n");
+
+                KPMPSolutionWriter writer = new KPMPSolutionWriter(instance.getK());
+                writer.setSpineOrder(solution.getSpineOrder());
+                for (KPMPSolutionWriter.PageEntry pageEntry: solution.getEdgePartition()){
+                    writer.addEdgeOnPage(pageEntry.a,pageEntry.b,pageEntry.page);
+                }
+                writer.write(outputPath+"automatic-"+instanceCounter+".txt");
+                instanceCounter++;
             }
 
-            System.out.println("crossing number before: " + new KPMPSolutionChecker().getCrossingNumber(new KPMPSolution(spineOrder, edgePart, instance.getK())));
-
-            long start = System.nanoTime();
-            KPMPSolution solution = new KPMPSolver(instance).solve();
-
-            System.out.println("new number of crossings: " + new KPMPSolutionChecker().getCrossingNumber(solution));
-            System.out.println((System.nanoTime() - start) / 1000000000 + " seconds runtime");
-
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

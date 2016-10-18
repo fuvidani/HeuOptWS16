@@ -9,9 +9,12 @@ import java.util.List;
  * Created by David on 16.10.2016.
  */
 public class KPMPSolver {
+
     private KPMPInstance instance;
     private KPMPSpineOrderHeuristic spineOrderHeuristic;
     private KPMPEdgePartitionHeuristic edgePartitionHeuristic;
+    private List<KPMPSolutionWriter.PageEntry> originalEdgePartition;
+    private int originalNumberOfCrossings;
 
     public static HeuristicType heuristicType = HeuristicType.SEPARATED;
 
@@ -19,8 +22,10 @@ public class KPMPSolver {
         SEPARATED, COMBINED
     }
 
-    public KPMPSolver(KPMPInstance instance) {
+    public KPMPSolver(KPMPInstance instance, List<KPMPSolutionWriter.PageEntry> originalEdgePartition, int originalNumberOfCrossings) {
         this.instance = instance;
+        this.originalEdgePartition = originalEdgePartition;
+        this.originalNumberOfCrossings = originalNumberOfCrossings;
 
         // set default heuristics
         this.spineOrderHeuristic = new KPMPSpineOrderDFSHeuristic();
@@ -39,7 +44,7 @@ public class KPMPSolver {
         KPMPSolution solution = new KPMPSolution();
 
         if (heuristicType == HeuristicType.SEPARATED) {
-            List<Integer> calculatedSpineOrder = spineOrderHeuristic.calculateSpineOrder(instance);
+            List<Integer> calculatedSpineOrder = spineOrderHeuristic.calculateSpineOrder(instance,originalEdgePartition,originalNumberOfCrossings);
             solution.setSpineOrder(calculatedSpineOrder);
             solution.setEdgePartition(edgePartitionHeuristic.calculateEdgePartition(instance,calculatedSpineOrder));
             solution.setNumberOfPages(instance.getK());
