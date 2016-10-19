@@ -1,10 +1,14 @@
 package at.ac.tuwien.ac;
 
+import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.impl.KPMPEdgePartitionCFLHeuristic;
+import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.impl.KPMPEdgePartitionRandomCFLHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.impl.KPMPEdgePartitionRandomHeuristic;
+import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.spineordering.impl.KPMPSpineOrderDFSHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.spineordering.impl.KPMPSpineOrderRandomDFSHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils.*;
 
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +22,10 @@ import java.util.List;
  */
 public class Main {
 
+    public static final int secondsBeforeStop = 720;  // 720 ~ 12 minutes
+    public static final int secondsToWaitForImprovement = 120; // ~ 2 minutes
+
+    private static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.RANDOM;
     private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
     private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
     //private static String inputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\";
@@ -26,8 +34,8 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            int instanceCounter = 2;
-            while (instanceCounter != 3) {
+            int instanceCounter = 1;
+            while (instanceCounter != 6) {
                 KPMPInstance instance = KPMPInstance.readInstance(inputPath +"automatic-"+instanceCounter+".txt");
                 System.out.println("Test Instance "+instanceCounter+ " - K: " + instance.getK() + ", Vertices: " + instance.getNumVertices());
 
@@ -50,23 +58,33 @@ public class Main {
                 System.out.println("Number of crossings before: " + originalNumberOfCrossings);
 
                 KPMPSolver kpmpSolver = new KPMPSolver(instance, edgePart, originalNumberOfCrossings);
-                //kpmpSolver.registerSpineOrderHeuristic(new KPMPSpineOrderDFSHeuristic());                   // deterministic
-                //kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionCFLHeuristic());             // deterministic
-                kpmpSolver.registerSpineOrderHeuristic(new KPMPSpineOrderRandomDFSHeuristic());           // pseudo-random
-                //kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomCFLHeuristic());       // pseudo-random
-                kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomHeuristic());       // full pseudo-random
+                switch (heuristicStrategy){
+                    case DETERMINISTIC:
+                        kpmpSolver.registerSpineOrderHeuristic(new KPMPSpineOrderDFSHeuristic());
+                        kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionCFLHeuristic());
+                        break;
+                    case SEMI_RANDOM:
+                        kpmpSolver.registerSpineOrderHeuristic(new KPMPSpineOrderRandomDFSHeuristic());
+                        kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomCFLHeuristic());
+                        break;
+                    default: // RANDOM
+                        kpmpSolver.registerSpineOrderHeuristic(new KPMPSpineOrderRandomDFSHeuristic());
+                        kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomHeuristic());
+                        break;
+                }
                 long start = System.nanoTime();
                 KPMPSolution solution = kpmpSolver.solve();
+                System.out.println("Runtime: " + (System.nanoTime() - start) / 1000000000 + " seconds");
+                int numberOfCrossings = new KPMPSolutionChecker().getCrossingNumber(solution);
+                System.out.println("Number of crossings after: " + NumberFormat.getIntegerInstance().format(numberOfCrossings) + "\n\n\n");
 
-                System.out.println("Number of crossings after: " + new KPMPSolutionChecker().getCrossingNumber(solution));
-                System.out.println("Runtime: " + (System.nanoTime() - start) / 1000000000 + " seconds\n\n\n");
 
                 KPMPSolutionWriter writer = new KPMPSolutionWriter(instance.getK());
                 writer.setSpineOrder(solution.getSpineOrder());
                 for (KPMPSolutionWriter.PageEntry pageEntry: solution.getEdgePartition()){
                     writer.addEdgeOnPage(pageEntry.a,pageEntry.b,pageEntry.page);
                 }
-                writer.write(outputPath+"automatic-"+instanceCounter+".txt");
+                writer.write(outputPath+heuristicStrategy.getFolderPath()+"automatic-"+instanceCounter+"_"+numberOfCrossings+".txt");
                 instanceCounter++;
             }
 

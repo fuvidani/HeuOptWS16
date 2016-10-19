@@ -29,8 +29,9 @@ public class KPMPSpineOrderRandomDFSHeuristic extends AbstractKPMPSpineOrderHeur
         List<Integer> bestSpineOrder = null;
         int bestNumberOfCrossings = originalNumberOfCrossings;
         KPMPSolutionChecker solutionChecker = new KPMPSolutionChecker();
+        int time = forAllPages ? 60 : 30;
         long start = System.nanoTime();
-        while (((System.nanoTime()-start)/1000000000) < 60){
+        while (((System.nanoTime()-start)/1000000000) < time){
             this.random = new Random(System.currentTimeMillis());
             discoveredNodes = new ArrayList<>();
             spineOrder = new ArrayList<>();

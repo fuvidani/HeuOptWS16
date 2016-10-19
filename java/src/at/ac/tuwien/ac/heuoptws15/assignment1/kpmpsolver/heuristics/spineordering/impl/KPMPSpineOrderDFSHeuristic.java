@@ -27,7 +27,7 @@ public class KPMPSpineOrderDFSHeuristic extends AbstractKPMPSpineOrderHeuristic 
         spineOrder.add(nodeIndex);
 
         List<Integer> sortedNeighbours = instance.getAdjacencyList().get(nodeIndex);
-        sortedNeighbours.sort(((o1, o2) -> o1- o2));
+        sortedNeighbours.sort(((o1, o2) -> o1 - o2));
 
         for (Integer neighbourNode: sortedNeighbours) {
             if (!discoveredNodes.contains(neighbourNode)) {

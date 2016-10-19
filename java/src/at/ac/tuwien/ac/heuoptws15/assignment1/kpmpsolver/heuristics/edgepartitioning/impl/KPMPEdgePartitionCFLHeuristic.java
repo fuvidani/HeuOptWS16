@@ -1,5 +1,6 @@
 package at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.impl;
 
+import at.ac.tuwien.ac.Main;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.AbstractKPMPEdgePartitionHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils.KPMPSolutionChecker;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils.KPMPSolutionWriter;
@@ -9,6 +10,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import static java.util.stream.Collectors.toCollection;
+
 /**
  * Created by David on 16.10.2016.
  */
@@ -17,11 +20,7 @@ public class KPMPEdgePartitionCFLHeuristic extends AbstractKPMPEdgePartitionHeur
 
     protected List<KPMPSolutionWriter.PageEntry> moveEdges() {
         KPMPSolutionChecker solutionChecker = new KPMPSolutionChecker();
-        List<KPMPSolutionWriter.PageEntry> discoveredEdges = new ArrayList<>();
-        List<KPMPSolutionWriter.PageEntry> sortDiscoveredEdges = new ArrayList<>();
-
-        List<KPMPSolutionWriter.PageEntry> edgeList = new ArrayList<>();
-        edgeList.addAll(edgeConflictMap.keySet());
+        List<KPMPSolutionWriter.PageEntry> edgeList = edgeConflictMap.keySet().stream().map(KPMPSolutionWriter.PageEntry::clone).collect(toCollection(ArrayList::new));
 
         HashMap<Integer,Integer> pageCrossingsMap = new HashMap<>();
         for (int i = 0; i < instance.getK(); i++) {
@@ -35,10 +34,9 @@ public class KPMPEdgePartitionCFLHeuristic extends AbstractKPMPEdgePartitionHeur
         int counter = 0;
         Iterator<KPMPSolutionWriter.PageEntry> iterator =sortedEdgeConflictMap.keySet().iterator();
         long start = System.nanoTime();
-        while (counter < sortedEdgeConflictMap.size() && ((System.nanoTime()-start)/1000000000) < 780){
+        while (counter < sortedEdgeConflictMap.size() && ((System.nanoTime()-start)/1000000000) < Main.secondsBeforeStop){
             KPMPSolutionWriter.PageEntry currentEdge = iterator.next();
             int maxValue = edgeConflictMap.get(currentEdge);
-            discoveredEdges.add(currentEdge);
             for (int pageIndex = 0; pageIndex < instance.getK(); pageIndex++) {
                 if (currentEdge.page != pageIndex) {
                     edgeConflictMap.remove(currentEdge);
@@ -48,14 +46,13 @@ public class KPMPEdgePartitionCFLHeuristic extends AbstractKPMPEdgePartitionHeur
                     List<KPMPSolutionWriter.PageEntry> newList = new ArrayList<>();
                     newList.addAll(edgeConflictMap.keySet());
 
-                    int newNumberOfCrossings = solutionChecker.getCrossingNumberOfPage(spineOrder, newList, pageIndex);
-                    //int newNumberOfCrossings = solutionChecker.getCrossingNumberOfEdge(spineOrder, newList, pageIndex, currentEdge);
-                    if (newNumberOfCrossings - pageCrossingsMap.get(pageIndex) < maxValue) {
-                    //if (newNumberOfCrossings < maxValue) {
-                        pageCrossingsMap.put(pageIndex, newNumberOfCrossings);
-                        //pageCrossingsMap.put(pageIndex, pageCrossingsMap.get(pageIndex) + newNumberOfCrossings);
+                    //int newNumberOfCrossings = solutionChecker.getCrossingNumberOfPage(spineOrder, newList, pageIndex);
+                    int newNumberOfCrossings = solutionChecker.getCrossingNumberOfEdge(spineOrder, newList, pageIndex, currentEdge);
+                    //if (newNumberOfCrossings - pageCrossingsMap.get(pageIndex) < maxValue) {
+                    if (newNumberOfCrossings < maxValue) {
+                        //pageCrossingsMap.put(pageIndex, newNumberOfCrossings);
+                        pageCrossingsMap.put(pageIndex, pageCrossingsMap.get(pageIndex) + newNumberOfCrossings);
                         pageCrossingsMap.put(0, pageCrossingsMap.get(0) - maxValue);
-
                         break;
                     } else if (pageIndex == instance.getK() - 1) {
                         edgeConflictMap.remove(currentEdge);

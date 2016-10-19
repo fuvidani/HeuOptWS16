@@ -1,5 +1,6 @@
 package at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.impl;
 
+import at.ac.tuwien.ac.Main;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.AbstractKPMPEdgePartitionHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils.KPMPSolutionChecker;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils.KPMPSolutionWriter;
@@ -8,6 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+
+import static java.util.stream.Collectors.toCollection;
 
 /**
  * <h4>About this class</h4>
@@ -23,10 +26,8 @@ public class KPMPEdgePartitionRandomCFLHeuristic extends AbstractKPMPEdgePartiti
     protected List<KPMPSolutionWriter.PageEntry> moveEdges() {
         Random random = new Random(System.currentTimeMillis());
         KPMPSolutionChecker solutionChecker = new KPMPSolutionChecker();
-        List<KPMPSolutionWriter.PageEntry> discoveredEdges = new ArrayList<>();
 
-        List<KPMPSolutionWriter.PageEntry> edgeList = new ArrayList<>();
-        edgeList.addAll(edgeConflictMap.keySet());
+        List<KPMPSolutionWriter.PageEntry> edgeList = edgeConflictMap.keySet().stream().map(KPMPSolutionWriter.PageEntry::clone).collect(toCollection(ArrayList::new));
 
         HashMap<Integer,Integer> pageCrossingsMap = new HashMap<>();
         for (int i = 0; i < instance.getK(); i++) {
@@ -35,16 +36,15 @@ public class KPMPEdgePartitionRandomCFLHeuristic extends AbstractKPMPEdgePartiti
         HashMap<KPMPSolutionWriter.PageEntry, Integer> sortedEdgeConflictMap = edgeConflictMap;
         sortedEdgeConflictMap = removeZeroes(sortedEdgeConflictMap);
         //sortedEdgeConflictMap = sortByValue(sortedEdgeConflictMap);
-        List<KPMPSolutionWriter.PageEntry> keyList = new ArrayList<>(sortedEdgeConflictMap.keySet());
+        List<KPMPSolutionWriter.PageEntry> keyList = sortedEdgeConflictMap.keySet().stream().map(KPMPSolutionWriter.PageEntry::clone).collect(toCollection(ArrayList::new));;
         int size = keyList.size();
         int counter = 0;
         long start = System.nanoTime();
-        while (counter < size && ((System.nanoTime()-start)/1000000000) < 780){
+        while (counter < size && ((System.nanoTime()-start)/1000000000) < Main.secondsBeforeStop){
             int index = random.nextInt(size-counter);
             KPMPSolutionWriter.PageEntry currentEdge = keyList.get(index);
             keyList.remove(index);
             int maxValue = edgeConflictMap.get(currentEdge);
-            discoveredEdges.add(currentEdge);
             for (int pageIndex = 0; pageIndex < instance.getK(); pageIndex++) {
                 if (currentEdge.page != pageIndex) {
                     edgeConflictMap.remove(currentEdge);

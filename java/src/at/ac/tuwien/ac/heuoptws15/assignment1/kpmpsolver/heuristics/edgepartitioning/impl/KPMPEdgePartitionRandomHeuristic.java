@@ -1,5 +1,6 @@
 package at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.impl;
 
+import at.ac.tuwien.ac.Main;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.AbstractKPMPEdgePartitionHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.spineordering.AbstractKPMPSpineOrderHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.spineordering.impl.KPMPSpineOrderRandomDFSHeuristic;
@@ -22,6 +23,7 @@ public class KPMPEdgePartitionRandomHeuristic extends AbstractKPMPEdgePartitionH
         Random random;
         KPMPSolutionChecker solutionChecker = new KPMPSolutionChecker();
 
+        // sort for faster iteration
         edgeConflictMap = sortByValue(edgeConflictMap);
         List<KPMPSolutionWriter.PageEntry> edgeList = edgeConflictMap.keySet().stream().map(KPMPSolutionWriter.PageEntry::clone).collect(toCollection(ArrayList::new));
         List<KPMPSolutionWriter.PageEntry> bestSolution = edgeList.stream().map(KPMPSolutionWriter.PageEntry::clone).collect(toCollection(ArrayList::new));
@@ -45,11 +47,11 @@ public class KPMPEdgePartitionRandomHeuristic extends AbstractKPMPEdgePartitionH
                 timeOfLastImprovement = System.nanoTime();
             }
             // assign edges randomly
-            random = new Random(System.currentTimeMillis());    // re-seed generator before each run
+            // re-seed generator before each run
+            random = new Random(System.currentTimeMillis());
             for (KPMPSolutionWriter.PageEntry edge : edgeList) {
                 if (edgeConflictMap.get(edge) > 0) {
-                    int index = random.nextInt(instance.getK());
-                    edge.page = index;
+                    edge.page = random.nextInt(instance.getK());
                 }
             }
             // check solution
@@ -60,9 +62,9 @@ public class KPMPEdgePartitionRandomHeuristic extends AbstractKPMPEdgePartitionH
                 timeOfLastImprovement = System.nanoTime();
             }
             long elapsedSeconds = ((System.nanoTime()-start)/1000000000);
-            if (elapsedSeconds > 720){
+            if (elapsedSeconds > Main.secondsBeforeStop){
                 makeAnotherRun = false;
-            }else if(((System.nanoTime()-timeOfLastImprovement)/1000000000) > 90){
+            }else if(((System.nanoTime()-timeOfLastImprovement)/1000000000) > Main.secondsToWaitForImprovement){
                 rearrangeSpineOrder = true;
             }
             edgeList = originalList.stream().map(KPMPSolutionWriter.PageEntry::clone).collect(toCollection(ArrayList::new));

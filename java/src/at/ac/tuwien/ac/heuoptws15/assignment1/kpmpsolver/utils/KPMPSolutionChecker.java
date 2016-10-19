@@ -134,31 +134,29 @@ public class KPMPSolutionChecker {
         }
 
         for (Integer index : spineOrder) {
-            for (KPMPSolutionWriter.PageEntry edge2 : edges) {
-                int indexOfEdge1A = indexOfEdgeA;
-                int indexOfEdge1B = indexOfEdgeB;
-                int indexOfEdge2A = spineOrderMap.get(edge2.a);
-                int indexOfEdge2B = spineOrderMap.get(edge2.b);
-                if (indexOfEdge1A > indexOfEdge1B) {
-                    int temp = indexOfEdge1A;
-                    indexOfEdge1A = indexOfEdge1B;
-                    indexOfEdge1B = temp;
-                }
-                if (indexOfEdge2A > indexOfEdge2B) {
-                    int temp = indexOfEdge2A;
-                    indexOfEdge2A = indexOfEdge2B;
-                    indexOfEdge2B = temp;
-                }
+            if (index == indexOfEdgeA) {
+                for (KPMPSolutionWriter.PageEntry edge2 : edges) {
+                    int indexOfEdge1A = indexOfEdgeA;
+                    int indexOfEdge1B = indexOfEdgeB;
+                    int indexOfEdge2A = spineOrderMap.get(edge2.a);
+                    int indexOfEdge2B = spineOrderMap.get(edge2.b);
+                    if (indexOfEdge1A > indexOfEdge1B) {
+                        int temp = indexOfEdge1A;
+                        indexOfEdge1A = indexOfEdge1B;
+                        indexOfEdge1B = temp;
+                    }
+                    if (indexOfEdge2A > indexOfEdge2B) {
+                        int temp = indexOfEdge2A;
+                        indexOfEdge2A = indexOfEdge2B;
+                        indexOfEdge2B = temp;
+                    }
 
-                if (indexOfEdge2B <= indexOfEdge1A || indexOfEdge2A >= indexOfEdge1B) {
-                    break;
-                }
-
-                if (indexOfEdge2B > indexOfEdge1A){
-                    if (indexOfEdge2A > indexOfEdge1A) {
-                        //if (edge1.a < edge2.a && edge1.a < edge1.b && edge1.a < edge2.b && edge2.a < edge1.b && edge2.a < edge2.b && edge1.b < edge2.b){
-                        if (indexOfEdge1A < indexOfEdge2A && indexOfEdge1A < indexOfEdge1B && indexOfEdge1A < indexOfEdge2B && indexOfEdge2A < indexOfEdge1B && indexOfEdge2A < indexOfEdge2B && indexOfEdge1B < indexOfEdge2B) {
-                            result++;
+                    if (indexOfEdge2B > indexOfEdge1A) {
+                        if (indexOfEdge2A > indexOfEdge1A) {
+                            //if (edge1.a < edge2.a && edge1.a < edge1.b && edge1.a < edge2.b && edge2.a < edge1.b && edge2.a < edge2.b && edge1.b < edge2.b){
+                            if (indexOfEdge1A < indexOfEdge2A && indexOfEdge1A < indexOfEdge1B && indexOfEdge1A < indexOfEdge2B && indexOfEdge2A < indexOfEdge1B && indexOfEdge2A < indexOfEdge2B && indexOfEdge1B < indexOfEdge2B) {
+                                result++;
+                            }
                         }
                     }
                 }
