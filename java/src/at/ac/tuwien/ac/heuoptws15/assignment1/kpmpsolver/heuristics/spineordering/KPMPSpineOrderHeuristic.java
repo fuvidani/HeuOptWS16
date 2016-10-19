@@ -28,9 +28,12 @@ public interface KPMPSpineOrderHeuristic {
      *                              of the graph
      * @param originalNumberOfCrossings the initial number of crossings
      *                                  the graph has
+     * @param forAllPages flag to indicate whether the number of crossings
+     *                    should be calculated only for the first (0) page
+     *                    or across all pages
      * @return valid order of vertices as the spine of the "book"
      */
-    List<Integer> calculateSpineOrder(KPMPInstance instance,  List<KPMPSolutionWriter.PageEntry> originalEdgePartition, int originalNumberOfCrossings);
+    List<Integer> calculateSpineOrder(KPMPInstance instance,  List<KPMPSolutionWriter.PageEntry> originalEdgePartition, int originalNumberOfCrossings, boolean forAllPages);
 
     /**
      * Returns the number of crossings the

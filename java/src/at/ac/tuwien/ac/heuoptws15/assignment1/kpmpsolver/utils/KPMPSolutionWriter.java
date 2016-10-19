@@ -1,15 +1,11 @@
 package at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 
 public class KPMPSolutionWriter {
-	public static class PageEntry {
+	public static class PageEntry implements Cloneable{
 		public int a, b;
 		public int page;
 		
@@ -17,6 +13,30 @@ public class KPMPSolutionWriter {
 			this.a = a;
 			this.b = b;
 			this.page = page;
+		}
+
+		@Override
+		public PageEntry clone() {
+			return new PageEntry(this.a,this.b,this.page);
+		}
+
+
+		@Override
+		public int hashCode() {
+			//return super.hashCode();
+			return this.a+this.b+this.page;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof PageEntry){
+				PageEntry entry = (PageEntry)obj;
+				if (entry.a == this.a && entry.b == this.b && entry.page == this.page){
+					return true;
+				}
+				return false;
+			}
+			return false;
 		}
 	}
 	

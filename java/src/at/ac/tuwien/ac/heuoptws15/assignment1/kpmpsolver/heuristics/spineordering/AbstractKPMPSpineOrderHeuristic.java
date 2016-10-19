@@ -6,7 +6,6 @@ import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils.KPMPSolutionWrite
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * <h4>Abstract Spine Order Heuristic for the Interface</h4>
@@ -24,7 +23,8 @@ public abstract class AbstractKPMPSpineOrderHeuristic implements KPMPSpineOrderH
     protected List<Integer> discoveredNodes = new ArrayList<>();
     protected List<KPMPSolutionWriter.PageEntry> originalEdgePartition;
     protected int originalNumberOfCrossings;
-    protected final Logger LOGGER = Logger.getLogger(AbstractKPMPSpineOrderHeuristic.class.getName());
+    protected int numberOfCrossingsForNewSpineOrder = -1;
+    protected boolean forAllPages;
 
     /**
      * Calculates the new spine order depending
@@ -36,19 +36,22 @@ public abstract class AbstractKPMPSpineOrderHeuristic implements KPMPSpineOrderH
     protected abstract List<Integer> calculateSpineOrder();
 
     @Override
-    public List<Integer> calculateSpineOrder(KPMPInstance instance, List<KPMPSolutionWriter.PageEntry> originalEdgePartition, int originalNumberOfCrossings) {
+    public List<Integer> calculateSpineOrder(KPMPInstance instance, List<KPMPSolutionWriter.PageEntry> originalEdgePartition, int originalNumberOfCrossings, boolean forAllPages) {
         this.instance = instance;
         this.originalEdgePartition = originalEdgePartition;
         this.originalNumberOfCrossings = originalNumberOfCrossings;
-        List<Integer> result = calculateSpineOrder();
-        LOGGER.info("Spine Order calculated.");
-        return result;
+        this.forAllPages = forAllPages;
+        return calculateSpineOrder();
     }
 
 
     @Override
     public int getNumberOfCrossingsForNewSpineOrder() {
-        return new KPMPSolutionChecker().getCrossingNumberOfPage(spineOrder,originalEdgePartition,0);
+        if (numberOfCrossingsForNewSpineOrder == -1){
+            return new KPMPSolutionChecker().getCrossingNumberOfPage(spineOrder,originalEdgePartition,0);
+        }else {
+            return numberOfCrossingsForNewSpineOrder;
+        }
     }
 
 }

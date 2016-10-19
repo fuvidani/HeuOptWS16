@@ -1,132 +1,72 @@
 package at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.impl;
 
-import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.KPMPEdgePartitionHeuristic;
-import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils.KPMPInstance;
+import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.AbstractKPMPEdgePartitionHeuristic;
+import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.spineordering.AbstractKPMPSpineOrderHeuristic;
+import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.spineordering.impl.KPMPSpineOrderRandomDFSHeuristic;
+import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils.KPMPSolution;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils.KPMPSolutionChecker;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils.KPMPSolutionWriter;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import static java.util.stream.Collectors.toCollection;
 
 /**
  * Created by David on 19.10.2016.
  */
-public class KPMPEdgePartitionRandomHeuristic implements KPMPEdgePartitionHeuristic {
-    private HashMap<KPMPSolutionWriter.PageEntry, Integer> edgeConflictMap = new HashMap<>();
-    private KPMPInstance instance;
-    private List<Integer> spineOrder;
-    private Random random;
+public class KPMPEdgePartitionRandomHeuristic extends AbstractKPMPEdgePartitionHeuristic {
 
-    @Override
-    public List<KPMPSolutionWriter.PageEntry> calculateEdgePartition(KPMPInstance instance, List<Integer> spineOrder) {
-        this.instance = instance;
-        this.spineOrder = spineOrder;
-        this.random = new Random(System.currentTimeMillis());
-
-        this.calculateConflicts();
-        this.moveEdges();
-
-        List<KPMPSolutionWriter.PageEntry> edgeList = new ArrayList<>();
-        edgeList.addAll(edgeConflictMap.keySet());
-
-        return edgeList;
-    }
-
-    private void moveEdges() {
+    protected List<KPMPSolutionWriter.PageEntry> moveEdges() {
+        Random random;
         KPMPSolutionChecker solutionChecker = new KPMPSolutionChecker();
-        List<KPMPSolutionWriter.PageEntry> discoveredEdges = new ArrayList<>();
 
-        List<KPMPSolutionWriter.PageEntry> edgeList = new ArrayList<>();
-        edgeList.addAll(edgeConflictMap.keySet());
-
-        HashMap<Integer, Integer> pageCrossingsMap = new HashMap<>();
-        for (int i = 0; i < instance.getK(); i++) {
-            pageCrossingsMap.put(i, solutionChecker.getCrossingNumberOfPage(spineOrder, edgeList, i));
-        }
-        HashMap<KPMPSolutionWriter.PageEntry, Integer> sortedEdgeConflictMap = edgeConflictMap;
-        sortedEdgeConflictMap = removeZeroes(sortedEdgeConflictMap);
-        //sortedEdgeConflictMap = sortByValue(sortedEdgeConflictMap);
-        List<KPMPSolutionWriter.PageEntry> keyList = new ArrayList<>(sortedEdgeConflictMap.keySet());
-        int size = keyList.size();
-        int counter = 0;
+        edgeConflictMap = sortByValue(edgeConflictMap);
+        List<KPMPSolutionWriter.PageEntry> edgeList = edgeConflictMap.keySet().stream().map(KPMPSolutionWriter.PageEntry::clone).collect(toCollection(ArrayList::new));
+        List<KPMPSolutionWriter.PageEntry> bestSolution = edgeList.stream().map(KPMPSolutionWriter.PageEntry::clone).collect(toCollection(ArrayList::new));
+        List<KPMPSolutionWriter.PageEntry> originalList = edgeList.stream().map(KPMPSolutionWriter.PageEntry::clone).collect(toCollection(ArrayList::new));
+        int bestNumberOfCrossings = currentNumberOfCrossings;
+        boolean makeAnotherRun = true;
+        boolean rearrangeSpineOrder = false;
+        long timeOfLastImprovement = System.nanoTime();
         long start = System.nanoTime();
-
-        for (KPMPSolutionWriter.PageEntry edge : keyList) {
-            int index = random.nextInt(instance.getK()) + 1;
-            edge.page = index;
-        }
-    }
-
-    private void calculateConflicts() {
-        List<List<Integer>> adjacencyList = instance.getAdjacencyList();
-        List<KPMPSolutionWriter.PageEntry> edges = new ArrayList<>();
-        for (int row = 0; row < adjacencyList.size(); row++) {
-            for (int j = 0; j < adjacencyList.get(row).size(); j++) {
-                if (adjacencyList.get(row).get(j) > row) {
-                    edges.add(new KPMPSolutionWriter.PageEntry(row, adjacencyList.get(row).get(j), 0));
+        while (makeAnotherRun) {
+            // shuffle spine order if there hasn't been any improvement for 90 seconds
+            if (rearrangeSpineOrder){
+                rearrangeSpineOrder = false;
+                AbstractKPMPSpineOrderHeuristic spineOrderHeuristic = new KPMPSpineOrderRandomDFSHeuristic();
+                List<Integer> newSpineOrder = spineOrderHeuristic.calculateSpineOrder(instance,bestSolution,bestNumberOfCrossings, true);
+                int newSpineOrderCrossings = spineOrderHeuristic.getNumberOfCrossingsForNewSpineOrder();
+                if (newSpineOrderCrossings < bestNumberOfCrossings){
+                    bestNumberOfCrossings = newSpineOrderCrossings;
+                    spineOrder = newSpineOrder.stream().collect(toCollection(ArrayList::new));
+                }
+                timeOfLastImprovement = System.nanoTime();
+            }
+            // assign edges randomly
+            random = new Random(System.currentTimeMillis());    // re-seed generator before each run
+            for (KPMPSolutionWriter.PageEntry edge : edgeList) {
+                if (edgeConflictMap.get(edge) > 0) {
+                    int index = random.nextInt(instance.getK());
+                    edge.page = index;
                 }
             }
-        }
-
-        for (KPMPSolutionWriter.PageEntry edge : edges) {
-            edgeConflictMap.put(edge, 0);
-        }
-
-        HashMap<Integer, Integer> spineOrderMap = new HashMap<>();
-
-        for (int i = 0; i < spineOrder.size(); i++) {
-            spineOrderMap.put(spineOrder.get(i), i);
-        }
-
-        for (Integer index : spineOrder) {
-            for (KPMPSolutionWriter.PageEntry edge1 : edges) {
-
-                if (edge1.a == index) {
-                    for (KPMPSolutionWriter.PageEntry edge2 : edges) {
-                        int indexOfEdge1A = spineOrderMap.get(edge1.a);
-                        int indexOfEdge1B = spineOrderMap.get(edge1.b);
-                        int indexOfEdge2A = spineOrderMap.get(edge2.a);
-                        int indexOfEdge2B = spineOrderMap.get(edge2.b);
-                        if (indexOfEdge1A > indexOfEdge1B) {
-                            int temp = indexOfEdge1A;
-                            indexOfEdge1A = indexOfEdge1B;
-                            indexOfEdge1B = temp;
-                        }
-                        if (indexOfEdge2A > indexOfEdge2B) {
-                            int temp = indexOfEdge2A;
-                            indexOfEdge2A = indexOfEdge2B;
-                            indexOfEdge2B = temp;
-                        }
-                        if (indexOfEdge2A > indexOfEdge1A) {
-                            if (indexOfEdge1A < indexOfEdge2A && indexOfEdge1A < indexOfEdge1B && indexOfEdge1A < indexOfEdge2B && indexOfEdge2A < indexOfEdge1B && indexOfEdge2A < indexOfEdge2B && indexOfEdge1B < indexOfEdge2B) {
-                                edgeConflictMap.put(edge2, edgeConflictMap.get(edge2) + 1);
-                            }
-                        }
-                    }
-                }
+            // check solution
+            int crossings = solutionChecker.getCrossingNumber(new KPMPSolution(spineOrder,edgeList,instance.getK()));
+            if (crossings < bestNumberOfCrossings){
+                bestSolution = edgeList.stream().map(KPMPSolutionWriter.PageEntry::clone).collect(toCollection(ArrayList::new));
+                bestNumberOfCrossings = crossings;
+                timeOfLastImprovement = System.nanoTime();
             }
-        }
-    }
-
-    public HashMap<KPMPSolutionWriter.PageEntry, Integer> sortByValue(HashMap<KPMPSolutionWriter.PageEntry, Integer> map) {
-        return map.entrySet()
-                .stream()
-                .sorted(Map.Entry.comparingByValue(Collections.reverseOrder()))
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (e1, e2) -> e1,
-                        LinkedHashMap::new
-                ));
-    }
-
-    private HashMap<KPMPSolutionWriter.PageEntry, Integer> removeZeroes(HashMap<KPMPSolutionWriter.PageEntry, Integer> map) {
-        HashMap<KPMPSolutionWriter.PageEntry, Integer> result = new HashMap<>();
-        for (KPMPSolutionWriter.PageEntry pageEntry : map.keySet()) {
-            if (map.get(pageEntry) > 0) {
-                result.put(pageEntry, map.get(pageEntry));
+            long elapsedSeconds = ((System.nanoTime()-start)/1000000000);
+            if (elapsedSeconds > 720){
+                makeAnotherRun = false;
+            }else if(((System.nanoTime()-timeOfLastImprovement)/1000000000) > 90){
+                rearrangeSpineOrder = true;
             }
+            edgeList = originalList.stream().map(KPMPSolutionWriter.PageEntry::clone).collect(toCollection(ArrayList::new));
         }
-        return result;
+        return bestSolution;
     }
 }

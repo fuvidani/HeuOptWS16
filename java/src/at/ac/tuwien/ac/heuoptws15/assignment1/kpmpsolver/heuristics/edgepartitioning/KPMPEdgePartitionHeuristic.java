@@ -23,9 +23,26 @@ public interface KPMPEdgePartitionHeuristic {
      *                 instance
      * @param spineOrder a valid order of vertices being
      *                   the spine of the graph
+     * @param currentNumberOfCrossings the number of crossings
+     *                                 the current spine order
+     *                                 and edge partitioning
+     *                                 have
      * @return an edge partitioning with much less crossings
      * than the original one; best-case: partitioning with
      * the minimum number of crossings
      */
-    List<KPMPSolutionWriter.PageEntry> calculateEdgePartition(KPMPInstance instance, List<Integer> spineOrder);
+    List<KPMPSolutionWriter.PageEntry> calculateEdgePartition(KPMPInstance instance, List<Integer> spineOrder, int currentNumberOfCrossings);
+
+    /**
+     * Returns the spine order of the current solution.
+     *
+     * The implementation of the algorithm may re-arrange
+     * the spine order that, is why the caller needs
+     * to be able to obtain the new order. Otherwise
+     * it simply remains the same.
+     *
+     * @return list of integers being the
+     * spine of the graph
+     */
+     List<Integer> getSpineOrder();
 }
