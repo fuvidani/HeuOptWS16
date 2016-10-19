@@ -40,6 +40,8 @@ public class KPMPSpineOrderRandomDFSHeuristic extends AbstractKPMPSpineOrderHeur
                 bestSpineOrder = spineOrder;
             }
         }
+        
+        System.out.println("Number of crossings after spine order calculation: " + bestNumberOfCrossings);
         return bestSpineOrder;
     }
 

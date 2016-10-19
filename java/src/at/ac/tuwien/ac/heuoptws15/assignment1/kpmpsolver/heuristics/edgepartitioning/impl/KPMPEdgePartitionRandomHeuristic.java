@@ -52,7 +52,7 @@ public class KPMPEdgePartitionRandomHeuristic implements KPMPEdgePartitionHeuris
         long start = System.nanoTime();
 
         for (KPMPSolutionWriter.PageEntry edge : keyList) {
-            int index = random.nextInt(3) + 1;
+            int index = random.nextInt(instance.getK()) + 1;
             edge.page = index;
         }
     }

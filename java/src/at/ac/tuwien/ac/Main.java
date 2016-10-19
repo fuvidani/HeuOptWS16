@@ -30,7 +30,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             int instanceCounter = 1;
-            while (instanceCounter != 6) {
+            while (instanceCounter != 11) {
                 KPMPInstance instance = KPMPInstance.readInstance(inputPath +"automatic-"+instanceCounter+".txt");
                 System.out.println("Test Instance "+instanceCounter+ " - K: " + instance.getK() + ", Vertices: " + instance.getNumVertices());
 
@@ -53,11 +53,11 @@ public class Main {
                 System.out.println("Number of crossings before: " + originalNumberOfCrossings);
 
                 KPMPSolver kpmpSolver = new KPMPSolver(instance, edgePart, originalNumberOfCrossings);
-                kpmpSolver.registerSpineOrderHeuristic(new KPMPSpineOrderDFSHeuristic());                   // deterministic
-                kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionCFLHeuristic());             // deterministic
-                //kpmpSolver.registerSpineOrderHeuristic(new KPMPSpineOrderRandomDFSHeuristic());           // pseudo-random
+                //kpmpSolver.registerSpineOrderHeuristic(new KPMPSpineOrderDFSHeuristic());                   // deterministic
+                //kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionCFLHeuristic());             // deterministic
+                kpmpSolver.registerSpineOrderHeuristic(new KPMPSpineOrderRandomDFSHeuristic());           // pseudo-random
                 //kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomCFLHeuristic());       // pseudo-random
-                //kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomHeuristic());       // full pseudo-random
+                kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomHeuristic());       // full pseudo-random
                 long start = System.nanoTime();
                 KPMPSolution solution = kpmpSolver.solve();
 
