@@ -1,5 +1,7 @@
 package at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils;
 
+import java.io.File;
+
 /**
  * <h4>About this class</h4>
  * <p>Description</p>
@@ -10,9 +12,9 @@ package at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils;
  */
 public enum HeuristicStrategy {
 
-    DETERMINISTIC("deterministic/"),
-    SEMI_RANDOM("semi_random/"),
-    RANDOM("random/");
+    DETERMINISTIC("deterministic" + File.separator),
+    SEMI_RANDOM("semi_random" + File.separator),
+    RANDOM("random" + File.separator);
 
     private String folderPath;
 

@@ -36,7 +36,11 @@ public class KPMPEdgePartitionCFLHeuristic extends AbstractKPMPEdgePartitionHeur
         long start = System.nanoTime();
         while (counter < sortedEdgeConflictMap.size() && ((System.nanoTime()-start)/1000000000) < Main.secondsBeforeStop){
             KPMPSolutionWriter.PageEntry currentEdge = iterator.next();
-            int maxValue = edgeConflictMap.get(currentEdge);
+            List<KPMPSolutionWriter.PageEntry> newList1 = new ArrayList<>();
+            newList1.addAll(edgeConflictMap.keySet());
+            int maxValue = solutionChecker.getCrossingNumberOfEdge(spineOrder, newList1, 0, currentEdge);
+            int bestKIndex = 0;
+            int bestKCrossingNumber = maxValue;
             for (int pageIndex = 0; pageIndex < instance.getK(); pageIndex++) {
                 if (currentEdge.page != pageIndex) {
                     edgeConflictMap.remove(currentEdge);
@@ -49,18 +53,31 @@ public class KPMPEdgePartitionCFLHeuristic extends AbstractKPMPEdgePartitionHeur
                     //int newNumberOfCrossings = solutionChecker.getCrossingNumberOfPage(spineOrder, newList, pageIndex);
                     int newNumberOfCrossings = solutionChecker.getCrossingNumberOfEdge(spineOrder, newList, pageIndex, currentEdge);
                     //if (newNumberOfCrossings - pageCrossingsMap.get(pageIndex) < maxValue) {
-                    if (newNumberOfCrossings < maxValue) {
+                    if (newNumberOfCrossings < bestKCrossingNumber) {
+                        bestKIndex = pageIndex;
+                        bestKCrossingNumber = newNumberOfCrossings;
                         //pageCrossingsMap.put(pageIndex, newNumberOfCrossings);
-                        pageCrossingsMap.put(pageIndex, pageCrossingsMap.get(pageIndex) + newNumberOfCrossings);
-                        pageCrossingsMap.put(0, pageCrossingsMap.get(0) - maxValue);
-                        break;
-                    } else if (pageIndex == instance.getK() - 1) {
-                        edgeConflictMap.remove(currentEdge);
-                        currentEdge.page = 0;
-                        edgeConflictMap.put(currentEdge, maxValue);
+                        //pageCrossingsMap.put(pageIndex, pageCrossingsMap.get(pageIndex) + newNumberOfCrossings);
+                        //pageCrossingsMap.put(0, pageCrossingsMap.get(0) - maxValue);
+
+
                     }
+                    edgeConflictMap.remove(currentEdge);
+                    currentEdge.page = 0;
+                    edgeConflictMap.put(currentEdge, maxValue);
                 }
             }
+            if (bestKIndex != 0){
+                pageCrossingsMap.put(bestKIndex, pageCrossingsMap.get(bestKIndex) + bestKCrossingNumber);
+                pageCrossingsMap.put(0, pageCrossingsMap.get(0) - maxValue);
+
+                edgeConflictMap.remove(currentEdge);
+                currentEdge.page = bestKIndex;
+                edgeConflictMap.put(currentEdge, bestKCrossingNumber);
+            } else {
+                pageCrossingsMap.put(bestKIndex, pageCrossingsMap.get(bestKIndex) + bestKCrossingNumber);
+            }
+
             counter++;
         }
         return new ArrayList<>(edgeConflictMap.keySet());
