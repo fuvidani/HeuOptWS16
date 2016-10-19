@@ -1,6 +1,11 @@
 package at.ac.tuwien.ac;
 
-import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.impl.*;
+import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.impl.KPMPEdgePartitionCFLHeuristic;
+import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.impl.KPMPEdgePartitionRandomCFLHeuristic;
+import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.impl.KPMPEdgePartitionRandomHeuristic;
+import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.spineordering.impl.KPMPSpineOrderDFSHeuristic;
+import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.spineordering.impl.KPMPSpineOrderRandomDFSHeuristic;
+import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,10 +21,10 @@ import java.util.List;
  */
 public class Main {
 
-    private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
-    private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
-    //private static String inputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\";
-    //private static String outputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\solutions\\";
+    //private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
+    //private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
+    private static String inputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\";
+    private static String outputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\solutions\\";
 
 
     public static void main(String[] args) {
@@ -48,10 +53,11 @@ public class Main {
                 System.out.println("Number of crossings before: " + originalNumberOfCrossings);
 
                 KPMPSolver kpmpSolver = new KPMPSolver(instance, edgePart, originalNumberOfCrossings);
-                //kpmpSolver.registerSpineOrderHeuristic(new KPMPSpineOrderDFSHeuristic());                   // deterministic
-                //kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionCFLHeuristic());             // deterministic
-                kpmpSolver.registerSpineOrderHeuristic(new KPMPSpineOrderRandomDFSHeuristic());           // pseudo-random
-                kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomCFLHeuristic());       // pseudo-random
+                kpmpSolver.registerSpineOrderHeuristic(new KPMPSpineOrderDFSHeuristic());                   // deterministic
+                kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionCFLHeuristic());             // deterministic
+                //kpmpSolver.registerSpineOrderHeuristic(new KPMPSpineOrderRandomDFSHeuristic());           // pseudo-random
+                //kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomCFLHeuristic());       // pseudo-random
+                //kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomHeuristic());       // full pseudo-random
                 long start = System.nanoTime();
                 KPMPSolution solution = kpmpSolver.solve();
 
