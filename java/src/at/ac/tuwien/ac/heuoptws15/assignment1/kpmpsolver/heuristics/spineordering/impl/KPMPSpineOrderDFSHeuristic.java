@@ -2,7 +2,10 @@ package at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.spineorderi
 
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.spineordering.AbstractKPMPSpineOrderHeuristic;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static java.util.stream.Collectors.toCollection;
 
 /**
  * Created by David on 16.10.2016.
@@ -11,6 +14,13 @@ public class KPMPSpineOrderDFSHeuristic extends AbstractKPMPSpineOrderHeuristic 
 
     @Override
     protected List<Integer> calculateSpineOrder() {
+        List<List<Integer>> adjacencyList = instance.getAdjacencyList().stream().collect(toCollection(ArrayList::new));
+        for (int index = 0; index < adjacencyList.size(); index++){
+            if (adjacencyList.get(index).isEmpty()){
+                spineOrder.add(index);
+                discoveredNodes.add(index);
+            }
+        }
         this.rootNodeIndex = instance.getNumVertices()/2;
         DFS(rootNodeIndex);
         return spineOrder;

@@ -22,19 +22,19 @@ import java.util.List;
  */
 public class Main {
 
-    public static final int secondsBeforeStop = 720;  // 720 ~ 12 minutes
-    public static final int secondsToWaitForImprovement = 120; // ~ 2 minutes
+    public static final int secondsBeforeStop = 120;  // 720 ~ 12 minutes
+    public static final int secondsToWaitForImprovement = 10; // ~ 2 minutes
 
-    private static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.DETERMINISTIC;
-    //private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
-    //private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
-    private static String inputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\";
-    private static String outputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\solutions\\";
+    private static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.RANDOM;
+    private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
+    private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
+    //private static String inputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\";
+    //private static String outputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\solutions\\";
 
 
     public static void main(String[] args) {
         try {
-            int instanceCounter = 1;
+            int instanceCounter = 7;
             while (instanceCounter != 11) {
                 KPMPInstance instance = KPMPInstance.readInstance(inputPath +"automatic-"+instanceCounter+".txt");
                 System.out.println("Test Instance "+instanceCounter+ " - K: " + instance.getK() + ", Vertices: " + instance.getNumVertices());

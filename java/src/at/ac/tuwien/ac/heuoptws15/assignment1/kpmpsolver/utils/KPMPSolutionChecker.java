@@ -26,34 +26,32 @@ public class KPMPSolutionChecker {
                 }
             }
 
-            for (Integer index : solution.getSpineOrder()) {
-                for (KPMPSolutionWriter.PageEntry edge1 : edges) {
-                    if (edge1.a == index) {
-                        for (KPMPSolutionWriter.PageEntry edge2 : edges) {
-                            int indexOfEdge1A = spineOrderMap.get(edge1.a);
-                            int indexOfEdge1B = spineOrderMap.get(edge1.b);
-                            int indexOfEdge2A = spineOrderMap.get(edge2.a);
-                            int indexOfEdge2B = spineOrderMap.get(edge2.b);
-                            if (indexOfEdge1A > indexOfEdge1B) {
-                                int temp = indexOfEdge1A;
-                                indexOfEdge1A = indexOfEdge1B;
-                                indexOfEdge1B = temp;
-                            }
-                            if (indexOfEdge2A > indexOfEdge2B) {
-                                int temp = indexOfEdge2A;
-                                indexOfEdge2A = indexOfEdge2B;
-                                indexOfEdge2B = temp;
-                            }
-                            if (indexOfEdge2A > indexOfEdge1A) {
-                                //if (edge1.a < edge2.a && edge1.a < edge1.b && edge1.a < edge2.b && edge2.a < edge1.b && edge2.a < edge2.b && edge1.b < edge2.b){
-                                if (indexOfEdge1A < indexOfEdge2A && indexOfEdge1A < indexOfEdge1B && indexOfEdge1A < indexOfEdge2B && indexOfEdge2A < indexOfEdge1B && indexOfEdge2A < indexOfEdge2B && indexOfEdge1B < indexOfEdge2B) {
-                                    result++;
-                                }
-                            }
+            for (KPMPSolutionWriter.PageEntry edge1 : edges) {
+                for (KPMPSolutionWriter.PageEntry edge2 : edges) {
+                    int indexOfEdge1A = spineOrderMap.get(edge1.a);
+                    int indexOfEdge1B = spineOrderMap.get(edge1.b);
+                    int indexOfEdge2A = spineOrderMap.get(edge2.a);
+                    int indexOfEdge2B = spineOrderMap.get(edge2.b);
+                    if (indexOfEdge1A > indexOfEdge1B) {
+                        int temp = indexOfEdge1A;
+                        indexOfEdge1A = indexOfEdge1B;
+                        indexOfEdge1B = temp;
+                    }
+                    if (indexOfEdge2A > indexOfEdge2B) {
+                        int temp = indexOfEdge2A;
+                        indexOfEdge2A = indexOfEdge2B;
+                        indexOfEdge2B = temp;
+                    }
+                    if (indexOfEdge2A > indexOfEdge1A) {
+                        //if (edge1.a < edge2.a && edge1.a < edge1.b && edge1.a < edge2.b && edge2.a < edge1.b && edge2.a < edge2.b && edge1.b < edge2.b){
+                        if (indexOfEdge1A < indexOfEdge2A && indexOfEdge1A < indexOfEdge1B && indexOfEdge1A < indexOfEdge2B && indexOfEdge2A < indexOfEdge1B && indexOfEdge2A < indexOfEdge2B && indexOfEdge1B < indexOfEdge2B) {
+                            result++;
                         }
                     }
                 }
+
             }
+
         }
 
         return result;
@@ -141,7 +139,7 @@ public class KPMPSolutionChecker {
                 indexOfEdge2B = temp;
             }
             if (indexOfEdge2B <= indexOfEdge1A || indexOfEdge2A >= indexOfEdge1B) {
-
+                // skip edge
             } else {
                 if ((indexOfEdge2A < indexOfEdge1A && indexOfEdge2B > indexOfEdge1A && indexOfEdge2B < indexOfEdge1B) || (indexOfEdge2A > indexOfEdge1A && indexOfEdge2A < indexOfEdge1B && indexOfEdge2B > indexOfEdge1B)) {
                     result++;

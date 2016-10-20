@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static java.util.stream.Collectors.toCollection;
+
 /**
  * <h4>About this class</h4>
  * <p>Description</p>
@@ -26,6 +28,13 @@ public class KPMPSpineOrderRandomDFSHeuristic extends AbstractKPMPSpineOrderHeur
 
     @Override
     protected List<Integer> calculateSpineOrder() {
+        List<List<Integer>> adjacencyList = instance.getAdjacencyList().stream().collect(toCollection(ArrayList::new));
+        List<Integer> verticesWithoutNeighbours = new ArrayList<>();
+        for (int index = 0; index < adjacencyList.size(); index++){
+            if (adjacencyList.get(index).isEmpty()){
+                verticesWithoutNeighbours.add(index);
+            }
+        }
         List<Integer> bestSpineOrder = null;
         int bestNumberOfCrossings = originalNumberOfCrossings;
         KPMPSolutionChecker solutionChecker = new KPMPSolutionChecker();
@@ -35,7 +44,11 @@ public class KPMPSpineOrderRandomDFSHeuristic extends AbstractKPMPSpineOrderHeur
             this.random = new Random(System.currentTimeMillis());
             discoveredNodes = new ArrayList<>();
             spineOrder = new ArrayList<>();
-            this.rootNodeIndex = random.nextInt(instance.getNumVertices());
+            discoveredNodes.addAll(verticesWithoutNeighbours);
+            spineOrder.addAll(verticesWithoutNeighbours);
+            do {
+                this.rootNodeIndex = random.nextInt(instance.getNumVertices());
+            }while (verticesWithoutNeighbours.contains(rootNodeIndex));
             DFS(rootNodeIndex);
             if (bestSpineOrder == null)bestSpineOrder = spineOrder;
             int numberOfCrossings;
