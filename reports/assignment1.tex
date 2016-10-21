@@ -1,0 +1,82 @@
+\documentclass[11pt]{article}
+\usepackage{outline}
+\usepackage{pmgraph}
+\usepackage{listings}
+\usepackage[utf8]{inputenc}
+\usepackage[normalem]{ulem}
+\title{Programming Assignment 1\\ \vspace{10px} \large Heuristic Optimization Techniques}
+\author{David Molnar, 1326891\\ Daniel Füvesi 1326576\\Gruppe 9}
+\date{\today}
+%--------------------Make usable space all of page
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\topmargin}{0in}
+\setlength{\headsep}{-.25in}
+\setlength{\textwidth}{6.5in}
+\setlength{\textheight}{8.5in}
+%--------------------Indention
+\setlength{\parindent}{0.5cm}
+
+\begin{document}
+\lstset{language=Java}
+%--------------------Title Page
+\maketitle
+ 
+%--------------------Begin Outline
+\section{Construction Heuristic}
+\subsection{Deterministic Construction Heuristic}
+
+\hspace{0.5cm} Our construction heuristic consists of 2 separate steps, the spine odering and the edge partitioning. For the spine ordering we implemented a simple depth-first search algorithm. To satisfy determinism, the middle node of the initial spine is picked as the root of the new ordering. Neighbours with the lowest indices are prioritised and added to the spine. This new ordering is then used for the edge partitioning, namely the \textit{CFL (Conflicting Edge Distribution)}. Instead of simply iterating through the edges, we first sort them by the number of conflicts they induce in an ascending order and remove the ones with 0 conflicts. The idea is, that we want to move edges that cause the most crossings to another page as soon as possible. We iterate through this set and each edge gets placed on a page where it leads to the least crossings amongst all pages. With the help of an efficient calculation for the result of a "move", the whole algorithm finishes under a minute.\\
+\newline
+Insert source code.\\
+\newline
+
+%\begin{lstlisting}[frame=single]
+%// Create ordering
+%Ordering o = { first vertex given }
+%while (not all vertices in o) {
+%    v_l = last inserted vertex in o
+%    v_a = find vertex adjacient to v_l
+%    if(v_a exists) {
+%    	add v_a to o after v_l
+%    } else {
+%    	v_a = find next vertex not yet in o
+%        add v_a to o after v_l
+%    }
+%}
+%
+%// Create edge list
+%for (Edge e in instance) {
+%    for (Page k in instance) {
+%        crossingNr = calculate created crossing if we would add e to k
+%    }
+%    add e to the page k with the lowest crossingNr
+%}
+%\end{lstlisting}
+
+
+
+A valid solution is encapsuled in an object storing an arraylist of integers as the spine order, an arraylist of \textit{PageEntry} as the edge distribution and a single integer for the number of pages. A so-called \textit{SolutionChecker} is then used to calculate the crossings at the end.
+
+In our opinion it makes more sense to separate the two steps for they can have completely independent implementations and they can be optimized perfectly because of the fine granularity. While the spine-ordering might be enhanced by a local search, the edge partitioning could implement a natural selection algorithm without direct influence on one and each other.
+
+\subsection{Randomized/Multi-Solution Construction Heuristic}
+As far as randomization goes we implemented it in both steps. Our approach is to generate \textit{k} different solutions, evaluate them and return the best one. In case of the first step we let our \textit{SpineOrderHeuristic} to generate \textit{k} spine orders where the DFS algorithm is used from above with the modification of picking a random root node (\textit{Note:} Duplicate spine orders are possible in our current implementation. Ideally, the algorithm should return \textit{k} permutations - there is always room for improvement.). For each of these spine orders the edge distribution is executed like in the deterministic variant. However edges are not selected from a predefined (sorted) list, instead they are picked randomly. Since we've adapted/extended our deterministic approach, the algorithm does not degenerate into random search. After conducting multiple test-runs the randomized version turned out to be performing better in the majority of cases. Despite the overall good results, the huge number of iterations (due to multiple solutions) act as a significant trade-off regarding execution time (and performance). This could be compensated by reducing the number of generated solutions and by applying local search, simulated annealing and/or evolutionary algorithms to improve the few existing ones.
+
+\section{Experimental Setup}
+
+\newpage
+\section{Results}
+\subsection{Results of deterministic construction heuristic}
+{
+\center
+
+}
+
+\subsection{Results of randomized construction heuristic}
+{
+\center
+
+}
+
+\end{document}

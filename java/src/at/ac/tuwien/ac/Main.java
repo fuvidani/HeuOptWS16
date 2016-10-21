@@ -24,7 +24,7 @@ public class Main {
 
     public static final int secondsBeforeStop = 120;  // 720 ~ 12 minutes
 
-    private static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.RANDOM;
+    private static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.DETERMINISTIC;
     private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
     private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
     //private static String inputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\";
@@ -71,7 +71,7 @@ public class Main {
                         kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomHeuristic());
                         break;
                 }
-                kpmpSolver.setHeuristicType(KPMPSolver.HeuristicType.COMBINED);
+                kpmpSolver.setHeuristicType(KPMPSolver.HeuristicType.SEPARATED);
                 long start = System.nanoTime();
                 KPMPSolution solution = kpmpSolver.solve();
                 System.out.println("Runtime: " + (System.nanoTime() - start) / 1000000000 + " seconds");
