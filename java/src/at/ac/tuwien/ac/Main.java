@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class Main {
 
-    public static final int secondsBeforeStop = 120;  // 720 ~ 12 minutes
+    public static final int secondsBeforeStop = 300;  // 720 ~ 12 minutes
     public static final int secondsToWaitForImprovement = 10; // ~ 2 minutes
 
     private static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.RANDOM;
@@ -34,8 +34,8 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            int instanceCounter = 3;
-            while (instanceCounter != 6) {
+            int instanceCounter = 6;
+            while (instanceCounter != 7) {
                 KPMPInstance instance = KPMPInstance.readInstance(inputPath +"automatic-"+instanceCounter+".txt");
                 System.out.println("Test Instance "+instanceCounter+ " - K: " + instance.getK() + ", Vertices: " + instance.getNumVertices());
 
@@ -55,7 +55,7 @@ public class Main {
                 }
 
                 int originalNumberOfCrossings = new KPMPSolutionChecker().getCrossingNumber(new KPMPSolution(spineOrder, edgePart, instance.getK()));
-                System.out.println("Number of crossings before: " + originalNumberOfCrossings);
+                System.out.println("Number of crossings before: " + NumberFormat.getIntegerInstance().format(originalNumberOfCrossings));
 
                 KPMPSolver kpmpSolver = new KPMPSolver(instance, edgePart, originalNumberOfCrossings);
                 switch (heuristicStrategy){
@@ -72,6 +72,7 @@ public class Main {
                         kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomHeuristic());
                         break;
                 }
+                kpmpSolver.setHeuristicType(KPMPSolver.HeuristicType.SEPARATED);
                 long start = System.nanoTime();
                 KPMPSolution solution = kpmpSolver.solve();
                 System.out.println("Runtime: " + (System.nanoTime() - start) / 1000000000 + " seconds");

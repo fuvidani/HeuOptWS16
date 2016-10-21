@@ -7,6 +7,8 @@ import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils.KPMPSolutionWrite
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.stream.Collectors.toCollection;
+
 /**
  * <h4>Abstract Spine Order Heuristic for the Interface</h4>
  *
@@ -25,6 +27,7 @@ public abstract class AbstractKPMPSpineOrderHeuristic implements KPMPSpineOrderH
     protected int originalNumberOfCrossings;
     protected int numberOfCrossingsForNewSpineOrder = -1;
     protected boolean forAllPages;
+    protected List<Integer> verticesWithoutNeighbours;
 
     /**
      * Calculates the new spine order depending
@@ -35,12 +38,39 @@ public abstract class AbstractKPMPSpineOrderHeuristic implements KPMPSpineOrderH
      */
     protected abstract List<Integer> calculateSpineOrder();
 
+    /**
+     * (Pseudo-)Random depth-first search.
+     * Neighbour vertices are picked randomly
+     * and only if they haven't already been visited before.
+     * @param nodeIndex index of the current node/vertex
+     */
+    protected void DFS(int nodeIndex) {
+        discoveredNodes.add(nodeIndex);
+        spineOrder.add(nodeIndex);
+
+        List<Integer> sortedNeighbours = instance.getAdjacencyList().get(nodeIndex);
+        sortedNeighbours.sort(((o1, o2) -> o1 - o2));
+
+        for (Integer neighbourNode: sortedNeighbours) {
+            if (!discoveredNodes.contains(neighbourNode)) {
+                DFS(neighbourNode);
+            }
+        }
+    }
+
     @Override
     public List<Integer> calculateSpineOrder(KPMPInstance instance, List<KPMPSolutionWriter.PageEntry> originalEdgePartition, int originalNumberOfCrossings, boolean forAllPages) {
         this.instance = instance;
         this.originalEdgePartition = originalEdgePartition;
         this.originalNumberOfCrossings = originalNumberOfCrossings;
         this.forAllPages = forAllPages;
+        List<List<Integer>> adjacencyList = instance.getAdjacencyList().stream().collect(toCollection(ArrayList::new));
+        verticesWithoutNeighbours = new ArrayList<>();
+        for (int index = 0; index < adjacencyList.size(); index++){
+            if (adjacencyList.get(index).isEmpty()){
+                verticesWithoutNeighbours.add(index);
+            }
+        }
         return calculateSpineOrder();
     }
 

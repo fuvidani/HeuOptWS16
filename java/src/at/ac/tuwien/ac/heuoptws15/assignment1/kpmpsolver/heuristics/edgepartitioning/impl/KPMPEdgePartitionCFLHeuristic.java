@@ -50,17 +50,10 @@ public class KPMPEdgePartitionCFLHeuristic extends AbstractKPMPEdgePartitionHeur
                     List<KPMPSolutionWriter.PageEntry> newList = new ArrayList<>();
                     newList.addAll(edgeConflictMap.keySet());
 
-                    //int newNumberOfCrossings = solutionChecker.getCrossingNumberOfPage(spineOrder, newList, pageIndex);
                     int newNumberOfCrossings = solutionChecker.getCrossingNumberOfEdge(spineOrder, newList, pageIndex, currentEdge);
-                    //if (newNumberOfCrossings - pageCrossingsMap.get(pageIndex) < maxValue) {
                     if (newNumberOfCrossings < bestKCrossingNumber) {
                         bestKIndex = pageIndex;
                         bestKCrossingNumber = newNumberOfCrossings;
-                        //pageCrossingsMap.put(pageIndex, newNumberOfCrossings);
-                        //pageCrossingsMap.put(pageIndex, pageCrossingsMap.get(pageIndex) + newNumberOfCrossings);
-                        //pageCrossingsMap.put(0, pageCrossingsMap.get(0) - maxValue);
-
-
                     }
                     edgeConflictMap.remove(currentEdge);
                     currentEdge.page = 0;
@@ -77,7 +70,6 @@ public class KPMPEdgePartitionCFLHeuristic extends AbstractKPMPEdgePartitionHeur
             } else {
                 pageCrossingsMap.put(bestKIndex, pageCrossingsMap.get(bestKIndex) + bestKCrossingNumber);
             }
-
             counter++;
         }
         return new ArrayList<>(edgeConflictMap.keySet());

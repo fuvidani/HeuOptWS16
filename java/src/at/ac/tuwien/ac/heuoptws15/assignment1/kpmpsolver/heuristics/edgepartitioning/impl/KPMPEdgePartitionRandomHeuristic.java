@@ -19,21 +19,15 @@ public class KPMPEdgePartitionRandomHeuristic extends AbstractKPMPEdgePartitionH
     protected List<KPMPSolutionWriter.PageEntry> moveEdges() {
         Random random;
         KPMPSolutionChecker solutionChecker = new KPMPSolutionChecker();
-        ArrayList<KPMPSolutionWriter.PageEntry> discoveredEdges = new ArrayList<>(edgeConflictMap.size());
         // sort for faster iteration
         edgeConflictMap = sortByValue(edgeConflictMap);
         List<KPMPSolutionWriter.PageEntry> edgeList = edgeConflictMap.keySet().stream().map(KPMPSolutionWriter.PageEntry::clone).collect(toCollection(ArrayList::new));
-        List<KPMPSolutionWriter.PageEntry> bestSolution = edgeList.stream().map(KPMPSolutionWriter.PageEntry::clone).collect(toCollection(ArrayList::new));
-        List<KPMPSolutionWriter.PageEntry> originalList = edgeList.stream().map(KPMPSolutionWriter.PageEntry::clone).collect(toCollection(ArrayList::new));
-        int bestNumberOfCrossings = currentNumberOfCrossings;
-        boolean makeAnotherRun = true;
-        boolean rearrangeSpineOrder = false;
-        long timeOfLastImprovement = System.nanoTime();
+        long timeOfLastImprovement = 0;
         long start = System.nanoTime();
-        int iterations = 0;
-        while (((System.nanoTime()-start)/1000000000)< Main.secondsBeforeStop) {
+        int iterations =0;
+        while (iterations < 1000000 && ((System.nanoTime()-start)/1000000000)< Main.secondsBeforeStop) {
             // re-seed generator before each run
-            random = new Random(System.currentTimeMillis());
+            random = new Random(Double.doubleToLongBits(Math.random()));
             KPMPSolutionWriter.PageEntry edge;
             int index = random.nextInt(edgeList.size());
             edge = edgeList.get(index);
@@ -55,7 +49,7 @@ public class KPMPEdgePartitionRandomHeuristic extends AbstractKPMPEdgePartitionH
                     if (newNumberOfCrossings < bestKCrossingNumber) {
                         bestKIndex = pageIndex;
                         bestKCrossingNumber = newNumberOfCrossings;
-                        timeOfLastImprovement = System.nanoTime();
+                        timeOfLastImprovement = 0;
                     }
                     edgeConflictMap.remove(edge);
                     edge.page = 0;

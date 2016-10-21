@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractKPMPEdgePartitionHeuristic implements KPMPEdgePartitionHeuristic {
 
-    protected HashMap<KPMPSolutionWriter.PageEntry, Integer> edgeConflictMap = new HashMap<>();
+    protected HashMap<KPMPSolutionWriter.PageEntry, Integer> edgeConflictMap;
     protected KPMPInstance instance;
     protected List<Integer> spineOrder;
     protected int currentNumberOfCrossings;
@@ -26,6 +26,7 @@ public abstract class AbstractKPMPEdgePartitionHeuristic implements KPMPEdgePart
         this.instance = instance;
         this.spineOrder = spineOrder;
         this.currentNumberOfCrossings = currentNumberOfCrossings;
+        this.edgeConflictMap = new HashMap<>();
         this.calculateConflicts();
         return moveEdges();
     }

@@ -2,8 +2,8 @@ package at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.spineorderi
 
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.spineordering.AbstractKPMPSpineOrderHeuristic;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toCollection;
 
@@ -14,35 +14,33 @@ public class KPMPSpineOrderDFSHeuristic extends AbstractKPMPSpineOrderHeuristic 
 
     @Override
     protected List<Integer> calculateSpineOrder() {
-        List<List<Integer>> adjacencyList = instance.getAdjacencyList().stream().collect(toCollection(ArrayList::new));
-        for (int index = 0; index < adjacencyList.size(); index++){
-            if (adjacencyList.get(index).isEmpty()){
-                spineOrder.add(index);
-                discoveredNodes.add(index);
-            }
-        }
+        //coverBasedVertexOrdering();
+        spineOrder.addAll(verticesWithoutNeighbours);
+        discoveredNodes.addAll(verticesWithoutNeighbours);
         this.rootNodeIndex = instance.getNumVertices()/2;
         DFS(rootNodeIndex);
         return spineOrder;
     }
 
-    /**
-     * Deterministic depth-first search.
-     * Neighbour vertices are sorted in descending order
-     * and the next unvisited one is picked.
-     * @param nodeIndex index of the current node/vertex
-     */
-    private void DFS(int nodeIndex) {
-        discoveredNodes.add(nodeIndex);
-        spineOrder.add(nodeIndex);
-
-        List<Integer> sortedNeighbours = instance.getAdjacencyList().get(nodeIndex);
-        sortedNeighbours.sort(((o1, o2) -> o1 - o2));
-
-        for (Integer neighbourNode: sortedNeighbours) {
-            if (!discoveredNodes.contains(neighbourNode)) {
-                DFS(neighbourNode);
-            }
+    private void coverBasedVertexOrdering(){
+        HashMap<Integer, Integer> sortedVertices = new HashMap<>(instance.getNumVertices());
+        for (int i = 0; i < instance.getNumVertices(); i++){
+            sortedVertices.put(i,instance.getAdjacencyList().get(i).size());
         }
+
+        sortedVertices = sortByValue(sortedVertices);
+        spineOrder = sortedVertices.keySet().stream().collect(toCollection(ArrayList::new));
+    }
+
+    private HashMap<Integer, Integer> sortByValue(HashMap<Integer, Integer> map) {
+        return map.entrySet()
+                       .stream()
+                       .sorted(Map.Entry.comparingByValue())
+                       .collect(Collectors.toMap(
+                               Map.Entry::getKey,
+                               Map.Entry::getValue,
+                               (e1, e2) -> e1,
+                               LinkedHashMap::new
+                       ));
     }
 }

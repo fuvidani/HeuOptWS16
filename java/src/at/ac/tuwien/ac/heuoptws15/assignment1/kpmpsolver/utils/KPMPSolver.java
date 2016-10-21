@@ -1,5 +1,7 @@
 package at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils;
 
+import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.combined.KPMPCombinedHeuristic;
+import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.combined.KPMPRandomizedMultiSolutionHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.KPMPEdgePartitionHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.impl.KPMPEdgePartitionCFLHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.spineordering.KPMPSpineOrderHeuristic;
@@ -18,9 +20,9 @@ public class KPMPSolver {
     private List<KPMPSolutionWriter.PageEntry> originalEdgePartition;
     private int originalNumberOfCrossings;
 
-    public static HeuristicType heuristicType = HeuristicType.SEPARATED;
+    private HeuristicType heuristicType = HeuristicType.SEPARATED;
 
-    private enum HeuristicType {
+    public enum HeuristicType {
         SEPARATED, COMBINED
     }
 
@@ -32,6 +34,10 @@ public class KPMPSolver {
         // set default heuristics
         this.spineOrderHeuristic = new KPMPSpineOrderDFSHeuristic();
         this.edgePartitionHeuristic = new KPMPEdgePartitionCFLHeuristic();
+    }
+
+    public void setHeuristicType(HeuristicType heuristicType) {
+        this.heuristicType = heuristicType;
     }
 
     public void registerSpineOrderHeuristic(KPMPSpineOrderHeuristic spineOrderHeuristic) {
@@ -51,6 +57,12 @@ public class KPMPSolver {
             solution.setEdgePartition(edgePartitionHeuristic.calculateEdgePartition(instance,calculatedSpineOrder,spineOrderHeuristic.getNumberOfCrossingsForNewSpineOrder()));
             solution.setNumberOfPages(instance.getK());
             solution.setSpineOrder(edgePartitionHeuristic.getSpineOrder());
+        }else {
+            KPMPCombinedHeuristic combinedHeuristic = new KPMPRandomizedMultiSolutionHeuristic();
+            combinedHeuristic.calculateSpineOrder(instance,originalEdgePartition,originalNumberOfCrossings,false);
+            solution.setNumberOfPages(instance.getK());
+            solution.setEdgePartition(combinedHeuristic.calculateEdgePartition(instance,null,0));
+            solution.setSpineOrder(combinedHeuristic.getSpineOrder());
         }
 
         return solution;
