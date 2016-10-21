@@ -34,8 +34,8 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            int instanceCounter = 7;
-            while (instanceCounter != 11) {
+            int instanceCounter = 3;
+            while (instanceCounter != 6) {
                 KPMPInstance instance = KPMPInstance.readInstance(inputPath +"automatic-"+instanceCounter+".txt");
                 System.out.println("Test Instance "+instanceCounter+ " - K: " + instance.getK() + ", Vertices: " + instance.getNumVertices());
 

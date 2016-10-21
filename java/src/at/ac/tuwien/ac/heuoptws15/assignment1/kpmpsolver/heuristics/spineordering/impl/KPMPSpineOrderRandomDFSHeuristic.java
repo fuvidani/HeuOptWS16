@@ -40,7 +40,7 @@ public class KPMPSpineOrderRandomDFSHeuristic extends AbstractKPMPSpineOrderHeur
         KPMPSolutionChecker solutionChecker = new KPMPSolutionChecker();
         int time = forAllPages ? 60 : 30;
         long start = System.nanoTime();
-        while (((System.nanoTime()-start)/1000000000) < time){
+        while (((System.nanoTime()-start)/1000000000) < 10){
             this.random = new Random(System.currentTimeMillis());
             discoveredNodes = new ArrayList<>();
             spineOrder = new ArrayList<>();
