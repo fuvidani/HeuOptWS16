@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class Main {
 
-    public static final int secondsBeforeStop = 120;  // 720 ~ 12 minutes
+    public static final int secondsBeforeStop = 720;  // 720 ~ 12 minutes
 
     private static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.DETERMINISTIC;
     private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";

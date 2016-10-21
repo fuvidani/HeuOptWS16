@@ -1,6 +1,5 @@
 package at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.impl;
 
-import at.ac.tuwien.ac.Main;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.AbstractKPMPEdgePartitionHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils.KPMPSolutionChecker;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils.KPMPSolutionWriter;
@@ -25,7 +24,7 @@ public class KPMPEdgePartitionRandomHeuristic extends AbstractKPMPEdgePartitionH
         long timeOfLastImprovement = 0;
         long start = System.nanoTime();
         int iterations =0;
-        while (iterations < 1000 && ((System.nanoTime()-start)/1000000000)< Main.secondsBeforeStop) {
+        while (iterations < 100000) {
             // re-seed generator before each run
             random = new Random(Double.doubleToLongBits(Math.random()));
             KPMPSolutionWriter.PageEntry edge;

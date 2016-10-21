@@ -1,5 +1,6 @@
 package at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.combined;
 
+import at.ac.tuwien.ac.Main;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.KPMPEdgePartitionHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.impl.KPMPEdgePartitionRandomHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.spineordering.KPMPSpineOrderHeuristic;
@@ -30,7 +31,6 @@ public class KPMPRandomizedMultiSolutionHeuristic implements KPMPCombinedHeurist
 
     public KPMPRandomizedMultiSolutionHeuristic() {
         this.spineOrderHeuristic = new KPMPSpineOrderRandomDFSHeuristic();
-        //this.edgePartitionHeuristic = new KPMPEdgePartitionCFLHeuristic();
         this.edgePartitionHeuristic = new KPMPEdgePartitionRandomHeuristic();
     }
 
@@ -61,7 +61,7 @@ public class KPMPRandomizedMultiSolutionHeuristic implements KPMPCombinedHeurist
         if (instance.getNumVertices() < 100){
             numberOfSolutions = 50;
         }else if (instance.getNumVertices() == 200){
-            numberOfSolutions = 3;
+            numberOfSolutions = 10;
         }else {
             numberOfSolutions = 10;
         }
@@ -113,9 +113,17 @@ public class KPMPRandomizedMultiSolutionHeuristic implements KPMPCombinedHeurist
     @Override
     public List<KPMPSolutionWriter.PageEntry> calculateEdgePartition(KPMPInstance instance, List<Integer> spineOrder, int currentNumberOfCrossings) {
         HashMap<List<KPMPSolutionWriter.PageEntry>,List<Integer>> edgePartitions = new HashMap<>();
+        int remainingSolutions = spineOrders.size();
+        long start = System.nanoTime();
         for (List<Integer> spine: spineOrders){
-            List<KPMPSolutionWriter.PageEntry> edgePartition = edgePartitionHeuristic.calculateEdgePartition(instance, spine, currentNumberOfCrossings);
-            edgePartitions.put(edgePartition,spine);
+            if (((System.nanoTime() - start) / 1000000000) < Main.secondsBeforeStop) {
+                List<KPMPSolutionWriter.PageEntry> edgePartition = edgePartitionHeuristic.calculateEdgePartition(instance, spine, currentNumberOfCrossings);
+                edgePartitions.put(edgePartition, spine);
+                remainingSolutions--;
+            } else {
+                System.out.println("Skipping " + remainingSolutions + " solutions due to timeout");
+                break;
+            }
         }
         List<KPMPSolutionWriter.PageEntry> bestSolution = new ArrayList<>();
         KPMPSolutionChecker checker = new KPMPSolutionChecker();
