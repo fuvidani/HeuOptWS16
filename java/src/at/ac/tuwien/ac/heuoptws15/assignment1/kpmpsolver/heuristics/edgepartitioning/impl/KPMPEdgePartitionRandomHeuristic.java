@@ -25,7 +25,7 @@ public class KPMPEdgePartitionRandomHeuristic extends AbstractKPMPEdgePartitionH
         long timeOfLastImprovement = 0;
         long start = System.nanoTime();
         int iterations =0;
-        while (iterations < 1000000 && ((System.nanoTime()-start)/1000000000)< Main.secondsBeforeStop) {
+        while (iterations < 1000 && ((System.nanoTime()-start)/1000000000)< Main.secondsBeforeStop) {
             // re-seed generator before each run
             random = new Random(Double.doubleToLongBits(Math.random()));
             KPMPSolutionWriter.PageEntry edge;

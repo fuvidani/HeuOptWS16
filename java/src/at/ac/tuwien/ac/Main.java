@@ -22,8 +22,7 @@ import java.util.List;
  */
 public class Main {
 
-    public static final int secondsBeforeStop = 300;  // 720 ~ 12 minutes
-    public static final int secondsToWaitForImprovement = 10; // ~ 2 minutes
+    public static final int secondsBeforeStop = 120;  // 720 ~ 12 minutes
 
     private static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.RANDOM;
     private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
@@ -34,8 +33,8 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            int instanceCounter = 6;
-            while (instanceCounter != 7) {
+            int instanceCounter = 7;
+            while (instanceCounter != 11) {
                 KPMPInstance instance = KPMPInstance.readInstance(inputPath +"automatic-"+instanceCounter+".txt");
                 System.out.println("Test Instance "+instanceCounter+ " - K: " + instance.getK() + ", Vertices: " + instance.getNumVertices());
 
@@ -72,7 +71,7 @@ public class Main {
                         kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomHeuristic());
                         break;
                 }
-                kpmpSolver.setHeuristicType(KPMPSolver.HeuristicType.SEPARATED);
+                kpmpSolver.setHeuristicType(KPMPSolver.HeuristicType.COMBINED);
                 long start = System.nanoTime();
                 KPMPSolution solution = kpmpSolver.solve();
                 System.out.println("Runtime: " + (System.nanoTime() - start) / 1000000000 + " seconds");

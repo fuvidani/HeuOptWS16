@@ -69,6 +69,7 @@ public class KPMPRandomizedMultiSolutionHeuristic implements KPMPCombinedHeurist
             List<Integer> spineOrder = spineOrderHeuristic.calculateSpineOrder(instance,originalEdgePartition,originalNumberOfCrossings,forAllPages);
             spineOrders.add(spineOrder);
         }
+        System.out.println(numberOfSolutions + " Spine orders calculated.");
         return spineOrders.get(0);
     }
 
