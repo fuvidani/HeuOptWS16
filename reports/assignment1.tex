@@ -4,8 +4,14 @@
 \usepackage{listings}
 \usepackage[utf8]{inputenc}
 \usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+
 \title{Programming Assignment 1\\ \vspace{10px} \large Heuristic Optimization Techniques}
-\author{David Molnar, 1326891\\ Daniel Füvesi 1326576\\Gruppe 9}
+\author{David Molnar, 1326891\\ Daniel Füvesi, 1326576\\Gruppe 9}
 \date{\today}
 %--------------------Make usable space all of page
 \setlength{\oddsidemargin}{0in}
@@ -28,34 +34,38 @@
 
 \hspace{0.5cm} Our construction heuristic consists of 2 separate steps, the spine odering and the edge partitioning. For the spine ordering we implemented a simple depth-first search algorithm. To satisfy determinism, the middle node of the initial spine is picked as the root of the new ordering. Neighbours with the lowest indices are prioritised and added to the spine. This new ordering is then used for the edge partitioning, namely the \textit{CFL (Conflicting Edge Distribution)}. Instead of simply iterating through the edges, we first sort them by the number of conflicts they induce in an ascending order and remove the ones with 0 conflicts. The idea is, that we want to move edges that cause the most crossings to another page as soon as possible. We iterate through this set and each edge gets placed on a page where it leads to the least crossings amongst all pages. With the help of an efficient calculation for the result of a "move", the whole algorithm finishes under a minute.\\
 \newline
-Insert source code.\\
+\begin{algorithm}
+	\caption{KPMP}\label{euclid}
+	\begin{algorithmic}[1]
+		\Function{Solve}{problem instance}
+		\State $\textit{calcuated spine order} \gets \text{DFS Spine Ordering(adjacency list, number of vertices / 2)}$
+		\State $\textit{calcuated edge partitioning} \gets \text{CFL Edge Partitioning($\textit{calculated spine order}$, edges)}$
+		
+		\Return $\text{solution(calculated spine order, calculated edge partitoning)}$
+		\EndFunction
+		\newline
+		\Function{DFS Spine Ordering}{adjacency list, root vertex index}
+		
+		\Return $\textit{spine order} \gets \text{DFS(spine order, vertex index)}$
+		\EndFunction
+		\newline
+		\Function{CFL Edge Partitioning}{spine order, edge list}
+		\State $\textit{edges} \gets \text{sortByCrossings(edge list)}$
+		\State $\textit{new edge list} \gets \text{empty list}$
+		\newline
+		\While{edges not empty}
+
+		$\textit{new edge list} \gets \textit{new edge list} + edge $
+		
+		$\text{\textit{move edge} to page where it leads to the least crossings amongst all pages}$
+		\EndWhile
+		
+		\Return $\textit{new edge list}$
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm}
+\pagebreak
 \newline
-
-%\begin{lstlisting}[frame=single]
-%// Create ordering
-%Ordering o = { first vertex given }
-%while (not all vertices in o) {
-%    v_l = last inserted vertex in o
-%    v_a = find vertex adjacient to v_l
-%    if(v_a exists) {
-%    	add v_a to o after v_l
-%    } else {
-%    	v_a = find next vertex not yet in o
-%        add v_a to o after v_l
-%    }
-%}
-%
-%// Create edge list
-%for (Edge e in instance) {
-%    for (Page k in instance) {
-%        crossingNr = calculate created crossing if we would add e to k
-%    }
-%    add e to the page k with the lowest crossingNr
-%}
-%\end{lstlisting}
-
-
-
 A valid solution is encapsuled in an object storing an arraylist of integers as the spine order, an arraylist of \textit{PageEntry} as the edge distribution and a single integer for the number of pages. A so-called \textit{SolutionChecker} is then used to calculate the crossings at the end.
 
 In our opinion it makes more sense to separate the two steps for they can have completely independent implementations and they can be optimized perfectly because of the fine granularity. While the spine-ordering might be enhanced by a local search, the edge partitioning could implement a natural selection algorithm without direct influence on one and each other.
