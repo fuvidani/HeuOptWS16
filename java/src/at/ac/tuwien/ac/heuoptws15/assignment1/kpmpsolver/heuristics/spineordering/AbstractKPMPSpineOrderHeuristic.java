@@ -23,10 +23,10 @@ public abstract class AbstractKPMPSpineOrderHeuristic implements KPMPSpineOrderH
     protected List<Integer> spineOrder = new ArrayList<>();
     protected int rootNodeIndex;
     protected List<Integer> discoveredNodes = new ArrayList<>();
-    protected List<KPMPSolutionWriter.PageEntry> originalEdgePartition;
-    protected int originalNumberOfCrossings;
-    protected int numberOfCrossingsForNewSpineOrder = -1;
-    protected boolean forAllPages;
+    private List<KPMPSolutionWriter.PageEntry> originalEdgePartition;
+    private int originalNumberOfCrossings;
+    private int numberOfCrossingsForNewSpineOrder = -1;
+    private boolean forAllPages;
     protected List<Integer> verticesWithoutNeighbours;
 
     /**
@@ -72,6 +72,25 @@ public abstract class AbstractKPMPSpineOrderHeuristic implements KPMPSpineOrderH
             }
         }
         return calculateSpineOrder();
+    }
+
+    @Override
+    public List<Integer> calculateSpineOrder(KPMPInstance instance,  List<KPMPSolutionWriter.PageEntry> originalEdgePartition, int rootIndex){
+        this.instance = instance;
+        this.originalEdgePartition = originalEdgePartition;
+        List<List<Integer>> adjacencyList = instance.getAdjacencyList().stream().collect(toCollection(ArrayList::new));
+        verticesWithoutNeighbours = new ArrayList<>();
+        for (int index = 0; index < adjacencyList.size(); index++){
+            if (adjacencyList.get(index).isEmpty()){
+                verticesWithoutNeighbours.add(index);
+            }
+        }
+        discoveredNodes = new ArrayList<>();
+        spineOrder = new ArrayList<>();
+        discoveredNodes.addAll(verticesWithoutNeighbours);
+        spineOrder.addAll(verticesWithoutNeighbours);
+        DFS(rootIndex);
+        return spineOrder;
     }
 
 

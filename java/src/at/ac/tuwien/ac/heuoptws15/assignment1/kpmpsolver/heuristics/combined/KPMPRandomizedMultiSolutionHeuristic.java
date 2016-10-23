@@ -13,6 +13,9 @@ import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils.KPMPSolutionWrite
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
+
+import static java.util.stream.Collectors.toCollection;
 
 /**
  * <h4>About this class</h4>
@@ -57,20 +60,48 @@ public class KPMPRandomizedMultiSolutionHeuristic implements KPMPCombinedHeurist
     @Override
     public List<Integer> calculateSpineOrder(KPMPInstance instance, List<KPMPSolutionWriter.PageEntry> originalEdgePartition, int originalNumberOfCrossings, boolean forAllPages) {
         spineOrders = new ArrayList<>();
+        List<Integer> verticesWithoutNeighbours = new ArrayList<>();
+        List<List<Integer>> adjacencyList = instance.getAdjacencyList().stream().collect(toCollection(ArrayList::new));
+        for (int index = 0; index < adjacencyList.size(); index++){
+            if (adjacencyList.get(index).isEmpty()){
+                verticesWithoutNeighbours.add(index);
+            }
+        }
         int numberOfSolutions;
         if (instance.getNumVertices() < 100){
-            numberOfSolutions = 50;
+            numberOfSolutions = instance.getNumVertices()-verticesWithoutNeighbours.size();
         }else if (instance.getNumVertices() == 200){
-            numberOfSolutions = 10;
+            numberOfSolutions = 2;
         }else {
-            numberOfSolutions = 10;
+            numberOfSolutions = 5;
+        }
+
+        List<Integer> uniqueRootIndices = new ArrayList<>(numberOfSolutions);
+        Random random = new Random(Double.doubleToLongBits(Math.random()));
+        boolean deterministicAdded = false;
+        while (uniqueRootIndices.size() != numberOfSolutions){
+            int index;
+            if (!deterministicAdded){
+                index = instance.getNumVertices()/2;
+                deterministicAdded = true;
+            }else {
+                index = random.nextInt(instance.getNumVertices());
+            }
+            if (!uniqueRootIndices.contains(index) && !verticesWithoutNeighbours.contains(index)){
+                uniqueRootIndices.add(index);
+            }
         }
         for (int i = 0; i < numberOfSolutions; i++){
-            List<Integer> spineOrder = spineOrderHeuristic.calculateSpineOrder(instance,originalEdgePartition,originalNumberOfCrossings,forAllPages);
+            List<Integer> spineOrder = spineOrderHeuristic.calculateSpineOrder(instance,originalEdgePartition,uniqueRootIndices.get(i));
             spineOrders.add(spineOrder);
         }
         System.out.println(numberOfSolutions + " Spine orders calculated.");
         return spineOrders.get(0);
+    }
+
+    @Override
+    public List<Integer> calculateSpineOrder(KPMPInstance instance, List<KPMPSolutionWriter.PageEntry> originalEdgePartition, int rootIndex) {
+        return null;
     }
 
     /**
@@ -113,10 +144,10 @@ public class KPMPRandomizedMultiSolutionHeuristic implements KPMPCombinedHeurist
     @Override
     public List<KPMPSolutionWriter.PageEntry> calculateEdgePartition(KPMPInstance instance, List<Integer> spineOrder, int currentNumberOfCrossings) {
         HashMap<List<KPMPSolutionWriter.PageEntry>,List<Integer>> edgePartitions = new HashMap<>();
+        KPMPSolutionChecker checker = new KPMPSolutionChecker();
         int remainingSolutions = spineOrders.size();
-        long start = System.nanoTime();
         for (List<Integer> spine: spineOrders){
-            if (((System.nanoTime() - start) / 1000000000) < Main.secondsBeforeStop) {
+            if (((System.nanoTime() - Main.START) / 1000000000) < Main.secondsBeforeStop) {
                 List<KPMPSolutionWriter.PageEntry> edgePartition = edgePartitionHeuristic.calculateEdgePartition(instance, spine, currentNumberOfCrossings);
                 edgePartitions.put(edgePartition, spine);
                 remainingSolutions--;
@@ -126,7 +157,6 @@ public class KPMPRandomizedMultiSolutionHeuristic implements KPMPCombinedHeurist
             }
         }
         List<KPMPSolutionWriter.PageEntry> bestSolution = new ArrayList<>();
-        KPMPSolutionChecker checker = new KPMPSolutionChecker();
         int bestNumberOfCrossings = Integer.MAX_VALUE;
         for (List<KPMPSolutionWriter.PageEntry> edgePartition: edgePartitions.keySet()){
             List<Integer> spine = edgePartitions.get(edgePartition);

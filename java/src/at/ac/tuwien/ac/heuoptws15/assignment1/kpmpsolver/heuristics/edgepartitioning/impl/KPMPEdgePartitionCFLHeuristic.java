@@ -33,8 +33,10 @@ public class KPMPEdgePartitionCFLHeuristic extends AbstractKPMPEdgePartitionHeur
 
         int counter = 0;
         Iterator<KPMPSolutionWriter.PageEntry> iterator =sortedEdgeConflictMap.keySet().iterator();
-        long start = System.nanoTime();
-        while (counter < sortedEdgeConflictMap.size() && ((System.nanoTime()-start)/1000000000) < Main.secondsBeforeStop){
+        while (counter < sortedEdgeConflictMap.size()*Main.iterationMultiplier && ((System.nanoTime()-Main.START)/1000000000) < Main.secondsBeforeStop){
+            if (counter % sortedEdgeConflictMap.size() == 0){
+                iterator = sortedEdgeConflictMap.keySet().iterator();
+            }
             KPMPSolutionWriter.PageEntry currentEdge = iterator.next();
             List<KPMPSolutionWriter.PageEntry> newList1 = new ArrayList<>();
             newList1.addAll(edgeConflictMap.keySet());

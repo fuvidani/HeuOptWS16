@@ -1,10 +1,12 @@
 package at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.impl;
 
+import at.ac.tuwien.ac.Main;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.AbstractKPMPEdgePartitionHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils.KPMPSolutionChecker;
 import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils.KPMPSolutionWriter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -18,13 +20,12 @@ public class KPMPEdgePartitionRandomHeuristic extends AbstractKPMPEdgePartitionH
     protected List<KPMPSolutionWriter.PageEntry> moveEdges() {
         Random random;
         KPMPSolutionChecker solutionChecker = new KPMPSolutionChecker();
-        // sort for faster iteration
-        edgeConflictMap = sortByValue(edgeConflictMap);
+        HashMap<KPMPSolutionWriter.PageEntry, Integer> sortedEdgeConflictMap = edgeConflictMap;
         List<KPMPSolutionWriter.PageEntry> edgeList = edgeConflictMap.keySet().stream().map(KPMPSolutionWriter.PageEntry::clone).collect(toCollection(ArrayList::new));
         long timeOfLastImprovement = 0;
-        long start = System.nanoTime();
         int iterations =0;
-        while (iterations < 100000) {
+
+        while (iterations < sortedEdgeConflictMap.size()*Main.iterationMultiplier){
             // re-seed generator before each run
             random = new Random(Double.doubleToLongBits(Math.random()));
             KPMPSolutionWriter.PageEntry edge;
