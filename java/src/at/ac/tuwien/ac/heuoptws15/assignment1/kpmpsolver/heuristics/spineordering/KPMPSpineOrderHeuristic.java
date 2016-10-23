@@ -36,6 +36,24 @@ public interface KPMPSpineOrderHeuristic {
     List<Integer> calculateSpineOrder(KPMPInstance instance,  List<KPMPSolutionWriter.PageEntry> originalEdgePartition, int originalNumberOfCrossings, boolean forAllPages);
 
     /**
+     * This method returns a spine order for a
+     * given graph in a KPMP instance with the root
+     * node being specified as a parameter.
+     * The way the resulting spine order is calculated
+     * depends on the implementation of this interface.
+     * Nevertheless the result is a valid order of
+     * the initial vertices.
+     *
+     * @param instance an instance of the K-page minimization
+     *                 problem
+     * @param originalEdgePartition the initial edge partitioning
+     *                              of the graph
+     * @param rootIndex the starting node of the spine order
+     * @return valid order of vertices as the spine of the "book"
+     */
+    List<Integer> calculateSpineOrder(KPMPInstance instance,  List<KPMPSolutionWriter.PageEntry> originalEdgePartition, int rootIndex);
+
+    /**
      * Returns the number of crossings the
      * re-ordered spine induces.
      *
