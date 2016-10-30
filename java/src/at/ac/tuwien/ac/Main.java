@@ -1,11 +1,13 @@
 package at.ac.tuwien.ac;
 
-import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.impl.KPMPEdgePartitionCFLHeuristic;
-import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.impl.KPMPEdgePartitionRandomCFLHeuristic;
-import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.edgepartitioning.impl.KPMPEdgePartitionRandomHeuristic;
-import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.spineordering.impl.KPMPSpineOrderDFSHeuristic;
-import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.heuristics.spineordering.impl.KPMPSpineOrderRandomDFSHeuristic;
-import at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils.*;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.edgepartitioning.impl.KPMPEdgePartitionCFLHeuristic;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.edgepartitioning.impl.KPMPEdgePartitionRandomCFLHeuristic;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.edgepartitioning.impl.KPMPEdgePartitionRandomHeuristic;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.impl.KPMPSpineOrderDFSHeuristic;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.impl.KPMPSpineOrderRandomDFSHeuristic;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.neighbourhoods.SpineOrderVertexSwap;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.RandomStepFunction;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.*;
 
 import java.io.IOException;
 import java.text.NumberFormat;
@@ -26,17 +28,17 @@ public class Main {
     public static long START;
     public static int iterationMultiplier;
     private static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.DETERMINISTIC;
-    //private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
-    //private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
-    private static String inputPath = "E:\\HeuOptWS16\\instances\\";
-    private static String outputPath = "E:\\HeuOptWS16\\solutions\\";
+    private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
+    private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
+    //private static String inputPath = "E:\\HeuOptWS16\\instances\\";
+    //private static String outputPath = "E:\\HeuOptWS16\\solutions\\";
     //private static String inputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\";
     //private static String outputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\solutions\\";
     private static int testRuns = 0;
 
     public static void main(String[] args) {
         try {
-            while (testRuns < 10) {
+            while (testRuns < 1) {
                 int instanceCounter = 1;
                 while (instanceCounter != 2) {
                     if (instanceCounter < 6) {
@@ -83,6 +85,8 @@ public class Main {
                             break;
                     }
                     kpmpSolver.setHeuristicType(KPMPSolver.HeuristicType.SEPARATED);
+                    kpmpSolver.registerLocalSearchImplementation(new SpineOrderVertexSwap());
+                    kpmpSolver.registerStepFunction(new RandomStepFunction());
                     START = System.nanoTime();
                     KPMPSolution solution = kpmpSolver.solve();
                     long millis = ((System.nanoTime() - START) / 1000000);

@@ -1,4 +1,4 @@
-package at.ac.tuwien.ac.heuoptws15.assignment1.kpmpsolver.utils;
+package at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
