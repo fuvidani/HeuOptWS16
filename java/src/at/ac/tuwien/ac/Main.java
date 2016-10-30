@@ -39,8 +39,8 @@ public class Main {
     public static void main(String[] args) {
         try {
             while (testRuns < 1) {
-                int instanceCounter = 1;
-                while (instanceCounter != 2) {
+                int instanceCounter = 7;
+                while (instanceCounter != 8) {
                     if (instanceCounter < 6) {
                         iterationMultiplier = 100;
                     } else if (instanceCounter == 6) {
