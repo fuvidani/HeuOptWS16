@@ -6,9 +6,9 @@ import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunctio
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.RandomStepFunction;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolution;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolutionChecker;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolutionWriter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -22,12 +22,14 @@ import static java.util.stream.Collectors.toCollection;
  * @version 1.0.0
  * @since 30.10.16
  */
-public class SpineOrderVertexSwap extends AbstractKPMPLocalSearch {
+public class SingleEdgeMove extends AbstractKPMPLocalSearch {
 
-    private int firstIndex;
-    private int secondIndex;
-    private int localBestCrossingNumber;
+    private int index;
+    private int originalPageIndex;
+    private int newPageIndex;
+    private KPMPSolutionWriter.PageEntry edge;
     private int numberOfIterations;
+    private int pageCounter;
 
     /**
      * This abstract method gives the implementing
@@ -40,10 +42,9 @@ public class SpineOrderVertexSwap extends AbstractKPMPLocalSearch {
      */
     @Override
     protected void beforeSearch() {
-        localBestCrossingNumber = bestCrossingNumber;
+        index = 0;
         numberOfIterations = 0;
-        firstIndex = 0;
-        secondIndex = 1;
+        pageCounter = 0;
     }
 
     /**
@@ -54,17 +55,13 @@ public class SpineOrderVertexSwap extends AbstractKPMPLocalSearch {
      */
     @Override
     protected KPMPSolution nextNeighbour() {
-        List<Integer> currentSpineOrder = bestSolution.getSpineOrder().stream().collect(toCollection(ArrayList::new));
-        KPMPSolution neighbourSolution = new KPMPSolution(currentSpineOrder, bestSolution.getEdgePartition(), bestSolution.getNumberOfPages());
-        if (secondIndex < currentSpineOrder.size()) {
-            Collections.swap(currentSpineOrder, firstIndex, secondIndex);
-            secondIndex++;
-        } else {
-            firstIndex++;
-            secondIndex = firstIndex + 1;
-            Collections.swap(currentSpineOrder, firstIndex, secondIndex);
-        }
-        neighbourSolution.setSpineOrder(currentSpineOrder);
+        List<KPMPSolutionWriter.PageEntry> edgePartition = bestSolution.getEdgePartition().stream().map(KPMPSolutionWriter.PageEntry::clone).collect(toCollection(ArrayList::new));
+        KPMPSolution neighbourSolution = new KPMPSolution(bestSolution.getSpineOrder(), edgePartition, bestSolution.getNumberOfPages());
+        edge = edgePartition.get(index);
+        originalPageIndex = edge.page;
+        newPageIndex = pageCounter;
+        edgePartition.get(index).page = newPageIndex;
+        index++;
         return neighbourSolution;
     }
 
@@ -77,25 +74,15 @@ public class SpineOrderVertexSwap extends AbstractKPMPLocalSearch {
     @Override
     protected KPMPSolution randomNextNeighbour() {
         random = new Random(Double.doubleToLongBits(Math.random()));
-
-        /* Copy spine order of best solution */
-        List<Integer> currentSpineOrder = bestSolution.getSpineOrder().stream().collect(toCollection(ArrayList::new));
-
-        /* Instantiate neighbour solution */
-        KPMPSolution neighbourSolution = new KPMPSolution(currentSpineOrder, bestSolution.getEdgePartition(), bestSolution.getNumberOfPages());
-
-        /* Pick 2 different random indices */
-        int firstRandom = random.nextInt(currentSpineOrder.size());
-        int secondRandom;
+        List<KPMPSolutionWriter.PageEntry> edgePartition = bestSolution.getEdgePartition().stream().map(KPMPSolutionWriter.PageEntry::clone).collect(toCollection(ArrayList::new));
+        KPMPSolution neighbourSolution = new KPMPSolution(bestSolution.getSpineOrder(), edgePartition, bestSolution.getNumberOfPages());
+        int randomIndex = random.nextInt(edgePartition.size());
+        edge = edgePartition.get(randomIndex);
+        originalPageIndex = edge.page;
         do {
-            secondRandom = random.nextInt(currentSpineOrder.size());
-        } while (firstRandom == secondRandom);
-
-        /* Swap the 2 vertices on those random indices */
-        Collections.swap(currentSpineOrder, firstRandom, secondRandom);
-
-        /* Set the new spine order and return neighbour solution*/
-        neighbourSolution.setSpineOrder(currentSpineOrder);
+            newPageIndex = random.nextInt(neighbourSolution.getNumberOfPages());
+        } while (newPageIndex == originalPageIndex);
+        edgePartition.get(randomIndex).page = newPageIndex;
         return neighbourSolution;
     }
 
@@ -112,21 +99,21 @@ public class SpineOrderVertexSwap extends AbstractKPMPLocalSearch {
      *                          criteria may be a time limit, a number of
      *                          iterations or a known upper or lower bound
      *
-     * @return true if another iteration should be made, false if
+     * @return true if another iterations should be made, false if
      * a satisfying solution has been reached or for any other reason
      * whatsoever (e.g. timeout)
      */
     @Override
     protected boolean stoppingCriteriaSatisfied(KPMPSolution generatedSolution, RandomStepFunction stepFunction) {
         numberOfIterations++;
-        // TODO incremental evaluation instead of checker
-        int crossingNumber = new KPMPSolutionChecker().getCrossingNumber(generatedSolution);
-        if (crossingNumber < localBestCrossingNumber) {
-            System.out.println("Improvement (" + crossingNumber + ")");
-            localBestCrossingNumber = crossingNumber;
+        KPMPSolutionChecker solutionChecker = new KPMPSolutionChecker();
+        int crossingsOnOriginalPage = solutionChecker.getCrossingNumberOfEdge(bestSolution.getSpineOrder(), bestSolution.getEdgePartition(), originalPageIndex, edge);
+        int crossingsOnNewPage = solutionChecker.getCrossingNumberOfEdge(generatedSolution.getSpineOrder(), generatedSolution.getEdgePartition(), newPageIndex, edge);
+        if (crossingsOnNewPage < crossingsOnOriginalPage) {
+            System.out.println("Improvement (from " + crossingsOnOriginalPage + " to " + crossingsOnNewPage + ")");
             bestSolution = generatedSolution;
         }
-        return numberOfIterations >= (generatedSolution.getSpineOrder().size() * Main.iterationMultiplier) || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
+        return numberOfIterations >= bestSolution.getEdgePartition().size() * bestSolution.getNumberOfPages() || numberOfIterations >= (generatedSolution.getEdgePartition().size() * Main.iterationMultiplier) || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
     }
 
     /**
@@ -142,21 +129,21 @@ public class SpineOrderVertexSwap extends AbstractKPMPLocalSearch {
      *                          the generated solution is better than the original
      *                          one true is returned immediately
      *
-     * @return true if another iteration should be made, false if
+     * @return true if another iterations should be made, false if
      * a satisfying solution has been reached or for any other reason
      * whatsoever (e.g. timeout)
      */
     @Override
     protected boolean stoppingCriteriaSatisfied(KPMPSolution generatedSolution, FirstImprovementStepFunction stepFunction) {
-        // TODO incremental evaluation instead of checker
-        int crossingNumber = new KPMPSolutionChecker().getCrossingNumber(generatedSolution);
-        if (crossingNumber < localBestCrossingNumber) {
-            System.out.println("Improvement (" + crossingNumber + ")");
-            localBestCrossingNumber = crossingNumber;
+        KPMPSolutionChecker solutionChecker = new KPMPSolutionChecker();
+        int crossingsOnOriginalPage = solutionChecker.getCrossingNumberOfEdge(bestSolution.getSpineOrder(), bestSolution.getEdgePartition(), originalPageIndex, edge);
+        int crossingsOnNewPage = solutionChecker.getCrossingNumberOfEdge(generatedSolution.getSpineOrder(), generatedSolution.getEdgePartition(), newPageIndex, edge);
+        if (crossingsOnNewPage < crossingsOnOriginalPage) {
+            System.out.println("Improvement (from " + crossingsOnOriginalPage + " to " + crossingsOnNewPage + ")");
             bestSolution = generatedSolution;
             return true;
         }
-        return (firstIndex == generatedSolution.getSpineOrder().size() - 2 && secondIndex == generatedSolution.getSpineOrder().size() - 1) || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
+        return ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000) || index == bestSolution.getEdgePartition().size() && pageCounter == bestSolution.getNumberOfPages() - 1;
     }
 
     /**
@@ -172,21 +159,25 @@ public class SpineOrderVertexSwap extends AbstractKPMPLocalSearch {
      *                          this will let to have the full neighbourhood
      *                          searched for the local optimum
      *
-     * @return true if another iteration should be made, false if
+     * @return true if another iterations should be made, false if
      * a satisfying solution has been reached or for any other reason
      * whatsoever (e.g. timeout)
      */
     @Override
     protected boolean stoppingCriteriaSatisfied(KPMPSolution generatedSolution, BestImprovementStepFunction stepFunction) {
-        // TODO incremental evaluation instead of checker
-        int crossingNumber = new KPMPSolutionChecker().getCrossingNumber(generatedSolution);
-        if (crossingNumber < localBestCrossingNumber) {
-            System.out.println("Improvement (" + crossingNumber + ")");
-            localBestCrossingNumber = crossingNumber;
+        KPMPSolutionChecker solutionChecker = new KPMPSolutionChecker();
+        int crossingsOnOriginalPage = solutionChecker.getCrossingNumberOfEdge(bestSolution.getSpineOrder(), bestSolution.getEdgePartition(), originalPageIndex, edge);
+        int crossingsOnNewPage = solutionChecker.getCrossingNumberOfEdge(generatedSolution.getSpineOrder(), generatedSolution.getEdgePartition(), newPageIndex, edge);
+        if (crossingsOnNewPage < crossingsOnOriginalPage) {
+            System.out.println("Improvement (from " + crossingsOnOriginalPage + " to " + crossingsOnNewPage + ")");
             bestSolution = generatedSolution;
-            firstIndex = 0;
-            secondIndex = 1;
+            index = 0;
+            pageCounter = 0;
         }
-        return (firstIndex == generatedSolution.getSpineOrder().size() - 2 && secondIndex == generatedSolution.getSpineOrder().size() - 1) || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
+        if (index == bestSolution.getEdgePartition().size() && pageCounter != bestSolution.getNumberOfPages() - 1) {
+            index = 0;
+            pageCounter++;
+        }
+        return ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000) || index == bestSolution.getEdgePartition().size() && pageCounter == bestSolution.getNumberOfPages() - 1;
     }
 }

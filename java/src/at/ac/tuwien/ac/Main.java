@@ -5,8 +5,8 @@ import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.edgepartitioning.impl.KPMPEdgePartitionRandomHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.impl.KPMPSpineOrderDFSHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.impl.KPMPSpineOrderRandomDFSHeuristic;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.neighbourhoods.SpineOrderVertexSwap;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.RandomStepFunction;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.neighbourhoods.SingleEdgeMove;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.BestImprovementStepFunction;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.*;
 
 import java.io.IOException;
@@ -38,11 +38,11 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            while (testRuns < 1) {
-                int instanceCounter = 7;
-                while (instanceCounter != 8) {
+            while (testRuns < 10) {
+                int instanceCounter = 5;
+                while (instanceCounter != 6) {
                     if (instanceCounter < 6) {
-                        iterationMultiplier = 100;
+                        iterationMultiplier = 10000;
                     } else if (instanceCounter == 6) {
                         iterationMultiplier = 2;
                     } else {
@@ -84,9 +84,9 @@ public class Main {
                             kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomHeuristic());
                             break;
                     }
-                    kpmpSolver.setHeuristicType(KPMPSolver.HeuristicType.SEPARATED);
-                    kpmpSolver.registerLocalSearchImplementation(new SpineOrderVertexSwap());
-                    kpmpSolver.registerStepFunction(new RandomStepFunction());
+                    kpmpSolver.setHeuristicType(KPMPSolver.HeuristicType.COMBINED);
+                    kpmpSolver.registerLocalSearchImplementation(new SingleEdgeMove());
+                    kpmpSolver.registerStepFunction(new BestImprovementStepFunction());
                     START = System.nanoTime();
                     KPMPSolution solution = kpmpSolver.solve();
                     long millis = ((System.nanoTime() - START) / 1000000);

@@ -101,7 +101,7 @@ public abstract class AbstractKPMPLocalSearch implements KPMPLocalSearch {
      * @param stepFunction random step function meaning the stopping
      *                     criteria may be a time limit, a number of
      *                     iterations or a known upper or lower bound
-     * @return true if another iterations should be made, false if
+     * @return true if another iteration should be made, false if
      * a satisfying solution has been reached or for any other reason
      * whatsoever (e.g. timeout)
      */
@@ -120,7 +120,7 @@ public abstract class AbstractKPMPLocalSearch implements KPMPLocalSearch {
      *                          the generated solution is better than the original
      *                          one true is returned immediately
      *
-     * @return true if another iterations should be made, false if
+     * @return true if another iteration should be made, false if
      * a satisfying solution has been reached or for any other reason
      * whatsoever (e.g. timeout)
      */
@@ -139,7 +139,7 @@ public abstract class AbstractKPMPLocalSearch implements KPMPLocalSearch {
      *                          this will let to have the full neighbourhood
      *                          searched for the local optimum
      *
-     * @return true if another iterations should be made, false if
+     * @return true if another iteration should be made, false if
      * a satisfying solution has been reached or for any other reason
      * whatsoever (e.g. timeout)
      */
