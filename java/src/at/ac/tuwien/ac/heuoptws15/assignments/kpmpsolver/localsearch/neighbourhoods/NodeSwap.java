@@ -22,7 +22,7 @@ import static java.util.stream.Collectors.toCollection;
  * @version 1.0.0
  * @since 30.10.16
  */
-public class SpineOrderVertexSwap extends AbstractKPMPLocalSearch {
+public class NodeSwap extends AbstractKPMPLocalSearch {
 
     private int firstIndex;
     private int secondIndex;
