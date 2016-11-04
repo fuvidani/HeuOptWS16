@@ -93,7 +93,7 @@ public class NodeEdgeMove extends AbstractKPMPLocalSearch {
         newEdges = new ArrayList<>();
         int randomNodeIndex = random.nextInt(neighbourSolution.getSpineOrder().size());
         for (int i = 0; i < edges.size(); i++) {
-            if (edges.get(i).a == randomNodeIndex || edges.get(i).b == randomNodeIndex) {
+            if ((edges.get(i).a == randomNodeIndex || edges.get(i).b == randomNodeIndex) && edges.get(i).page != randomPageIndex) {
                 originalEdges.add(edges.get(i).clone());
                 /*int currentPage = edges.get(i).page;
                 int newPageIndex;
