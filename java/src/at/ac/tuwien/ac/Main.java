@@ -5,8 +5,10 @@ import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.edgepartitioning.impl.KPMPEdgePartitionRandomHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.impl.KPMPSpineOrderDFSHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.impl.KPMPSpineOrderRandomDFSHeuristic;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.neighbourhoods.NodeEdgeMove;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.RandomStepFunction;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.KPMPLocalSearch;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.neighbourhoods.NodeSwap;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.BestImprovementStepFunction;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.StepFunction;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.*;
 
 import java.io.IOException;
@@ -24,24 +26,25 @@ import java.util.List;
  */
 public class Main {
 
-    public static final int secondsBeforeStop = 720;   // 720 ~ 12 minutes
+    public static final int secondsBeforeStop = 840;   // 840 ~ 14 minutes
     public static long START;
     public static int iterationMultiplier;
     private static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.DETERMINISTIC;
-    private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
-    private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
-    //private static String inputPath = "E:\\HeuOptWS16\\instances\\";
-    //private static String outputPath = "E:\\HeuOptWS16\\solutions\\";
+
+    //private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
+    //private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
+    private static String inputPath = "E:\\HeuOptWS16\\instances\\";
+    private static String outputPath = "E:\\HeuOptWS16\\solutions\\";
     //private static String inputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\";
     //private static String outputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\solutions\\";
     private static int testRuns = 0;
 
     public static void main(String[] args) {
         try {
-            while (testRuns < 10) {
-                int instanceCounter = 5;
+            while (testRuns < 1) {
+                int instanceCounter = 1;
                 while (instanceCounter != 6) {
-                    if (instanceCounter < 6) {
+                    if (instanceCounter < 11) {
                         iterationMultiplier = 10000;
                     } else if (instanceCounter == 6) {
                         iterationMultiplier = 2;
@@ -84,9 +87,11 @@ public class Main {
                             kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomHeuristic());
                             break;
                     }
+                    StepFunction stepFunction = new BestImprovementStepFunction();
+                    KPMPLocalSearch localSearch = new NodeSwap();
                     kpmpSolver.setHeuristicType(KPMPSolver.HeuristicType.SEPARATED);
-                    kpmpSolver.registerLocalSearchImplementation(new NodeEdgeMove());
-                    kpmpSolver.registerStepFunction(new RandomStepFunction());
+                    kpmpSolver.registerLocalSearchImplementation(localSearch);
+                    kpmpSolver.registerStepFunction(stepFunction);
                     START = System.nanoTime();
                     KPMPSolution solution = kpmpSolver.solve();
                     long millis = ((System.nanoTime() - START) / 1000000);
@@ -100,7 +105,7 @@ public class Main {
                     for (KPMPSolutionWriter.PageEntry pageEntry : solution.getEdgePartition()) {
                         writer.addEdgeOnPage(pageEntry.a, pageEntry.b, pageEntry.page);
                     }
-                    writer.write(outputPath + heuristicStrategy.getFolderPath() + "automatic-" + instanceCounter + "_" + numberOfCrossings + "_" + millis + ".txt");
+                    writer.write(outputPath + heuristicStrategy.getFolderPath() + "automatic-" + instanceCounter + "_" + localSearch.getAbbreviation() + "_" +stepFunction.getAbbreviation() + "_" + numberOfCrossings + "_" + millis + ".txt");
                     instanceCounter++;
                 }
                 testRuns++;

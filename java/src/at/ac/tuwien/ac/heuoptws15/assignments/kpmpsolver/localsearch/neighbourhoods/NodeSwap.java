@@ -64,6 +64,7 @@ public class NodeSwap extends AbstractKPMPLocalSearch {
             secondIndex = firstIndex + 1;
             Collections.swap(currentSpineOrder, firstIndex, secondIndex);
         }
+        numberOfIterations++;
         neighbourSolution.setSpineOrder(currentSpineOrder);
         return neighbourSolution;
     }
@@ -122,7 +123,7 @@ public class NodeSwap extends AbstractKPMPLocalSearch {
         // TODO incremental evaluation instead of checker
         int crossingNumber = new KPMPSolutionChecker().getCrossingNumber(generatedSolution);
         if (crossingNumber < localBestCrossingNumber) {
-            System.out.println("Improvement (" + crossingNumber + ")");
+            System.out.println("Improvement (" + crossingNumber + ") - " + numberOfIterations + ". iteration");
             localBestCrossingNumber = crossingNumber;
             bestSolution = generatedSolution;
         }
@@ -151,7 +152,7 @@ public class NodeSwap extends AbstractKPMPLocalSearch {
         // TODO incremental evaluation instead of checker
         int crossingNumber = new KPMPSolutionChecker().getCrossingNumber(generatedSolution);
         if (crossingNumber < localBestCrossingNumber) {
-            System.out.println("Improvement (" + crossingNumber + ")");
+            System.out.println("Improvement (" + crossingNumber + ") - " + numberOfIterations + ". iteration");
             localBestCrossingNumber = crossingNumber;
             bestSolution = generatedSolution;
             return true;
@@ -181,12 +182,17 @@ public class NodeSwap extends AbstractKPMPLocalSearch {
         // TODO incremental evaluation instead of checker
         int crossingNumber = new KPMPSolutionChecker().getCrossingNumber(generatedSolution);
         if (crossingNumber < localBestCrossingNumber) {
-            System.out.println("Improvement (" + crossingNumber + ")");
+            System.out.println("Improvement (" + crossingNumber + ") - " + numberOfIterations + ". iteration");
             localBestCrossingNumber = crossingNumber;
             bestSolution = generatedSolution;
             firstIndex = 0;
             secondIndex = 1;
         }
         return (firstIndex == generatedSolution.getSpineOrder().size() - 2 && secondIndex == generatedSolution.getSpineOrder().size() - 1) || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
+    }
+
+    @Override
+    public String getAbbreviation() {
+        return "NS";
     }
 }

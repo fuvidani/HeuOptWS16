@@ -9,4 +9,8 @@ package at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfuncti
  * @since 30.10.16
  */
 public class FirstImprovementStepFunction extends StepFunction {
+    @Override
+    public String getAbbreviation() {
+        return "first";
+    }
 }

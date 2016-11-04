@@ -27,4 +27,12 @@ public interface KPMPLocalSearch {
      */
     KPMPSolution improveSolution(KPMPSolution currentSolution, StepFunction stepFunction);
 
+    /**
+     * Returns the getAbbreviation of the neighbourhood structure that
+     * is used to mark solution files with the structure's name.
+     *
+     * @return getAbbreviation of the local search strategy
+     */
+    String getAbbreviation();
+
 }

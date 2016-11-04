@@ -62,6 +62,7 @@ public class SingleEdgeMove extends AbstractKPMPLocalSearch {
         newPageIndex = pageCounter;
         edgePartition.get(index).page = newPageIndex;
         index++;
+        numberOfIterations++;
         return neighbourSolution;
     }
 
@@ -110,7 +111,7 @@ public class SingleEdgeMove extends AbstractKPMPLocalSearch {
         int crossingsOnOriginalPage = solutionChecker.getCrossingNumberOfEdge(bestSolution.getSpineOrder(), bestSolution.getEdgePartition(), originalPageIndex, edge);
         int crossingsOnNewPage = solutionChecker.getCrossingNumberOfEdge(generatedSolution.getSpineOrder(), generatedSolution.getEdgePartition(), newPageIndex, edge);
         if (crossingsOnNewPage < crossingsOnOriginalPage) {
-            System.out.println("Improvement (from " + crossingsOnOriginalPage + " to " + crossingsOnNewPage + ")");
+            System.out.println("Improvement (from " + crossingsOnOriginalPage + " to " + crossingsOnNewPage + ") - "  + numberOfIterations + ". iteration");
             bestSolution = generatedSolution;
         }
         return numberOfIterations >= bestSolution.getEdgePartition().size() * bestSolution.getNumberOfPages() || numberOfIterations >= (generatedSolution.getEdgePartition().size() * Main.iterationMultiplier) || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
@@ -139,7 +140,7 @@ public class SingleEdgeMove extends AbstractKPMPLocalSearch {
         int crossingsOnOriginalPage = solutionChecker.getCrossingNumberOfEdge(bestSolution.getSpineOrder(), bestSolution.getEdgePartition(), originalPageIndex, edge);
         int crossingsOnNewPage = solutionChecker.getCrossingNumberOfEdge(generatedSolution.getSpineOrder(), generatedSolution.getEdgePartition(), newPageIndex, edge);
         if (crossingsOnNewPage < crossingsOnOriginalPage) {
-            System.out.println("Improvement (from " + crossingsOnOriginalPage + " to " + crossingsOnNewPage + ")");
+            System.out.println("Improvement (from " + crossingsOnOriginalPage + " to " + crossingsOnNewPage + ") - "  + numberOfIterations + ". iteration");
             bestSolution = generatedSolution;
             return true;
         }
@@ -169,7 +170,7 @@ public class SingleEdgeMove extends AbstractKPMPLocalSearch {
         int crossingsOnOriginalPage = solutionChecker.getCrossingNumberOfEdge(bestSolution.getSpineOrder(), bestSolution.getEdgePartition(), originalPageIndex, edge);
         int crossingsOnNewPage = solutionChecker.getCrossingNumberOfEdge(generatedSolution.getSpineOrder(), generatedSolution.getEdgePartition(), newPageIndex, edge);
         if (crossingsOnNewPage < crossingsOnOriginalPage) {
-            System.out.println("Improvement (from " + crossingsOnOriginalPage + " to " + crossingsOnNewPage + ")");
+            System.out.println("Improvement (from " + crossingsOnOriginalPage + " to " + crossingsOnNewPage + ") - " + numberOfIterations + ". iteration");
             bestSolution = generatedSolution;
             index = 0;
             pageCounter = 0;
@@ -179,5 +180,10 @@ public class SingleEdgeMove extends AbstractKPMPLocalSearch {
             pageCounter++;
         }
         return ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000) || index == bestSolution.getEdgePartition().size() && pageCounter == bestSolution.getNumberOfPages() - 1;
+    }
+
+    @Override
+    public String getAbbreviation() {
+        return "S-E-M";
     }
 }

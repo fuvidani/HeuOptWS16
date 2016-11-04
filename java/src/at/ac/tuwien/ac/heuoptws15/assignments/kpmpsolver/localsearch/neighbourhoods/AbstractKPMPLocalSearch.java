@@ -20,9 +20,9 @@ import java.util.Random;
  */
 public abstract class AbstractKPMPLocalSearch implements KPMPLocalSearch {
 
-    protected KPMPSolution initialSolution;
-    protected KPMPSolution bestSolution;
-    protected int bestCrossingNumber;
+    private KPMPSolution initialSolution;
+    KPMPSolution bestSolution;
+    int bestCrossingNumber;
     protected Random random;
     private StepFunction stepFunction;
 
@@ -36,7 +36,7 @@ public abstract class AbstractKPMPLocalSearch implements KPMPLocalSearch {
         return doTheHarlemShake();
     }
 
-    protected KPMPSolution doTheHarlemShake() {
+    private KPMPSolution doTheHarlemShake() {
         KPMPSolution neighbourSolution;
         beforeSearch();
         do {

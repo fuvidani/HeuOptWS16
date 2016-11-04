@@ -12,9 +12,9 @@ import java.io.File;
  */
 public enum HeuristicStrategy {
 
-    DETERMINISTIC("deterministic" + File.separator),
+    DETERMINISTIC("deterministic_ls" + File.separator),
     SEMI_RANDOM("semi_random" + File.separator),
-    RANDOM("random" + File.separator);
+    RANDOM("random_ls" + File.separator);
 
     private String folderPath;
 

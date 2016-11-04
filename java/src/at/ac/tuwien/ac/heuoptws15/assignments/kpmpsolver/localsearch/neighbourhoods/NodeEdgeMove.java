@@ -75,6 +75,7 @@ public class NodeEdgeMove extends AbstractKPMPLocalSearch {
             }
         }
         nodeIndex++;
+        numberOfIterations++;
         return neighbourSolution;
     }
 
@@ -136,7 +137,7 @@ public class NodeEdgeMove extends AbstractKPMPLocalSearch {
             newCrossings += checker.getCrossingNumberOfEdge(generatedSolution.getSpineOrder(), generatedSolution.getEdgePartition(), newEdges.get(i).page, newEdges.get(i));
         }
         if (newCrossings < originalCrossings) {
-            //System.out.println("Improvement (from " + originalCrossings + " to " + newCrossings + ")");
+            System.out.println("Improvement (from " + originalCrossings + " to " + newCrossings + ") - " + numberOfIterations + ". iteration");
             bestSolution = generatedSolution;
         }
         randomPageIndex = random.nextInt(bestSolution.getNumberOfPages());
@@ -170,7 +171,7 @@ public class NodeEdgeMove extends AbstractKPMPLocalSearch {
             newCrossings += checker.getCrossingNumberOfEdge(generatedSolution.getSpineOrder(), generatedSolution.getEdgePartition(), newEdges.get(i).page, newEdges.get(i));
         }
         if (newCrossings < originalCrossings) {
-            System.out.println("Improvement (from " + originalCrossings + " to " + newCrossings + ")");
+            System.out.println("Improvement (from " + originalCrossings + " to " + newCrossings + ") - " + numberOfIterations + ". iteration");
             bestSolution = generatedSolution;
             nodeIndex = 0;
             pageIndex = 0;
@@ -210,7 +211,7 @@ public class NodeEdgeMove extends AbstractKPMPLocalSearch {
             newCrossings += checker.getCrossingNumberOfEdge(generatedSolution.getSpineOrder(), generatedSolution.getEdgePartition(), newEdges.get(i).page, newEdges.get(i));
         }
         if (newCrossings < originalCrossings) {
-            System.out.println("Improvement (from " + originalCrossings + " to " + newCrossings + ")");
+            System.out.println("Improvement (from " + originalCrossings + " to " + newCrossings + ") - " + numberOfIterations + ". iteration");
             bestSolution = generatedSolution;
             nodeIndex = 0;
             pageIndex = 0;
@@ -220,5 +221,10 @@ public class NodeEdgeMove extends AbstractKPMPLocalSearch {
             pageIndex++;
         }
         return nodeIndex == bestSolution.getSpineOrder().size() && pageIndex == bestSolution.getNumberOfPages() - 1 || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
+    }
+
+    @Override
+    public String getAbbreviation() {
+        return "N-E-M";
     }
 }

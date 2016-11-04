@@ -9,4 +9,12 @@ package at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfuncti
  * @since 30.10.16
  */
 public abstract class StepFunction {
+
+    /**
+     * Returns the getAbbreviation of the step function that is
+     * used to mark solution files with the function's name.
+     *
+     * @return getAbbreviation of the function
+     */
+    public abstract String getAbbreviation();
 }
