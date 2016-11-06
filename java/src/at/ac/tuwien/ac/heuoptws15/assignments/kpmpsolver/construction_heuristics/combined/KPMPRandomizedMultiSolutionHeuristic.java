@@ -71,9 +71,9 @@ public class KPMPRandomizedMultiSolutionHeuristic implements KPMPCombinedHeurist
         if (instance.getNumVertices() < 100) {
             numberOfSolutions = instance.getNumVertices() - verticesWithoutNeighbours.size();
         } else if (instance.getNumVertices() == 200) {
-            numberOfSolutions = 2;
+            numberOfSolutions = 1;
         } else {
-            numberOfSolutions = 5;
+            numberOfSolutions = 1;
         }
 
         List<Integer> uniqueRootIndices = new ArrayList<>(numberOfSolutions);

@@ -144,6 +144,10 @@ public class SingleEdgeMove extends AbstractKPMPLocalSearch {
             bestSolution = generatedSolution;
             return true;
         }
+        if (index == bestSolution.getEdgePartition().size() && pageCounter != bestSolution.getNumberOfPages() - 1) {
+            index = 0;
+            pageCounter++;
+        }
         return ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000) || index == bestSolution.getEdgePartition().size() && pageCounter == bestSolution.getNumberOfPages() - 1;
     }
 
