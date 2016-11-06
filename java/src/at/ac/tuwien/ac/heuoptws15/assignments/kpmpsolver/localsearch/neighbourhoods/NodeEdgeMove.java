@@ -65,10 +65,6 @@ public class NodeEdgeMove extends AbstractKPMPLocalSearch {
 
         for (int i = 0; i < edges.size(); i++) {
             if ((edges.get(i).a == nodeIndex || edges.get(i).b == nodeIndex) && edges.get(i).page != pageIndex) {
-                /*pageIndex = edges.get(i).page;
-                originalEdges.add(edges.get(i).clone());
-                edges.get(i).page = ((++pageIndex) % neighbourSolution.getNumberOfPages());
-                newEdges.add(edges.get(i).clone());*/
                 originalEdges.add(edges.get(i).clone());
                 edges.get(i).page = pageIndex;
                 newEdges.add(edges.get(i).clone());
@@ -96,12 +92,6 @@ public class NodeEdgeMove extends AbstractKPMPLocalSearch {
         for (int i = 0; i < edges.size(); i++) {
             if ((edges.get(i).a == randomNodeIndex || edges.get(i).b == randomNodeIndex) && edges.get(i).page != randomPageIndex) {
                 originalEdges.add(edges.get(i).clone());
-                /*int currentPage = edges.get(i).page;
-                int newPageIndex;
-                do {
-                    newPageIndex = random.nextInt(neighbourSolution.getNumberOfPages());
-                }while (newPageIndex == currentPage);
-                edges.get(i).page = newPageIndex;*/
                 edges.get(i).page = randomPageIndex;
                 newEdges.add(edges.get(i).clone());
             }
