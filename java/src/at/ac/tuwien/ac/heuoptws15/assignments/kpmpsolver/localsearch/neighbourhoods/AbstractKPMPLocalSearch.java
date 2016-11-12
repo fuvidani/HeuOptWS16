@@ -32,7 +32,7 @@ public abstract class AbstractKPMPLocalSearch implements KPMPLocalSearch {
         bestSolution = initialSolution;
         bestCrossingNumber = new KPMPSolutionChecker().getCrossingNumber(currentSolution);
         this.stepFunction = stepFunction;
-        System.out.println("Crossings before local search: " + bestCrossingNumber);
+        //System.out.println("Crossings before local search: " + bestCrossingNumber);
         return doTheHarlemShake();
     }
 
@@ -62,6 +62,11 @@ public abstract class AbstractKPMPLocalSearch implements KPMPLocalSearch {
         }
     }
 
+    public void initSearch(KPMPSolution bestSolution) {
+        this.bestSolution = bestSolution;
+        beforeSearch();
+    }
+
     /**
      * This abstract method gives the implementing
      * classes the opportunity to do other operations
@@ -87,7 +92,7 @@ public abstract class AbstractKPMPLocalSearch implements KPMPLocalSearch {
      *
      * @return next random solution in the neighbourhood
      */
-    protected abstract KPMPSolution randomNextNeighbour();
+    public abstract KPMPSolution randomNextNeighbour();
 
     /**
      * This method is used as the objective function and as the

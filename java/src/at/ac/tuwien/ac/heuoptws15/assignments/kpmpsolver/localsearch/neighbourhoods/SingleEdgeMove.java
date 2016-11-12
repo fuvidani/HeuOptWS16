@@ -73,7 +73,7 @@ public class SingleEdgeMove extends AbstractKPMPLocalSearch {
      * @return next random solution in the neighbourhood
      */
     @Override
-    protected KPMPSolution randomNextNeighbour() {
+    public KPMPSolution randomNextNeighbour() {
         random = new Random(Double.doubleToLongBits(Math.random()));
         List<KPMPSolutionWriter.PageEntry> edgePartition = bestSolution.getEdgePartition().stream().map(KPMPSolutionWriter.PageEntry::clone).collect(toCollection(ArrayList::new));
         KPMPSolution neighbourSolution = new KPMPSolution(bestSolution.getSpineOrder(), edgePartition, bestSolution.getNumberOfPages());
@@ -140,7 +140,7 @@ public class SingleEdgeMove extends AbstractKPMPLocalSearch {
         int crossingsOnOriginalPage = solutionChecker.getCrossingNumberOfEdge(bestSolution.getSpineOrder(), bestSolution.getEdgePartition(), originalPageIndex, edge);
         int crossingsOnNewPage = solutionChecker.getCrossingNumberOfEdge(generatedSolution.getSpineOrder(), generatedSolution.getEdgePartition(), newPageIndex, edge);
         if (crossingsOnNewPage < crossingsOnOriginalPage) {
-            System.out.println("Improvement (from " + crossingsOnOriginalPage + " to " + crossingsOnNewPage + ") - "  + numberOfIterations + ". iteration");
+            //System.out.println("Improvement (from " + crossingsOnOriginalPage + " to " + crossingsOnNewPage + ") - "  + numberOfIterations + ". iteration");
             bestSolution = generatedSolution;
             return true;
         }
@@ -174,7 +174,7 @@ public class SingleEdgeMove extends AbstractKPMPLocalSearch {
         int crossingsOnOriginalPage = solutionChecker.getCrossingNumberOfEdge(bestSolution.getSpineOrder(), bestSolution.getEdgePartition(), originalPageIndex, edge);
         int crossingsOnNewPage = solutionChecker.getCrossingNumberOfEdge(generatedSolution.getSpineOrder(), generatedSolution.getEdgePartition(), newPageIndex, edge);
         if (crossingsOnNewPage < crossingsOnOriginalPage) {
-            System.out.println("Improvement (from " + crossingsOnOriginalPage + " to " + crossingsOnNewPage + ") - " + numberOfIterations + ". iteration");
+            //System.out.println("Improvement (from " + crossingsOnOriginalPage + " to " + crossingsOnNewPage + ") - " + numberOfIterations + ". iteration");
             bestSolution = generatedSolution;
             index = 0;
             pageCounter = 0;

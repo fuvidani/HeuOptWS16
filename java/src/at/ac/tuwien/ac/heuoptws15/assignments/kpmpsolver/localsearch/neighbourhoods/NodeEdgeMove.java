@@ -82,7 +82,7 @@ public class NodeEdgeMove extends AbstractKPMPLocalSearch {
      * @return next random solution in the neighbourhood
      */
     @Override
-    protected KPMPSolution randomNextNeighbour() {
+    public KPMPSolution randomNextNeighbour() {
         List<KPMPSolutionWriter.PageEntry> edgePartition = bestSolution.getEdgePartition().stream().map(KPMPSolutionWriter.PageEntry::clone).collect(toCollection(ArrayList::new));
         KPMPSolution neighbourSolution = new KPMPSolution(bestSolution.getSpineOrder(), edgePartition, bestSolution.getNumberOfPages());
         List<KPMPSolutionWriter.PageEntry> edges = neighbourSolution.getEdgePartition();
@@ -161,7 +161,7 @@ public class NodeEdgeMove extends AbstractKPMPLocalSearch {
             newCrossings += checker.getCrossingNumberOfEdge(generatedSolution.getSpineOrder(), generatedSolution.getEdgePartition(), newEdges.get(i).page, newEdges.get(i));
         }
         if (newCrossings < originalCrossings) {
-            System.out.println("Improvement (from " + originalCrossings + " to " + newCrossings + ") - " + numberOfIterations + ". iteration");
+           // System.out.println("Improvement (from " + originalCrossings + " to " + newCrossings + ") - " + numberOfIterations + ". iteration");
             bestSolution = generatedSolution;
             nodeIndex = 0;
             pageIndex = 0;
@@ -201,7 +201,7 @@ public class NodeEdgeMove extends AbstractKPMPLocalSearch {
             newCrossings += checker.getCrossingNumberOfEdge(generatedSolution.getSpineOrder(), generatedSolution.getEdgePartition(), newEdges.get(i).page, newEdges.get(i));
         }
         if (newCrossings < originalCrossings) {
-            System.out.println("Improvement (from " + originalCrossings + " to " + newCrossings + ") - " + numberOfIterations + ". iteration");
+            //System.out.println("Improvement (from " + originalCrossings + " to " + newCrossings + ") - " + numberOfIterations + ". iteration");
             bestSolution = generatedSolution;
             nodeIndex = 0;
             pageIndex = 0;

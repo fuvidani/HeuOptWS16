@@ -5,8 +5,11 @@ import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.edgepartitioning.impl.KPMPEdgePartitionRandomHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.impl.KPMPSpineOrderDFSHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.impl.KPMPSpineOrderRandomDFSHeuristic;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.GeneralVariableNeighbourhoodSearch;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.KPMPLocalSearch;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.neighbourhoods.NodeEdgeMove;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.BestImprovementStepFunction;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.FirstImprovementStepFunction;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.RandomStepFunction;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.StepFunction;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.*;
@@ -29,21 +32,21 @@ public class Main {
     public static final int secondsBeforeStop = 840;   // 840 ~ 14 minutes
     public static long START;
     public static int iterationMultiplier;
-    private static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.RANDOM;
+    private static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.DETERMINISTIC;
 
     //private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
     //private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
-    private static String inputPath = "E:\\HeuOptWS16\\instances\\";
-    private static String outputPath = "E:\\HeuOptWS16\\solutions\\";
-    //private static String inputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\";
-    //private static String outputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\solutions\\";
+    //private static String inputPath = "E:\\HeuOptWS16\\instances\\";
+    //private static String outputPath = "E:\\HeuOptWS16\\solutions\\";
+    private static String inputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\";
+    private static String outputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\solutions\\";
     private static int testRuns = 0;
 
     public static void main(String[] args) {
         try {
             while (testRuns < 1) {
-                int instanceCounter = 1;
-                while (instanceCounter != 11) {
+                int instanceCounter = 5;
+                while (instanceCounter != 7) {
                     if (instanceCounter < 6) {
                         iterationMultiplier = 10000;
                     } else if (instanceCounter == 6) {
@@ -87,9 +90,9 @@ public class Main {
                             kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomHeuristic());
                             break;
                     }
-                    StepFunction stepFunction = new RandomStepFunction();
-                    KPMPLocalSearch localSearch = new NodeEdgeMove();
-                    kpmpSolver.setHeuristicType(KPMPSolver.HeuristicType.COMBINED);
+                    StepFunction stepFunction = new BestImprovementStepFunction();
+                    KPMPLocalSearch localSearch = new GeneralVariableNeighbourhoodSearch();
+                    kpmpSolver.setHeuristicType(KPMPSolver.HeuristicType.SEPARATED);
                     kpmpSolver.registerLocalSearchImplementation(localSearch);
                     kpmpSolver.registerStepFunction(stepFunction);
                     START = System.nanoTime();

@@ -76,7 +76,7 @@ public class NodeSwap extends AbstractKPMPLocalSearch {
      * @return next random solution in the neighbourhood
      */
     @Override
-    protected KPMPSolution randomNextNeighbour() {
+    public KPMPSolution randomNextNeighbour() {
         random = new Random(Double.doubleToLongBits(Math.random()));
 
         /* Copy spine order of best solution */
@@ -152,7 +152,7 @@ public class NodeSwap extends AbstractKPMPLocalSearch {
         // TODO incremental evaluation instead of checker
         int crossingNumber = new KPMPSolutionChecker().getCrossingNumber(generatedSolution);
         if (crossingNumber < localBestCrossingNumber) {
-            System.out.println("Improvement (" + crossingNumber + ") - " + numberOfIterations + ". iteration");
+            //System.out.println("Improvement (" + crossingNumber + ") - " + numberOfIterations + ". iteration");
             localBestCrossingNumber = crossingNumber;
             bestSolution = generatedSolution;
             return true;
@@ -182,7 +182,7 @@ public class NodeSwap extends AbstractKPMPLocalSearch {
         // TODO incremental evaluation instead of checker
         int crossingNumber = new KPMPSolutionChecker().getCrossingNumber(generatedSolution);
         if (crossingNumber < localBestCrossingNumber) {
-            System.out.println("Improvement (" + crossingNumber + ") - " + numberOfIterations + ". iteration");
+           // System.out.println("Improvement (" + crossingNumber + ") - " + numberOfIterations + ". iteration");
             localBestCrossingNumber = crossingNumber;
             bestSolution = generatedSolution;
             firstIndex = 0;
