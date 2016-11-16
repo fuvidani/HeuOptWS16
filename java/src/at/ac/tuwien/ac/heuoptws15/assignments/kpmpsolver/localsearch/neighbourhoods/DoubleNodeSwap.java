@@ -20,15 +20,41 @@ import static java.util.stream.Collectors.toCollection;
  *
  * @author Daniel Fuevesi
  * @version 1.0.0
- * @since 30.10.16
+ * @since 15.11.16
  */
-public class NodeSwap extends AbstractKPMPLocalSearch {
+public class DoubleNodeSwap extends AbstractKPMPLocalSearch {
 
     private int firstIndex;
     private int secondIndex;
     private int localBestCrossingNumber;
     private int numberOfIterations;
-    private int maxNumberOfIterations;
+    private List<List<Integer>> permutations;
+    private int A_index1;
+    private int A_index2;
+    private int B_index1;
+    private int B_index2;
+
+    /**
+     * Just for experiments
+     */
+    private void permuteSolutions() {
+        firstIndex = 0;
+        secondIndex = 1;
+        permutations = new ArrayList<>();
+        List<Integer> originalSpineOrder = bestSolution.getSpineOrder();
+        int numberOfVertices = bestSolution.getSpineOrder().size();
+        int maxNumberOfPermutations = (numberOfVertices * (numberOfVertices - 1)) / 2;
+        for (int i = 0; i < maxNumberOfPermutations; i++) {
+            ArrayList<Integer> newOrder = originalSpineOrder.stream().collect(toCollection(ArrayList::new));
+            if (secondIndex >= numberOfVertices) {
+                firstIndex++;
+                secondIndex = firstIndex + 1;
+            }
+            Collections.swap(newOrder, firstIndex, secondIndex);
+            secondIndex++;
+            permutations.add(newOrder);
+        }
+    }
 
     /**
      * This abstract method gives the implementing
@@ -44,10 +70,11 @@ public class NodeSwap extends AbstractKPMPLocalSearch {
         localBestCrossingNumber = bestCrossingNumber;
         numberOfIterations = 0;
         firstIndex = 0;
-        secondIndex = 1;
-        firstIndex = 0;
-        secondIndex = 1;
-        maxNumberOfIterations = (bestSolution.getSpineOrder().size() * (bestSolution.getSpineOrder().size() - 1)) / 2;
+        secondIndex = 0;
+        A_index1 = 0;
+        A_index2 = 1;
+        B_index1 = 1;
+        B_index2 = 2;
     }
 
     /**
@@ -60,12 +87,28 @@ public class NodeSwap extends AbstractKPMPLocalSearch {
     protected KPMPSolution nextNeighbour() {
         List<Integer> currentSpineOrder = bestSolution.getSpineOrder().stream().collect(toCollection(ArrayList::new));
         KPMPSolution neighbourSolution = new KPMPSolution(currentSpineOrder, bestSolution.getEdgePartition(), bestSolution.getNumberOfPages());
-        if (secondIndex >= currentSpineOrder.size()) {
-            firstIndex++;
-            secondIndex = firstIndex + 1;
+        if (A_index1 < currentSpineOrder.size() && B_index2 < currentSpineOrder.size()) {
+            Collections.swap(currentSpineOrder, A_index1, A_index2);
+            Collections.swap(currentSpineOrder, B_index1, B_index2);
+        } else if (B_index2 >= currentSpineOrder.size() && B_index1 < currentSpineOrder.size()) {
+            B_index1++;
+            B_index2 = B_index1 + 1;
+            if (B_index2 >= currentSpineOrder.size() && B_index1 >= currentSpineOrder.size() - 1) {
+                A_index2++;
+                B_index1 = A_index1 + 1;
+                B_index2 = B_index1 + 1;
+            }
+            Collections.swap(currentSpineOrder, A_index1, A_index2);
+            Collections.swap(currentSpineOrder, B_index1, B_index2);
         }
-        Collections.swap(currentSpineOrder, firstIndex, secondIndex);
-        secondIndex++;
+        if (B_index2 >= currentSpineOrder.size() && B_index1 >= currentSpineOrder.size() - 1) {
+            A_index2++;
+            B_index1 = A_index1 + 1;
+            B_index2 = B_index1 + 1;
+            Collections.swap(currentSpineOrder, A_index1, A_index2);
+            Collections.swap(currentSpineOrder, B_index1, B_index2);
+        }
+        B_index2++;
         numberOfIterations++;
         neighbourSolution.setSpineOrder(currentSpineOrder);
         return neighbourSolution;
@@ -80,20 +123,24 @@ public class NodeSwap extends AbstractKPMPLocalSearch {
     @Override
     public KPMPSolution randomNextNeighbour() {
         random = new Random(Double.doubleToLongBits(Math.random()));
-        /* Copy spine order of best solution */
         List<Integer> currentSpineOrder = bestSolution.getSpineOrder().stream().collect(toCollection(ArrayList::new));
-        /* Instantiate neighbour solution */
         KPMPSolution neighbourSolution = new KPMPSolution(currentSpineOrder, bestSolution.getEdgePartition(), bestSolution.getNumberOfPages());
-        /* Pick 2 different random indices */
-        int firstRandom = random.nextInt(currentSpineOrder.size());
-        int secondRandom;
+        A_index1 = random.nextInt(currentSpineOrder.size());
         do {
-            secondRandom = random.nextInt(currentSpineOrder.size());
-        } while (firstRandom == secondRandom);
-        /* Swap the 2 vertices on those random indices */
-        Collections.swap(currentSpineOrder, firstRandom, secondRandom);
-        /* Set the new spine order and return neighbour solution*/
-        neighbourSolution.setSpineOrder(currentSpineOrder);
+            A_index2 = random.nextInt(currentSpineOrder.size());
+        } while (A_index1 == A_index2);
+
+        do {
+            B_index1 = random.nextInt(currentSpineOrder.size());
+        } while (A_index1 == B_index1 || A_index2 == B_index1);
+
+        do {
+            B_index2 = random.nextInt(currentSpineOrder.size());
+        } while (A_index1 == B_index2 || A_index2 == B_index2 || B_index1 == B_index2);
+
+        Collections.swap(currentSpineOrder, A_index1, A_index2);
+        Collections.swap(currentSpineOrder, B_index1, B_index2);
+        numberOfIterations++;
         return neighbourSolution;
     }
 
@@ -116,14 +163,10 @@ public class NodeSwap extends AbstractKPMPLocalSearch {
      */
     @Override
     protected boolean stoppingCriteriaSatisfied(KPMPSolution generatedSolution, RandomStepFunction stepFunction) {
-        numberOfIterations++;
-        // TODO incremental evaluation instead of checker
         int crossingNumber = new KPMPSolutionChecker().getCrossingNumber(generatedSolution);
         if (crossingNumber < localBestCrossingNumber) {
-            //System.out.println("Improvement (" + crossingNumber + ") - " + numberOfIterations + ". iteration");
             localBestCrossingNumber = crossingNumber;
             bestSolution = generatedSolution;
-
         }
         return numberOfIterations >= (generatedSolution.getSpineOrder().size() * Main.iterationMultiplier) || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
     }
@@ -147,14 +190,17 @@ public class NodeSwap extends AbstractKPMPLocalSearch {
      */
     @Override
     protected boolean stoppingCriteriaSatisfied(KPMPSolution generatedSolution, FirstImprovementStepFunction stepFunction) {
-        // TODO incremental evaluation instead of checker
         int crossingNumber = new KPMPSolutionChecker().getCrossingNumber(generatedSolution);
         if (crossingNumber < localBestCrossingNumber) {
             localBestCrossingNumber = crossingNumber;
             bestSolution = generatedSolution;
+            A_index1 = 0;
+            A_index2 = 1;
+            B_index1 = 1;
+            B_index2 = 2;
             return true;
         }
-        return numberOfIterations == maxNumberOfIterations || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
+        return A_index2 >= generatedSolution.getSpineOrder().size() - 1 && B_index2 >= generatedSolution.getSpineOrder().size() || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
     }
 
     /**
@@ -176,20 +222,27 @@ public class NodeSwap extends AbstractKPMPLocalSearch {
      */
     @Override
     protected boolean stoppingCriteriaSatisfied(KPMPSolution generatedSolution, BestImprovementStepFunction stepFunction) {
-        // TODO incremental evaluation instead of checker
         int crossingNumber = new KPMPSolutionChecker().getCrossingNumber(generatedSolution);
         if (crossingNumber < localBestCrossingNumber) {
             localBestCrossingNumber = crossingNumber;
             bestSolution = generatedSolution;
-            firstIndex = 0;
-            secondIndex = 1;
+            A_index1 = 0;
+            A_index2 = 1;
+            B_index1 = 1;
+            B_index2 = 2;
             numberOfIterations = 0;
         }
-        return numberOfIterations == maxNumberOfIterations || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
+        return A_index2 >= generatedSolution.getSpineOrder().size() - 1 && B_index2 >= generatedSolution.getSpineOrder().size() || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
     }
 
+    /**
+     * Returns the getAbbreviation of the neighbourhood structure that
+     * is used to mark solution files with the structure's name.
+     *
+     * @return getAbbreviation of the local search strategy
+     */
     @Override
     public String getAbbreviation() {
-        return "NS";
+        return "D-N-S";
     }
 }

@@ -1,17 +1,13 @@
 package at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch;
 
 import at.ac.tuwien.ac.Main;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.neighbourhoods.AbstractKPMPLocalSearch;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.neighbourhoods.NodeEdgeMove;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.neighbourhoods.NodeSwap;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.neighbourhoods.SingleEdgeMove;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.neighbourhoods.*;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.StepFunction;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolution;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolutionChecker;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Created by David on 12.11.2016.
@@ -20,7 +16,6 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
 
     private List<AbstractKPMPLocalSearch> neighbourhoods_K;
     private List<AbstractKPMPLocalSearch> neighbourhoods_I;
-    private Random random = new Random(Double.doubleToLongBits(Math.random()));
 
     public GeneralVariableNeighbourhoodSearch() {
         this.neighbourhoods_K = new ArrayList<>();
@@ -31,7 +26,7 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
         this.neighbourhoods_I = new ArrayList<>();
         this.neighbourhoods_I.add(new SingleEdgeMove());
         this.neighbourhoods_I.add(new NodeEdgeMove());
-        this.neighbourhoods_I.add(new NodeSwap());
+        this.neighbourhoods_I.add(new DoubleNodeSwap());
     }
 
     @Override

@@ -127,7 +127,7 @@ public class NodeEdgeMove extends AbstractKPMPLocalSearch {
             newCrossings += checker.getCrossingNumberOfEdge(generatedSolution.getSpineOrder(), generatedSolution.getEdgePartition(), newEdges.get(i).page, newEdges.get(i));
         }
         if (newCrossings < originalCrossings) {
-            System.out.println("Improvement (from " + originalCrossings + " to " + newCrossings + ") - " + numberOfIterations + ". iteration");
+            //System.out.println("Improvement (from " + originalCrossings + " to " + newCrossings + ") - " + numberOfIterations + ". iteration");
             bestSolution = generatedSolution;
         }
         randomPageIndex = random.nextInt(bestSolution.getNumberOfPages());
