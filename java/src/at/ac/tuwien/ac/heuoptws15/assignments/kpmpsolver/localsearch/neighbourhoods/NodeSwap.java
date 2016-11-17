@@ -29,6 +29,7 @@ public class NodeSwap extends AbstractKPMPLocalSearch {
     private int localBestCrossingNumber;
     private int numberOfIterations;
     private int maxNumberOfIterations;
+    private KPMPSolution bestInNeighbourhood;
 
     /**
      * This abstract method gives the implementing
@@ -45,9 +46,9 @@ public class NodeSwap extends AbstractKPMPLocalSearch {
         numberOfIterations = 0;
         firstIndex = 0;
         secondIndex = 1;
-        firstIndex = 0;
-        secondIndex = 1;
         maxNumberOfIterations = (bestSolution.getSpineOrder().size() * (bestSolution.getSpineOrder().size() - 1)) / 2;
+        List<Integer> currentSpineOrder = bestSolution.getSpineOrder().stream().collect(toCollection(ArrayList::new));
+        bestInNeighbourhood = new KPMPSolution(currentSpineOrder, bestSolution.getEdgePartition(), bestSolution.getNumberOfPages());
     }
 
     /**
@@ -80,19 +81,19 @@ public class NodeSwap extends AbstractKPMPLocalSearch {
     @Override
     public KPMPSolution randomNextNeighbour() {
         random = new Random(Double.doubleToLongBits(Math.random()));
-        /* Copy spine order of best solution */
+        /* 1. Copy spine order of best solution
+         * 2. Instantiate neighbour solution
+         * 3. Pick 2 different random indices
+         * 4. Swap the 2 vertices on those random indices
+         * 5. Set the new spine order and return neighbour solution */
         List<Integer> currentSpineOrder = bestSolution.getSpineOrder().stream().collect(toCollection(ArrayList::new));
-        /* Instantiate neighbour solution */
         KPMPSolution neighbourSolution = new KPMPSolution(currentSpineOrder, bestSolution.getEdgePartition(), bestSolution.getNumberOfPages());
-        /* Pick 2 different random indices */
         int firstRandom = random.nextInt(currentSpineOrder.size());
         int secondRandom;
         do {
             secondRandom = random.nextInt(currentSpineOrder.size());
         } while (firstRandom == secondRandom);
-        /* Swap the 2 vertices on those random indices */
         Collections.swap(currentSpineOrder, firstRandom, secondRandom);
-        /* Set the new spine order and return neighbour solution*/
         neighbourSolution.setSpineOrder(currentSpineOrder);
         return neighbourSolution;
     }
@@ -116,11 +117,10 @@ public class NodeSwap extends AbstractKPMPLocalSearch {
      */
     @Override
     protected boolean stoppingCriteriaSatisfied(KPMPSolution generatedSolution, RandomStepFunction stepFunction) {
-        numberOfIterations++;
         // TODO incremental evaluation instead of checker
+        numberOfIterations++;
         int crossingNumber = new KPMPSolutionChecker().getCrossingNumber(generatedSolution);
         if (crossingNumber < localBestCrossingNumber) {
-            //System.out.println("Improvement (" + crossingNumber + ") - " + numberOfIterations + ". iteration");
             localBestCrossingNumber = crossingNumber;
             bestSolution = generatedSolution;
 
@@ -186,6 +186,25 @@ public class NodeSwap extends AbstractKPMPLocalSearch {
             numberOfIterations = 0;
         }
         return numberOfIterations == maxNumberOfIterations || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
+
+        /*int crossingNumber = new KPMPSolutionChecker().getCrossingNumber(generatedSolution);
+        if (crossingNumber < localBestCrossingNumber){
+            bestInNeighbourhood = generatedSolution;
+            localBestCrossingNumber = crossingNumber;
+
+        }
+        if ((firstIndex == generatedSolution.getSpineOrder().size()-2 && secondIndex == generatedSolution.getSpineOrder().size())){
+            if (localBestCrossingNumber < bestCrossingNumber) {
+                bestSolution = bestInNeighbourhood;
+                bestCrossingNumber = localBestCrossingNumber;
+                firstIndex = 0;
+                secondIndex = 1;
+                return false;
+            }else {
+                return true;
+            }
+        }
+        return false;*/
     }
 
     @Override

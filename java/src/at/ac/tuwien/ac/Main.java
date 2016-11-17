@@ -5,9 +5,9 @@ import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.edgepartitioning.impl.KPMPEdgePartitionRandomHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.impl.KPMPSpineOrderDFSHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.impl.KPMPSpineOrderRandomDFSHeuristic;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.GeneralVariableNeighbourhoodSearch;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.KPMPLocalSearch;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.RandomStepFunction;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.neighbourhoods.NodeSwap;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.BestImprovementStepFunction;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.StepFunction;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.*;
 
@@ -87,8 +87,8 @@ public class Main {
                             kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomHeuristic());
                             break;
                     }
-                    StepFunction stepFunction = new RandomStepFunction();
-                    KPMPLocalSearch localSearch = new GeneralVariableNeighbourhoodSearch();
+                    StepFunction stepFunction = new BestImprovementStepFunction();
+                    KPMPLocalSearch localSearch = new NodeSwap();
                     kpmpSolver.setHeuristicType(KPMPSolver.HeuristicType.SEPARATED);
                     kpmpSolver.registerLocalSearchImplementation(localSearch);
                     kpmpSolver.registerStepFunction(stepFunction);
