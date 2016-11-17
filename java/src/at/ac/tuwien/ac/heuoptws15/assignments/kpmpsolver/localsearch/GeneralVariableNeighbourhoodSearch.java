@@ -24,9 +24,9 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
         this.neighbourhoods_K.add(new NodeSwap());
 
         this.neighbourhoods_I = new ArrayList<>();
-        this.neighbourhoods_I.add(new SingleEdgeMove());
+        this.neighbourhoods_I.add(new DoubleEdgeMove());
         this.neighbourhoods_I.add(new NodeEdgeMove());
-        this.neighbourhoods_I.add(new DoubleNodeSwap());
+        this.neighbourhoods_I.add(new SingleEdgeMove());
     }
 
     @Override

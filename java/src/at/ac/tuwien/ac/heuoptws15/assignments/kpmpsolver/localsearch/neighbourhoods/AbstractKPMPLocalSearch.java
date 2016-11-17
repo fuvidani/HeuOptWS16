@@ -20,23 +20,20 @@ import java.util.Random;
  */
 public abstract class AbstractKPMPLocalSearch implements KPMPLocalSearch {
 
-    private KPMPSolution initialSolution;
-    KPMPSolution bestSolution;
-    int bestCrossingNumber;
-    protected Random random;
     private StepFunction stepFunction;
+    protected KPMPSolution bestSolution;
+    protected int bestCrossingNumber;
+    protected Random random;
 
     @Override
     public KPMPSolution improveSolution(KPMPSolution currentSolution, StepFunction stepFunction) {
-        initialSolution = currentSolution;
-        bestSolution = initialSolution;
+        bestSolution = currentSolution;
         bestCrossingNumber = new KPMPSolutionChecker().getCrossingNumber(currentSolution);
         this.stepFunction = stepFunction;
-        //System.out.println("Crossings before local search: " + bestCrossingNumber);
-        return doTheHarlemShake();
+        return performLocalSearch();
     }
 
-    private KPMPSolution doTheHarlemShake() {
+    private KPMPSolution performLocalSearch() {
         KPMPSolution neighbourSolution;
         beforeSearch();
         do {
