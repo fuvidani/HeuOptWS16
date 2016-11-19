@@ -7,7 +7,7 @@ import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.impl.KPMPSpineOrderRandomDFSHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.GeneralVariableNeighbourhoodSearch;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.KPMPLocalSearch;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.RandomStepFunction;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.BestImprovementStepFunction;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.StepFunction;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.*;
 
@@ -31,10 +31,10 @@ public class Main {
     public static int iterationMultiplier;
     private static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.DETERMINISTIC;
 
-    private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
-    private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
-    //private static String inputPath = "E:\\HeuOptWS16\\instances\\";
-    //private static String outputPath = "E:\\HeuOptWS16\\solutions\\";
+    //private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
+    //private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
+    private static String inputPath = "E:\\HeuOptWS16\\instances\\";
+    private static String outputPath = "E:\\HeuOptWS16\\solutions\\";
     //private static String inputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\";
     //private static String outputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\solutions\\";
     private static int testRuns = 0;
@@ -49,15 +49,10 @@ public class Main {
                     } else if (instanceCounter == 6) {
                         iterationMultiplier = 2;
                     } else {
-                        iterationMultiplier = 10;
+                        iterationMultiplier = 1000;
                     }
                     KPMPInstance instance = KPMPInstance.readInstance(inputPath + "automatic-" + instanceCounter + ".txt");
                     System.out.println("Test Instance " + instanceCounter + " - K: " + instance.getK() + ", Vertices: " + instance.getNumVertices());
-
-                    /*List<Integer> spineOrder = new ArrayList<>();
-                    for (int i = 0; i < instance.getNumVertices(); i++) {
-                        spineOrder.add(i);
-                    }*/
 
                     List<List<Integer>> adjacencyList = instance.getAdjacencyList();
                     List<KPMPSolutionWriter.PageEntry> edgePart = new ArrayList<>();
@@ -68,9 +63,6 @@ public class Main {
                             }
                         }
                     }
-
-                    //int originalNumberOfCrossings = new KPMPSolutionChecker().getCrossingNumber(new KPMPSolution(spineOrder, edgePart, instance.getK()));
-                    //System.out.println("Number of crossings before: " + NumberFormat.getIntegerInstance().format(originalNumberOfCrossings));
 
                     KPMPSolver kpmpSolver = new KPMPSolver(instance, edgePart, 0);
                     switch (heuristicStrategy) {
@@ -87,7 +79,7 @@ public class Main {
                             kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomHeuristic());
                             break;
                     }
-                    StepFunction stepFunction = new RandomStepFunction();
+                    StepFunction stepFunction = new BestImprovementStepFunction();
                     KPMPLocalSearch localSearch = new GeneralVariableNeighbourhoodSearch();
                     kpmpSolver.setHeuristicType(KPMPSolver.HeuristicType.SEPARATED);
                     kpmpSolver.registerLocalSearchImplementation(localSearch);
@@ -98,7 +90,6 @@ public class Main {
                     System.out.println("Runtime: " + millis + " milliseconds");
                     int numberOfCrossings = new KPMPSolutionChecker().getCrossingNumber(solution);
                     System.out.println("Number of crossings after: " + NumberFormat.getIntegerInstance().format(numberOfCrossings) + "\n\n\n");
-
 
                     KPMPSolutionWriter writer = new KPMPSolutionWriter(instance.getK());
                     writer.setSpineOrder(solution.getSpineOrder());

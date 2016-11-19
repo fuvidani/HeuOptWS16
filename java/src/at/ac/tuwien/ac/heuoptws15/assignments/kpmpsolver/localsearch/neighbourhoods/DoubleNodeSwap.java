@@ -163,12 +163,14 @@ public class DoubleNodeSwap extends AbstractKPMPLocalSearch {
      */
     @Override
     protected boolean stoppingCriteriaSatisfied(KPMPSolution generatedSolution, RandomStepFunction stepFunction) {
+        numberOfIterationsWithoutImprovement++;
         int crossingNumber = new KPMPSolutionChecker().getCrossingNumber(generatedSolution);
         if (crossingNumber < localBestCrossingNumber) {
             localBestCrossingNumber = crossingNumber;
             bestSolution = generatedSolution;
+            numberOfIterationsWithoutImprovement = 0;
         }
-        return numberOfIterations >= (generatedSolution.getSpineOrder().size() * Main.iterationMultiplier) || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
+        return numberOfIterationsWithoutImprovement >=  Main.iterationMultiplier || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
     }
 
     /**

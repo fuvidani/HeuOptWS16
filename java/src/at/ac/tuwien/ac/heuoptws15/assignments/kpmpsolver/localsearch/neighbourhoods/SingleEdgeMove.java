@@ -107,13 +107,15 @@ public class SingleEdgeMove extends AbstractKPMPLocalSearch {
     @Override
     protected boolean stoppingCriteriaSatisfied(KPMPSolution generatedSolution, RandomStepFunction stepFunction) {
         numberOfIterations++;
+        numberOfIterationsWithoutImprovement++;
         KPMPSolutionChecker solutionChecker = new KPMPSolutionChecker();
         int crossingsOnOriginalPage = solutionChecker.getCrossingNumberOfEdge(bestSolution.getSpineOrder(), bestSolution.getEdgePartition(), originalPageIndex, edge);
         int crossingsOnNewPage = solutionChecker.getCrossingNumberOfEdge(generatedSolution.getSpineOrder(), generatedSolution.getEdgePartition(), newPageIndex, edge);
         if (crossingsOnNewPage < crossingsOnOriginalPage) {
             bestSolution = generatedSolution;
+            numberOfIterationsWithoutImprovement = 0;
         }
-        return numberOfIterations >= bestSolution.getEdgePartition().size() * bestSolution.getNumberOfPages() || numberOfIterations >= (generatedSolution.getEdgePartition().size() * Main.iterationMultiplier) || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
+        return numberOfIterations >= bestSolution.getEdgePartition().size() * bestSolution.getNumberOfPages() || numberOfIterationsWithoutImprovement >=  Main.iterationMultiplier || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
     }
 
     /**

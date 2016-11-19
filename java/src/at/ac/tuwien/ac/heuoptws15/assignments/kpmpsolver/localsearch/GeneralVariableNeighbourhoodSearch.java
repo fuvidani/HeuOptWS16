@@ -20,13 +20,17 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
     public GeneralVariableNeighbourhoodSearch() {
         this.neighbourhoods_K = new ArrayList<>();
         this.neighbourhoods_K.add(new SingleEdgeMove());
-        this.neighbourhoods_K.add(new NodeEdgeMove());
         this.neighbourhoods_K.add(new NodeSwap());
+        this.neighbourhoods_K.add(new NodeEdgeMove());
 
         this.neighbourhoods_I = new ArrayList<>();
+        /*this.neighbourhoods_I.add(new DoubleEdgeMove());
         this.neighbourhoods_I.add(new DoubleNodeSwap());
-        this.neighbourhoods_I.add(new NodeEdgeMove());
-        this.neighbourhoods_I.add(new DoubleEdgeMove());
+        this.neighbourhoods_I.add(new NodeEdgeMove());*/
+        this.neighbourhoods_I.add(new DoubleNodeSwap());
+        this.neighbourhoods_I.add(new SingleEdgeMove());
+        this.neighbourhoods_I.add(new SingleEdgeMove());
+
     }
 
     @Override
@@ -35,14 +39,16 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
         KPMPSolutionChecker solutionChecker = new KPMPSolutionChecker();
         int crossingNumberOfBestSolution = solutionChecker.getCrossingNumber(bestSolution);
         int runCounter = 0;
+        int runsWithoutImprovement = 0;
         do {
             int index_K = 0;
-            while (index_K < neighbourhoods_K.size()) {
-                neighbourhoods_K.get(index_K).initSearch(initialSolution);
+            runsWithoutImprovement++;
+            while (!runTimeLimitExceeded() && index_K < neighbourhoods_K.size()) {
+                neighbourhoods_K.get(index_K).initSearch(bestSolution);
                 KPMPSolution randomSolution = neighbourhoods_K.get(index_K).randomNextNeighbour();
                 int crossingNumberOfRandomSolution = solutionChecker.getCrossingNumber(randomSolution);
                 int index_I = 0;
-                while (index_I < neighbourhoods_I.size()) {
+                while (!runTimeLimitExceeded() && index_I < neighbourhoods_I.size()) {
                     KPMPSolution solution = VNDSearch(randomSolution,neighbourhoods_I.get(index_I),stepFunction);
                     int crossingNumberOfSolution = solutionChecker.getCrossingNumber(solution);
                     if (crossingNumberOfSolution < crossingNumberOfRandomSolution) {
@@ -57,18 +63,26 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
                     bestSolution = randomSolution;
                     crossingNumberOfBestSolution = crossingNumberOfRandomSolution;
                     index_K = 0;
+                    runsWithoutImprovement = 0;
                 } else {
                     index_K++;
                 }
             }
+            if (crossingNumberOfBestSolution == 0){
+                break;
+            }
             runCounter++;
-        } while (runCounter < 1 && ((System.nanoTime() - Main.START) / 1000000) < (Main.secondsBeforeStop * 1000));
+        } while (runsWithoutImprovement < 50 && !runTimeLimitExceeded());
 
         return bestSolution;
     }
 
     private KPMPSolution VNDSearch(KPMPSolution solution, AbstractKPMPLocalSearch localSearch, StepFunction stepFunction) {
         return localSearch.improveSolution(solution,stepFunction);
+    }
+
+    private boolean runTimeLimitExceeded(){
+        return ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
     }
 
     @Override

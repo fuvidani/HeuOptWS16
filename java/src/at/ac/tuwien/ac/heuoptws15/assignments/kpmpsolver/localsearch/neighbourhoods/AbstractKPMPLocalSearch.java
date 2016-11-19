@@ -23,6 +23,7 @@ public abstract class AbstractKPMPLocalSearch implements KPMPLocalSearch {
     private StepFunction stepFunction;
     protected KPMPSolution bestSolution;
     protected int bestCrossingNumber;
+    protected int numberOfIterationsWithoutImprovement;
     protected Random random;
 
     @Override
@@ -30,6 +31,7 @@ public abstract class AbstractKPMPLocalSearch implements KPMPLocalSearch {
         bestSolution = currentSolution;
         bestCrossingNumber = new KPMPSolutionChecker().getCrossingNumber(currentSolution);
         this.stepFunction = stepFunction;
+        numberOfIterationsWithoutImprovement = 0;
         return performLocalSearch();
     }
 

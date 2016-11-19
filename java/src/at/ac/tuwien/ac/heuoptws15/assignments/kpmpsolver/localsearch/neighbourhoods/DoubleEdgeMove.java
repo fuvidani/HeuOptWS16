@@ -127,6 +127,7 @@ public class DoubleEdgeMove extends AbstractKPMPLocalSearch {
     @Override
     protected boolean stoppingCriteriaSatisfied(KPMPSolution generatedSolution, RandomStepFunction stepFunction) {
         numberOfIterations++;
+        numberOfIterationsWithoutImprovement++;
         KPMPSolutionChecker solutionChecker = new KPMPSolutionChecker();
         int firstCrossingsOnOriginalPage = solutionChecker.getCrossingNumberOfEdge(bestSolution.getSpineOrder(), bestSolution.getEdgePartition(), firstEdgeOriginalPageIndex, firstEdge);
         int secondCrossingsOnOriginalPage = solutionChecker.getCrossingNumberOfEdge(bestSolution.getSpineOrder(), bestSolution.getEdgePartition(), secondEdgeOriginalPageIndex, secondEdge);
@@ -134,8 +135,9 @@ public class DoubleEdgeMove extends AbstractKPMPLocalSearch {
         int secondCrossingsOnNewPage = solutionChecker.getCrossingNumberOfEdge(generatedSolution.getSpineOrder(), generatedSolution.getEdgePartition(), secondEdgeNewPageIndex, secondEdge);
         if (firstCrossingsOnNewPage + secondCrossingsOnNewPage < firstCrossingsOnOriginalPage + secondCrossingsOnOriginalPage) {
             bestSolution = generatedSolution;
+            numberOfIterationsWithoutImprovement = 0;
         }
-        return numberOfIterations >= bestSolution.getEdgePartition().size() * bestSolution.getNumberOfPages() || numberOfIterations >= (generatedSolution.getEdgePartition().size() * Main.iterationMultiplier) || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
+        return numberOfIterationsWithoutImprovement >= bestSolution.getEdgePartition().size() || numberOfIterationsWithoutImprovement >=  Main.iterationMultiplier || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
     }
 
     /**
