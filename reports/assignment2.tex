@@ -1,0 +1,167 @@
+\documentclass[11pt]{article}
+\usepackage{outline}
+\usepackage{pmgraph}
+\usepackage{listings}
+\usepackage[utf8]{inputenc}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{caption}
+\usepackage{mathtools}
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\title{Programming Assignment 2\\ \vspace{10px} \large Heuristic Optimization Techniques}
+\author{David Molnar, 1326891\\ Daniel Füvesi, 1326576\\Gruppe 9}
+\date{\today}
+%--------------------Make usable space all of page
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\topmargin}{0in}
+\setlength{\headsep}{-.25in}
+\setlength{\textwidth}{6.5in}
+\setlength{\textheight}{8.5in}
+%--------------------Indention
+\setlength{\parindent}{0.5cm}
+\algdef{SE}[DOWHILE]{Do}{doWhile}{\algorithmicdo}[1]{\algorithmicwhile\ #1}
+
+\begin{document}
+\lstset{language=Java}
+%--------------------Title Page
+\maketitle
+ 
+%--------------------Begin Outline
+\section{Local Search}
+\subsection{Description}
+
+\hspace{0.5cm}For this assignment we extended our current program with a local search strategy. Due to a solid software architecture that we have been carefully designing since the beginning, we only had to define a new interface and inject the proper implementation. An abstract class encapsulates the basic procedure of the local search: 
+\begin{algorithm}
+	\caption{KPMP Local Search}\label{euclid}
+	\begin{algorithmic}[1]
+		\Require Constructed KPMPSolution
+		\Ensure KPMPSolution that is at least as good as the input
+		\Function{improveSolution}{initialSolution, stepFunction}
+		\State $\textit{best solution} \gets \textit{initialSolution}$
+		\State $\textit{globalStepfunction} \gets \textit{stepFunction}$
+		
+		\Return $\text{performLocalSearch()};$
+		\EndFunction
+		\newline
+		\Function{performLocalSearch}{ }
+		\Do 
+		\State $\textit{neighbourSolution} \gets \text{nextNeighbour(\textit{globalStepfunction})}$
+		\If {$\textit{neighbourSolution better than best solution}$}
+		\State $\textit{best solution } \gets \textit{neighbourSolution}$
+		\EndIf
+		\doWhile{$\text{isStoppingCriteriaSatisfied(\textit{neighbourSolution})} \neq \text{true}$} \\
+		\Return $\textit{best solution}$
+		\EndFunction
+	
+		%\algstore{myalg}
+	\end{algorithmic}
+\end{algorithm}
+
+Subclasses only need to implement the \textit{nextNeighbour()}, \textit{randomNextNeighbour()} methods that are invoked depending on the type of the step function and 3 stopping criterias also driven by the actual step function.
+\pagebreak
+
+\subsection{Neighbourhood Structures}
+We implemented the following 3 neighbourhood structures:
+\begin{enumerate}
+	\item \textbf{NodeSwap} This neighbourhood consists of all solutions, where 2 vertices of the spine order are swapped.
+	\begin{itemize}
+		\item Objective function: Unfortunately all the crossings need to be calculated for each solution which obviously results in an overhead.
+	\end{itemize}
+	\item \textbf{Single-Edge-Move} This neighbourhood consists of all solutions, where a \textbf{single} edge is put on another page.
+	\begin{itemize}
+		\item Objective function: Incremental evaluation; only calculate the difference of the crossings that this edge creates on both pages.
+	\end{itemize}
+	\item \textbf{Node-Edge-Move} This neighbourhood consists of all solutions, where \textbf{all} edges of a node are put on another page.
+	\begin{itemize}
+		\item Objective function: Incremental evaluation; only calculate the difference of the crossings that those edges create on both pages.
+	\end{itemize}
+	
+\end{enumerate}
+
+
+\subsection{Step functions}
+\begin{itemize}
+	\item \textbf{BestImprovement}: enumerate all the solutions in the neighbourhood and return the best
+	\item \textbf{FirstImprovement}: return the first solution that is better than the original one
+	\item \textbf{Random}: generate random solutions until a certain limit (time or number of iterations) is exceeded
+\end{itemize}
+
+\section{Experimental Setup}
+\hspace{0.5cm} The heuristics were tested on a Windows 10 PC with Intel Core i7 870 (4 cores, 2.93GHz) and 8GB RAM, implemented in Java without external libraries. All instances received a CPU time limit of 14 minutes. If the running time exceeds the limit (checked on each iteration), the current best solution is returned. The number of spine order solutions and iterations in the partitioning were allocated dynamically depending on the "weight" of the instance. Instances 1-5 always generated as many different spine order solutions as the number of vertices they had. Instance 6 only randomized 2 spine orders, while the rest (7-10) did 5 different ones. In case of the random step function, the number of max itarations (besides the time limit) was always the number of edges multiplied by the number of vertices.
+\newpage
+\section{Results}
+\hspace{0.5cm}First of all it needs to be said that due to the high number of combinations to test we we are not content with the amount of testing we have conducted. From the tables below it is quite obvious that the Single-Edge-Move neighbourhood structure returns the best solutions. It is a good structure and we could use incremental evaluation thus having a good overall performance. In most cases random initial solutions yield better end results, especially when either the instance is small enough for best improvement step function \textbf{or} the random step function is used. As far as the number of itaration goes, we could not set up a pattern when local optima are reached. Generally, a good number of iterations were needed to reach good (or best) solutions. For simplicity we only present the best solutions, otherwise the tables would be too big.\\
+\newline
+Abbreviations: (neighbourhood\_structure, step\_function)
+\begin{itemize}
+	\item \textbf{NS} ... NodeSwap
+	\item \textbf{S-E-M} ... Single-Edge-Move
+	\item \textbf{N-E-M} ... Node-Edge-Move
+	\item \textbf{b} ... best step function
+	\item \textbf{f} ... first step function
+	\item \textbf{r} ... random step function
+\end{itemize}
+\subsection{Results with Deterministic Construction Heuristic}
+
+
+\begin{tabular}{l*{6}{c}r}
+	Instance & Best Crossings & Time \\
+	\hline
+	automatic-1 & 13 (S-E-M, \textbf{b}) & 10 ms \\
+	automatic-2 & 8 (NS, \textbf{b}) & 77 ms \\
+	automatic-3 & 66 (S-E-M, \textbf{b}) & 44 ms \\
+	automatic-4 & 3 (NS, \textbf{b}) & 250 ms \\
+	automatic-5 & 14 (S-E-M, \textbf{b}) & 12 ms \\
+	automatic-6 & 5'015'298 (S-E-M, \textbf{r}) & 285'736 ms (4.76 min) \\
+	automatic-7 & 8860 (N-E-M, \textbf{b}) & 11564 ms \\
+	automatic-8 & 382'945 (S-E-M, \textbf{r}) & 68796 ms  \\
+	automatic-9 & 102'859 (S-E-M, \textbf{r}) & 71616 ms \\
+	automatic-10 & 34392 (S-E-M, \textbf{r}) & 22708 ms  \\
+\end{tabular}
+
+
+
+\subsection{Results with Randomized Construction Heuristic}
+
+\begin{tabular}{l*{6}{c}r}
+Instance & Best Crossings & Avg. Time & Runs\\
+\hline
+automatic-1 & 12 (NS, \textbf{b}) & 3 ms & 5 \\
+automatic-2 & 4 (S-E-M, \textbf{b}) & 35 ms & 5 \\
+automatic-3 & 72 (S-E-M, \textbf{b}) & 190 ms & 5 \\
+automatic-4 & 8 (S-E-M, \textbf{b}) & 50 ms & 5 \\
+automatic-5 & 10 (N-E-M, \textbf{b}) & 66 ms & 5 \\
+automatic-6 & 4'199'545 (S-E-M, \textbf{r}) & 271'586 ms & 5 \\
+automatic-7 & 8738 (S-E-M, \textbf{b}) & 166137 ms & 5 \\
+automatic-8 & 292'692 (S-E-M, \textbf{r}) & 68870 ms  & 5 \\
+automatic-9 & 117'712 (S-E-M, \textbf{r}) & 69546 ms & 5 \\
+automatic-10 & 26633 (S-E-M, \textbf{r}) & 24711 ms  & 5 \\
+\end{tabular}
+\newline
+\newline
+
+\begin{tabular}{l*{6}{c}r}
+	Instance & Avg. Crossings B4 GVNS & Best Crossings & Avg. Crossings & Avg. Time & Runs\\
+	\hline
+	automatic-1 & 20 & 9 (\textbf{b}) & 9 & 36010 ms & 3x14 \\
+	automatic-2 & 12 & 0 (\textbf{f})& 0 & 1149 ms & 3x14 \\
+	automatic-3 & 151 & 21 (\textbf{r})& 28 & 478173ms & 3x14 \\
+	automatic-4 & 18 & 0 (\textbf{f})& 0 & 6760 ms & 3x14 \\
+	automatic-5 & 23 & 0 (\textbf{r})& 0.90 & 206990 ms & 3x14 \\
+	automatic-6 & 9'813'265 &2'280'656 (\textbf{r})& 7'393'025 & 844817 ms (!) & 3x14 \\
+	automatic-7 & 24'935 & 7803 (\textbf{r})& 8505 & 840158 ms (!) & 3x14 \\
+	automatic-8 & 1'543'365 & 194'286 (\textbf{r})& 1'102'975 & 841170 ms (!) & 3x14 \\
+	automatic-9 & 933'825 & 34'563 (\textbf{r})& 622'879 & 841333 ms (!) & 3x14 \\
+	automatic-10 & 186'191 &15'831 (\textbf{r})& 100'160 & 840415 ms (!)  & 3x14 \\
+\end{tabular}
+
+
+\end{document}

@@ -20,16 +20,13 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
     public GeneralVariableNeighbourhoodSearch() {
         this.neighbourhoods_K = new ArrayList<>();
         this.neighbourhoods_K.add(new SingleEdgeMove());
-        this.neighbourhoods_K.add(new NodeSwap());
         this.neighbourhoods_K.add(new NodeEdgeMove());
+        this.neighbourhoods_K.add(new DoubleNodeSwap());
 
         this.neighbourhoods_I = new ArrayList<>();
-        /*this.neighbourhoods_I.add(new DoubleEdgeMove());
-        this.neighbourhoods_I.add(new DoubleNodeSwap());
-        this.neighbourhoods_I.add(new NodeEdgeMove());*/
-        this.neighbourhoods_I.add(new DoubleNodeSwap());
         this.neighbourhoods_I.add(new SingleEdgeMove());
-        this.neighbourhoods_I.add(new SingleEdgeMove());
+        this.neighbourhoods_I.add(new NodeSwap());
+        this.neighbourhoods_I.add(new DoubleEdgeMove());
 
     }
 
@@ -38,6 +35,7 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
         KPMPSolution bestSolution = initialSolution;
         KPMPSolutionChecker solutionChecker = new KPMPSolutionChecker();
         int crossingNumberOfBestSolution = solutionChecker.getCrossingNumber(bestSolution);
+        System.out.println("Number of crossings before local search: " + crossingNumberOfBestSolution);
         int runCounter = 0;
         int runsWithoutImprovement = 0;
         do {
@@ -47,6 +45,7 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
                 neighbourhoods_K.get(index_K).initSearch(bestSolution);
                 KPMPSolution randomSolution = neighbourhoods_K.get(index_K).randomNextNeighbour();
                 int crossingNumberOfRandomSolution = solutionChecker.getCrossingNumber(randomSolution);
+
                 int index_I = 0;
                 while (!runTimeLimitExceeded() && index_I < neighbourhoods_I.size()) {
                     KPMPSolution solution = VNDSearch(randomSolution,neighbourhoods_I.get(index_I),stepFunction);
@@ -72,7 +71,7 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
                 break;
             }
             runCounter++;
-        } while (runsWithoutImprovement < 50 && !runTimeLimitExceeded());
+        } while (runsWithoutImprovement < 2000 && !runTimeLimitExceeded());
 
         return bestSolution;
     }
