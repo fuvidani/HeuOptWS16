@@ -7,7 +7,7 @@ import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.impl.KPMPSpineOrderRandomDFSHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.GeneralVariableNeighbourhoodSearch;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.KPMPLocalSearch;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.BestImprovementStepFunction;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.RandomStepFunction;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.StepFunction;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.*;
 
@@ -29,7 +29,8 @@ public class Main {
     public static final int secondsBeforeStop = 840;   // 840 ~ 14 minutes
     public static long START;
     public static int iterationMultiplier;
-    private static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.DETERMINISTIC;
+    public static int crossingsBeforeLocalSearch;
+    private static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.RANDOM;
 
     //private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
     //private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
@@ -42,12 +43,12 @@ public class Main {
     public static void main(String[] args) {
         try {
             while (testRuns < 1) {
-                int instanceCounter = 3;
-                while (instanceCounter != 4) {
+                int instanceCounter = 1;
+                while (instanceCounter != 11) {
                     if (instanceCounter < 6) {
                         iterationMultiplier = 1000;
                     } else if (instanceCounter == 6) {
-                        iterationMultiplier = 2;
+                        iterationMultiplier = 500;
                     } else {
                         iterationMultiplier = 1000;
                     }
@@ -79,9 +80,9 @@ public class Main {
                             kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomHeuristic());
                             break;
                     }
-                    StepFunction stepFunction = new BestImprovementStepFunction();
+                    StepFunction stepFunction = new RandomStepFunction();
                     KPMPLocalSearch localSearch = new GeneralVariableNeighbourhoodSearch();
-                    kpmpSolver.setHeuristicType(KPMPSolver.HeuristicType.SEPARATED);
+                    kpmpSolver.setHeuristicType(KPMPSolver.HeuristicType.COMBINED);
                     kpmpSolver.registerLocalSearchImplementation(localSearch);
                     kpmpSolver.registerStepFunction(stepFunction);
                     START = System.nanoTime();
@@ -96,7 +97,7 @@ public class Main {
                     for (KPMPSolutionWriter.PageEntry pageEntry : solution.getEdgePartition()) {
                         writer.addEdgeOnPage(pageEntry.a, pageEntry.b, pageEntry.page);
                     }
-                    writer.write(outputPath + heuristicStrategy.getFolderPath() + "automatic-" + instanceCounter + "_" + localSearch.getAbbreviation() + "_" +stepFunction.getAbbreviation() + "_" + numberOfCrossings + "_" + millis + ".txt");
+                    writer.write(outputPath + heuristicStrategy.getFolderPath() + "automatic-" + instanceCounter + "_" + localSearch.getAbbreviation() + "_" +stepFunction.getAbbreviation() + "_" + crossingsBeforeLocalSearch + "_" + numberOfCrossings + "_" + millis + "ms.txt");
                     instanceCounter++;
                 }
                 testRuns++;

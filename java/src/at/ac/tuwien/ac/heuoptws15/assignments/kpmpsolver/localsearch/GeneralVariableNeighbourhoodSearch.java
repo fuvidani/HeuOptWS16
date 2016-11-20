@@ -20,16 +20,13 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
     public GeneralVariableNeighbourhoodSearch() {
         this.neighbourhoods_K = new ArrayList<>();
         this.neighbourhoods_K.add(new SingleEdgeMove());
-        this.neighbourhoods_K.add(new NodeSwap());
         this.neighbourhoods_K.add(new NodeEdgeMove());
+        this.neighbourhoods_K.add(new DoubleNodeSwap());
 
         this.neighbourhoods_I = new ArrayList<>();
-        /*this.neighbourhoods_I.add(new DoubleEdgeMove());
-        this.neighbourhoods_I.add(new DoubleNodeSwap());
-        this.neighbourhoods_I.add(new NodeEdgeMove());*/
-        this.neighbourhoods_I.add(new DoubleNodeSwap());
         this.neighbourhoods_I.add(new SingleEdgeMove());
-        this.neighbourhoods_I.add(new SingleEdgeMove());
+        this.neighbourhoods_I.add(new NodeSwap());
+        this.neighbourhoods_I.add(new DoubleEdgeMove());
 
     }
 
@@ -38,7 +35,7 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
         KPMPSolution bestSolution = initialSolution;
         KPMPSolutionChecker solutionChecker = new KPMPSolutionChecker();
         int crossingNumberOfBestSolution = solutionChecker.getCrossingNumber(bestSolution);
-        int runCounter = 0;
+        Main.crossingsBeforeLocalSearch = crossingNumberOfBestSolution;
         int runsWithoutImprovement = 0;
         do {
             int index_K = 0;
@@ -64,6 +61,7 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
                     crossingNumberOfBestSolution = crossingNumberOfRandomSolution;
                     index_K = 0;
                     runsWithoutImprovement = 0;
+                    //System.out.println("Improvement: " + crossingNumberOfBestSolution);
                 } else {
                     index_K++;
                 }
@@ -71,8 +69,7 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
             if (crossingNumberOfBestSolution == 0){
                 break;
             }
-            runCounter++;
-        } while (runsWithoutImprovement < 50 && !runTimeLimitExceeded());
+        } while (runsWithoutImprovement < 1000 && !runTimeLimitExceeded());
 
         return bestSolution;
     }
