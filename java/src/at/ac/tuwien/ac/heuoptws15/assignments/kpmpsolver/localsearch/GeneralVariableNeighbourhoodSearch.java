@@ -35,6 +35,7 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
         KPMPSolution bestSolution = initialSolution;
         KPMPSolutionChecker solutionChecker = new KPMPSolutionChecker();
         int crossingNumberOfBestSolution = solutionChecker.getCrossingNumber(bestSolution);
+        int runCounter = 0;
         Main.crossingsBeforeLocalSearch = crossingNumberOfBestSolution;
         int runsWithoutImprovement = 0;
         do {
@@ -44,6 +45,7 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
                 neighbourhoods_K.get(index_K).initSearch(bestSolution);
                 KPMPSolution randomSolution = neighbourhoods_K.get(index_K).randomNextNeighbour();
                 int crossingNumberOfRandomSolution = solutionChecker.getCrossingNumber(randomSolution);
+
                 int index_I = 0;
                 while (!runTimeLimitExceeded() && index_I < neighbourhoods_I.size()) {
                     KPMPSolution solution = VNDSearch(randomSolution,neighbourhoods_I.get(index_I),stepFunction);
@@ -69,7 +71,8 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
             if (crossingNumberOfBestSolution == 0){
                 break;
             }
-        } while (runsWithoutImprovement < 1000 && !runTimeLimitExceeded());
+            runCounter++;
+        } while (runsWithoutImprovement < 2000 && !runTimeLimitExceeded());
 
         return bestSolution;
     }
