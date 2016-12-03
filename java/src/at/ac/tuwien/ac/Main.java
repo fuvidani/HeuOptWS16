@@ -11,6 +11,7 @@ import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunctio
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.StepFunction;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -32,17 +33,21 @@ public class Main {
     public static int crossingsBeforeLocalSearch;
     private static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.RANDOM;
 
-    //private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
-    //private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
-    private static String inputPath = "E:\\HeuOptWS16\\instances\\";
-    private static String outputPath = "E:\\HeuOptWS16\\solutions\\";
+    private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
+    private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
+    //private static String inputPath = "E:\\HeuOptWS16\\instances\\";
+    //private static String outputPath = "E:\\HeuOptWS16\\solutions\\";
     //private static String inputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\";
     //private static String outputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\solutions\\";
     private static int testRuns = 0;
 
     public static void main(String[] args) {
+        /*int instanceIndex = 10;
+        calculateAvgRuntime(instanceIndex);
+        calculateAvgCrossings(instanceIndex);
+        calculateAvgCrossingsBeforeLocalSearch(instanceIndex);*/
         try {
-            while (testRuns < 1) {
+            while (testRuns < 0) {
                 int instanceCounter = 1;
                 while (instanceCounter != 11) {
                     if (instanceCounter < 6) {
@@ -104,6 +109,91 @@ public class Main {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private static void calculateAvgRuntime(int instance) {
+        String path = outputPath + heuristicStrategy.getFolderPath();
+        String targetInstance = "automatic-" + instance + "_";
+        File dir = new File(path);
+        File[] directoryListing = dir.listFiles();
+        int sum = 0;
+        int amount = 0;
+        if (directoryListing != null) {
+            for (File child : directoryListing) {
+                String name = child.getName();
+                if (name.contains(targetInstance)) {
+                    int lastUnderScore = name.lastIndexOf("_");
+                    sum += Integer.parseInt(name.substring(lastUnderScore + 1, name.indexOf("ms")));
+                    amount++;
+                }
+            }
+            if (amount == 0) {
+                System.out.println("Avg. Runtime for intance-" + instance + ": 0 ms");
+            }
+            System.out.println("Avg. Runtime for intance-" + instance + ": " + sum / amount + " ms");
+        }
+    }
+
+    private static void calculateAvgCrossings(int instance) {
+        String path = outputPath + heuristicStrategy.getFolderPath();
+        String targetInstance = "automatic-" + instance + "_";
+        File dir = new File(path);
+        File[] directoryListing = dir.listFiles();
+        int sum = 0;
+        int amount = 0;
+        if (directoryListing != null) {
+            for (File child : directoryListing) {
+                String name = child.getName();
+                if (name.contains(targetInstance)) {
+                    int stepfunction = name.lastIndexOf("first");
+                    if (stepfunction == -1) {
+                        stepfunction = name.lastIndexOf("best");
+                        if (stepfunction == -1) {
+                            stepfunction = name.lastIndexOf("rand");
+                        }
+                    }
+                    int underScore = name.indexOf("_", stepfunction);
+                    //int secondUnderScore = name.indexOf("_", underScore+1);
+                    int lastUnderScore = name.indexOf("_", underScore + 1);
+                    sum += Integer.parseInt(name.substring(lastUnderScore + 1, name.lastIndexOf("_")));
+                    amount++;
+                }
+            }
+            if (amount == 0) {
+                System.out.println("Avg. Runtime for intance-" + instance + ": 0");
+            }
+            System.out.println("Avg. Crossings for intance-" + instance + ": " + sum / (double) amount);
+        }
+    }
+
+    private static void calculateAvgCrossingsBeforeLocalSearch(int instance) {
+        String path = outputPath + heuristicStrategy.getFolderPath();
+        String targetInstance = "automatic-" + instance + "_";
+        File dir = new File(path);
+        File[] directoryListing = dir.listFiles();
+        int sum = 0;
+        int amount = 0;
+        if (directoryListing != null) {
+            for (File child : directoryListing) {
+                String name = child.getName();
+                if (name.contains(targetInstance)) {
+                    int stepfunction = name.lastIndexOf("first");
+                    if (stepfunction == -1) {
+                        stepfunction = name.lastIndexOf("best");
+                        if (stepfunction == -1) {
+                            stepfunction = name.lastIndexOf("rand");
+                        }
+                    }
+                    int underScore = name.indexOf("_", stepfunction);
+                    sum += Integer.parseInt(name.substring(underScore + 1, name.indexOf("_", underScore + 1)));
+                    amount++;
+                }
+            }
+            if (amount == 0) {
+                System.out.println("Avg. Crossings before GVNS for intance-" + instance + ": 0");
+            }
+            System.out.println("Avg. Crossings before GVNS for intance-" + instance + ": " + sum / amount);
         }
     }
 }
