@@ -1,5 +1,6 @@
 package at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils;
 
+import at.ac.tuwien.ac.Main;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.combined.KPMPCombinedHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.combined.KPMPRandomizedMultiSolutionHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.edgepartitioning.KPMPEdgePartitionHeuristic;
@@ -8,6 +9,7 @@ import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.impl.KPMPSpineOrderDFSHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.KPMPLocalSearch;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.StepFunction;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.GeneticAlgorithm;
 
 import java.util.List;
 
@@ -62,20 +64,25 @@ public class KPMPSolver {
 
     public KPMPSolution solve() {
         KPMPSolution solution = new KPMPSolution();
-        if (heuristicType == HeuristicType.SEPARATED) {
-            List<Integer> calculatedSpineOrder = spineOrderHeuristic.calculateSpineOrder(instance,originalEdgePartition,originalNumberOfCrossings,false);
-            solution.setSpineOrder(calculatedSpineOrder);
-            solution.setEdgePartition(edgePartitionHeuristic.calculateEdgePartition(instance,calculatedSpineOrder,spineOrderHeuristic.getNumberOfCrossingsForNewSpineOrder()));
-            solution.setNumberOfPages(instance.getK());
-            solution.setSpineOrder(edgePartitionHeuristic.getSpineOrder());
-        }else {
-            KPMPCombinedHeuristic combinedHeuristic = new KPMPRandomizedMultiSolutionHeuristic();
-            combinedHeuristic.calculateSpineOrder(instance,originalEdgePartition,originalNumberOfCrossings,false);
-            solution.setNumberOfPages(instance.getK());
-            solution.setEdgePartition(combinedHeuristic.calculateEdgePartition(instance,null,0));
-            solution.setSpineOrder(combinedHeuristic.getSpineOrder());
+        if (Main.heuristicStrategy == HeuristicStrategy.GA) {
+            solution = new GeneticAlgorithm(instance,originalEdgePartition).improve();
+        } else {
+            if (heuristicType == HeuristicType.SEPARATED) {
+                List<Integer> calculatedSpineOrder = spineOrderHeuristic.calculateSpineOrder(instance,originalEdgePartition,originalNumberOfCrossings,false);
+                solution.setSpineOrder(calculatedSpineOrder);
+                solution.setEdgePartition(edgePartitionHeuristic.calculateEdgePartition(instance,calculatedSpineOrder,spineOrderHeuristic.getNumberOfCrossingsForNewSpineOrder()));
+                solution.setNumberOfPages(instance.getK());
+                solution.setSpineOrder(edgePartitionHeuristic.getSpineOrder());
+            }else {
+                KPMPCombinedHeuristic combinedHeuristic = new KPMPRandomizedMultiSolutionHeuristic();
+                combinedHeuristic.calculateSpineOrder(instance,originalEdgePartition,originalNumberOfCrossings,false);
+                solution.setNumberOfPages(instance.getK());
+                solution.setEdgePartition(combinedHeuristic.calculateEdgePartition(instance,null,0));
+                solution.setSpineOrder(combinedHeuristic.getSpineOrder());
+            }
+            solution = localSearch.improveSolution(solution, stepFunction);
         }
-        solution = localSearch.improveSolution(solution, stepFunction);
+
         return solution;
     }
 }

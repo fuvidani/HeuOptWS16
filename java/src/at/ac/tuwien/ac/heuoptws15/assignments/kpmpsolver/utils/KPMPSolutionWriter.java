@@ -38,6 +38,15 @@ public class KPMPSolutionWriter {
 			}
 			return false;
 		}
+
+		@Override
+		public String toString() {
+			return "PageEntry{" +
+					"a=" + a +
+					", b=" + b +
+					", page=" + page +
+					'}';
+		}
 	}
 	
 	private int K = 0;

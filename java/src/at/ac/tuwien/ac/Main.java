@@ -31,14 +31,14 @@ public class Main {
     public static long START;
     public static int iterationMultiplier;
     public static int crossingsBeforeLocalSearch;
-    private static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.RANDOM;
+    public static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.GA;
 
-    private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
-    private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
+    //private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
+    //private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
     //private static String inputPath = "E:\\HeuOptWS16\\instances\\";
     //private static String outputPath = "E:\\HeuOptWS16\\solutions\\";
-    //private static String inputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\";
-    //private static String outputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\solutions\\";
+    private static String inputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\";
+    private static String outputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\solutions\\";
     private static int testRuns = 0;
 
     public static void main(String[] args) {
@@ -47,9 +47,9 @@ public class Main {
         calculateAvgCrossings(instanceIndex);
         calculateAvgCrossingsBeforeLocalSearch(instanceIndex);*/
         try {
-            while (testRuns < 0) {
+            while (testRuns < 1) {
                 int instanceCounter = 1;
-                while (instanceCounter != 11) {
+                while (instanceCounter != 2) {
                     if (instanceCounter < 6) {
                         iterationMultiplier = 1000;
                     } else if (instanceCounter == 6) {
@@ -71,38 +71,41 @@ public class Main {
                     }
 
                     KPMPSolver kpmpSolver = new KPMPSolver(instance, edgePart, 0);
-                    switch (heuristicStrategy) {
-                        case DETERMINISTIC:
-                            kpmpSolver.registerSpineOrderHeuristic(new KPMPSpineOrderDFSHeuristic());
-                            kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionCFLHeuristic());
-                            break;
-                        case SEMI_RANDOM:
-                            kpmpSolver.registerSpineOrderHeuristic(new KPMPSpineOrderRandomDFSHeuristic());
-                            kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomCFLHeuristic());
-                            break;
-                        default: // RANDOM
-                            kpmpSolver.registerSpineOrderHeuristic(new KPMPSpineOrderRandomDFSHeuristic());
-                            kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomHeuristic());
-                            break;
+                    if (heuristicStrategy != HeuristicStrategy.GA) {
+                        switch (heuristicStrategy) {
+                            case DETERMINISTIC:
+                                kpmpSolver.registerSpineOrderHeuristic(new KPMPSpineOrderDFSHeuristic());
+                                kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionCFLHeuristic());
+                                break;
+                            case SEMI_RANDOM:
+                                kpmpSolver.registerSpineOrderHeuristic(new KPMPSpineOrderRandomDFSHeuristic());
+                                kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomCFLHeuristic());
+                                break;
+                            default: // RANDOM
+                                kpmpSolver.registerSpineOrderHeuristic(new KPMPSpineOrderRandomDFSHeuristic());
+                                kpmpSolver.registerEdgePartitionHeuristic(new KPMPEdgePartitionRandomHeuristic());
+                                break;
+                        }
+                        StepFunction stepFunction = new RandomStepFunction();
+                        KPMPLocalSearch localSearch = new GeneralVariableNeighbourhoodSearch();
+                        kpmpSolver.setHeuristicType(KPMPSolver.HeuristicType.COMBINED);
+                        kpmpSolver.registerLocalSearchImplementation(localSearch);
+                        kpmpSolver.registerStepFunction(stepFunction);
                     }
-                    StepFunction stepFunction = new RandomStepFunction();
-                    KPMPLocalSearch localSearch = new GeneralVariableNeighbourhoodSearch();
-                    kpmpSolver.setHeuristicType(KPMPSolver.HeuristicType.COMBINED);
-                    kpmpSolver.registerLocalSearchImplementation(localSearch);
-                    kpmpSolver.registerStepFunction(stepFunction);
+
                     START = System.nanoTime();
                     KPMPSolution solution = kpmpSolver.solve();
                     long millis = ((System.nanoTime() - START) / 1000000);
                     System.out.println("Runtime: " + millis + " milliseconds");
                     int numberOfCrossings = new KPMPSolutionChecker().getCrossingNumber(solution);
                     System.out.println("Number of crossings after: " + NumberFormat.getIntegerInstance().format(numberOfCrossings) + "\n\n\n");
-
                     KPMPSolutionWriter writer = new KPMPSolutionWriter(instance.getK());
                     writer.setSpineOrder(solution.getSpineOrder());
                     for (KPMPSolutionWriter.PageEntry pageEntry : solution.getEdgePartition()) {
                         writer.addEdgeOnPage(pageEntry.a, pageEntry.b, pageEntry.page);
                     }
-                    writer.write(outputPath + heuristicStrategy.getFolderPath() + "automatic-" + instanceCounter + "_" + localSearch.getAbbreviation() + "_" +stepFunction.getAbbreviation() + "_" + crossingsBeforeLocalSearch + "_" + numberOfCrossings + "_" + millis + "ms.txt");
+                    //writer.write(outputPath + heuristicStrategy.getFolderPath() + "automatic-" + instanceCounter + "_" + localSearch.getAbbreviation() + "_" + stepFunction.getAbbreviation() + "_" + crossingsBeforeLocalSearch + "_" + numberOfCrossings + "_" + millis + "ms.txt");
+                    writer.write(outputPath + heuristicStrategy.getFolderPath() + "automatic-" + instanceCounter + "_" + numberOfCrossings + "_" + millis + "ms.txt");
                     instanceCounter++;
                 }
                 testRuns++;
