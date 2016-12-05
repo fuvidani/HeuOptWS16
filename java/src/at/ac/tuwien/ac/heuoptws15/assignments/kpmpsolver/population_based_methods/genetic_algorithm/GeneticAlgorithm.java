@@ -19,12 +19,12 @@ import java.util.Random;
  * @since 04.12.2016
  */
 public class GeneticAlgorithm {
-    private static Random m_rand = new Random();  // random-number generator
+    private Random m_rand = new Random();  // random-number generator
 
     final static int ELITISM_K = 5;
     final static int POP_SIZE = 200 + ELITISM_K;  // population size
     //final static int MAX_ITER = 2000;             // max number of iterations
-    final static double MUTATION_RATE = 0.05;     // probability of mutation
+    final static double MUTATION_RATE = 0.2;     // probability of mutation
     final static double CROSSOVER_RATE = 0.7;     // probability of crossover
 
     private KPMPInstance instance;
@@ -40,7 +40,7 @@ public class GeneticAlgorithm {
         pop.generatePopulation(instance,originalEdgePartitioning);
         pop.evaluate();
 
-        List<Individual> nextGeneration = new ArrayList<>(POP_SIZE);
+        List<Individual> nextGeneration;
 
         // current population
         System.out.print("Total Fitness = " + pop.getTotalFitness());
@@ -50,9 +50,12 @@ public class GeneticAlgorithm {
         // main loop
         int count;
         for (int iter = 0; iter < Main.iterationMultiplier; iter++) {
+            m_rand = new Random(Double.doubleToLongBits(Math.random()));
+            nextGeneration = new ArrayList<>(POP_SIZE);
             count = 0;
 
             // Elitism
+            //TODO spare re-calculation of crossings
             for (int i = 0; i < ELITISM_K; ++i) {
                 nextGeneration.add(pop.findBestIndividual());
                 count++;
@@ -61,8 +64,8 @@ public class GeneticAlgorithm {
             // build new Population
             while (count < POP_SIZE) {
                 // Selection
-                Individual mother = pop.rouletteWheelSelection();
-                Individual father = pop.rouletteWheelSelection();
+                Individual mother = pop.tournamentSelection();
+                Individual father = pop.tournamentSelection();
 
                 List<Individual> children = new ArrayList<>(2);
                 // Crossover

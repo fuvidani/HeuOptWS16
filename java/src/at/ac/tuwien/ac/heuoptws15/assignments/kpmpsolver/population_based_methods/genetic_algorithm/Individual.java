@@ -1,5 +1,6 @@
 package at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm;
 
+import at.ac.tuwien.ac.Main;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolution;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolutionChecker;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolutionWriter;
@@ -16,10 +17,11 @@ import java.util.Random;
  * @version 0.0.1
  * @since 04.12.2016
  */
-public class Individual {
+public class Individual implements Cloneable {
     //public static final int SIZE = 500;
     private KPMPSolution genes;
     //private int[] genes = new int[SIZE];
+    private int numberOfCrossings;
     private int fitnessValue;
 
     public Individual() {
@@ -27,10 +29,6 @@ public class Individual {
 
     public int getFitnessValue() {
         return fitnessValue;
-    }
-
-    public void setFitnessValue(int fitnessValue) {
-        this.fitnessValue = fitnessValue;
     }
 
     public KPMPSolution getGenes() {
@@ -41,14 +39,24 @@ public class Individual {
         this.genes = genes;
     }
 
-/*    public void randGenes() {
-        Random rand = new Random();
-        for (int i = 0; i < SIZE; ++i) {
-            this.setGene(i, rand.nextInt(2));
-        }
-    }*/
+    public int getNumberOfCrossings() {
+        return numberOfCrossings;
+    }
+
+    public void setNumberOfCrossings(int numberOfCrossings) {
+        this.numberOfCrossings = numberOfCrossings;
+        this.fitnessValue = Main.maxCrossingNumber - numberOfCrossings;
+    }
+
+    public Individual clone() {
+        return new Individual() {{
+            setGenes(genes.clone());
+            setNumberOfCrossings(numberOfCrossings);
+        }};
+    }
 
     public void mutate() {
+        // TODO calculate only difference of crossings to avoid performance overhead
         Random rand = new Random();
         int pageIndex = rand.nextInt(genes.getNumberOfPages());
         int edgeIndex = rand.nextInt(genes.getEdgePartition().size());
@@ -60,9 +68,9 @@ public class Individual {
     }
 
     public int evaluate() {
-        int fitness = new KPMPSolutionChecker().getCrossingNumber(genes);
-        this.setFitnessValue(fitness);
+        int crossings = new KPMPSolutionChecker().getCrossingNumber(genes);
+        this.setNumberOfCrossings(crossings);
 
-        return fitness;
+        return fitnessValue;
     }
 }

@@ -32,13 +32,14 @@ public class Main {
     public static int iterationMultiplier;
     public static int crossingsBeforeLocalSearch;
     public static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.GA;
+    public static int maxCrossingNumber;
 
-    //private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
-    //private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
+    private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
+    private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
     //private static String inputPath = "E:\\HeuOptWS16\\instances\\";
     //private static String outputPath = "E:\\HeuOptWS16\\solutions\\";
-    private static String inputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\";
-    private static String outputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\solutions\\";
+    //private static String inputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\";
+    //private static String outputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\solutions\\";
     private static int testRuns = 0;
 
     public static void main(String[] args) {
@@ -48,8 +49,8 @@ public class Main {
         calculateAvgCrossingsBeforeLocalSearch(instanceIndex);*/
         try {
             while (testRuns < 1) {
-                int instanceCounter = 1;
-                while (instanceCounter != 2) {
+                int instanceCounter = 4;
+                while (instanceCounter != 5) {
                     if (instanceCounter < 6) {
                         iterationMultiplier = 1000;
                     } else if (instanceCounter == 6) {
@@ -70,6 +71,12 @@ public class Main {
                         }
                     }
 
+                    List<Integer> spineOrder = new ArrayList<>();
+                    for (int i = 0; i < instance.getNumVertices(); i++) {
+                        spineOrder.add(i);
+                    }
+                    KPMPSolution initialSolution = new KPMPSolution(spineOrder, edgePart, instance.getK());
+                    maxCrossingNumber = new KPMPSolutionChecker().getCrossingNumber(initialSolution);
                     KPMPSolver kpmpSolver = new KPMPSolver(instance, edgePart, 0);
                     if (heuristicStrategy != HeuristicStrategy.GA) {
                         switch (heuristicStrategy) {

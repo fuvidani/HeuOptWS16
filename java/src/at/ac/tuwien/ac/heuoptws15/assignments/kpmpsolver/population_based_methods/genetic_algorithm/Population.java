@@ -26,7 +26,7 @@ import java.util.Random;
 import static java.util.stream.Collectors.toCollection;
 
 public class Population {
-    private static Random m_rand = new Random();  // random-number generator
+    private Random m_rand = new Random();  // random-number generator
     private List<Individual> m_population;
     private int totalFitness;
     private int POP_SIZE;
@@ -37,7 +37,7 @@ public class Population {
     }
 
     public void setPopulation(List<Individual> newPop) {
-        this.m_population = newPop.stream().collect(toCollection(ArrayList::new));
+        this.m_population = newPop.stream().map(Individual::clone).collect(toCollection(ArrayList::new));
     }
 
     public List<Individual> getPopulation() {
@@ -52,13 +52,66 @@ public class Population {
         return this.totalFitness;
     }
 
+
     public Individual rouletteWheelSelection() {
-        double randNum = m_rand.nextDouble() * this.totalFitness;
+        /*
+        * fs = [fitness(i) for i in population]
+        sum_fs = sum(fs)
+        max_fs = max(fs)
+        min_fs = min(fs)
+        p = random()*sum_fs
+        t = max_fs + min_fs
+        chosen = population[0]
+        for i in population:
+            if MAXIMIZATION:
+                 p -= fitness(i)
+            elseif MINIMIZATION:
+                p -= (t - fitness(i))
+            f p < 0:
+                chosen = i
+            break
+        return chosen */
+        /*int max = 0;
+        int min = Integer.MAX_VALUE;
+        for (int i = 0; i < POP_SIZE;i++){
+            int value = m_population.get(i).getFitnessValue();
+            if (value > max){
+                max = value;
+            }
+            if (value < min){
+                min = value;
+            }
+        }
+        int t = max + min;
+
+        final int maxF = max;
+        List<Integer> inverseInts = new ArrayList<>(m_population.size());
+        int inversTotalFitness = 0;
+        for (Individual individual : m_population){
+            int fitness = maxF - individual.getFitnessValue();
+            inverseInts.add(fitness);
+            inversTotalFitness += fitness;
+        }*/
+        m_rand = new Random(Double.doubleToLongBits(Math.random()));
+        double randNum = m_rand.nextDouble() * totalFitness;
         int idx;
         for (idx = 0; idx < POP_SIZE && randNum > 0; ++idx) {
-            randNum -= m_population.get(idx).getFitnessValue();
+            randNum -= -m_population.get(idx).getFitnessValue();
         }
         return m_population.get(idx - 1);
+
+    }
+
+    public Individual tournamentSelection() {
+        m_rand = new Random(Double.doubleToLongBits(Math.random()));
+        int numberOfParticipants = POP_SIZE / 10;
+        List<Individual> participants = new ArrayList<>(numberOfParticipants);
+        for (int i = 0; i < numberOfParticipants; i++) {
+            int index = m_rand.nextInt(m_population.size());
+            participants.add(m_population.get(index));
+        }
+        participants.sort(Comparator.comparingInt(Individual::getFitnessValue));
+        return participants.get(participants.size() - 1);
     }
 
     public Individual findBestIndividual() {
@@ -66,7 +119,7 @@ public class Population {
         int currentMin = Integer.MAX_VALUE;
 
         for (int idx = 0; idx < POP_SIZE; ++idx) {
-            int currentVal = m_population.get(idx).getFitnessValue();
+            int currentVal = m_population.get(idx).getNumberOfCrossings();
             if (currentVal < currentMin) {
                 currentMin = currentVal;
                 idxMin = idx;
@@ -117,8 +170,9 @@ public class Population {
         List<Integer> child1SpineOrder = new ArrayList<>();
         List<Integer> fatherSpineOrderCopy = father.getGenes().getSpineOrder().stream().collect(toCollection(ArrayList::new));
         for (int i = 0; i < randPointForSpineOrder; i++) {
-            child1SpineOrder.add(mother.getGenes().getSpineOrder().get(i));
-            fatherSpineOrderCopy.remove(new Integer(i));
+            final int value = mother.getGenes().getSpineOrder().get(i);
+            child1SpineOrder.add(value);
+            fatherSpineOrderCopy.remove(new Integer(value));
         }
         for (int i = 0; i < fatherSpineOrderCopy.size(); i++) {
             child1SpineOrder.add(fatherSpineOrderCopy.get(i));
@@ -138,8 +192,9 @@ public class Population {
         List<Integer> child2SpineOrder = new ArrayList<>();
         List<Integer> motherSpineOrderCopy = mother.getGenes().getSpineOrder().stream().collect(toCollection(ArrayList::new));
         for (int i = 0; i < randPointForSpineOrder; i++) {
-            child2SpineOrder.add(father.getGenes().getSpineOrder().get(i));
-            motherSpineOrderCopy.remove(new Integer(i));
+            final int vertex = father.getGenes().getSpineOrder().get(i);
+            child2SpineOrder.add(vertex);
+            motherSpineOrderCopy.remove(new Integer(vertex));
         }
         for (int i = 0; i < motherSpineOrderCopy.size(); i++) {
             child2SpineOrder.add(motherSpineOrderCopy.get(i));
