@@ -3,9 +3,11 @@ package at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_metho
 import at.ac.tuwien.ac.Main;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPInstance;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolution;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolutionChecker;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolutionWriter;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -19,12 +21,11 @@ import java.util.Random;
  * @since 04.12.2016
  */
 public class GeneticAlgorithm {
-    private Random m_rand = new Random();  // random-number generator
 
     final static int ELITISM_K = 5;
     final static int POP_SIZE = 200 + ELITISM_K;  // population size
     //final static int MAX_ITER = 2000;             // max number of iterations
-    final static double MUTATION_RATE = 0.2;     // probability of mutation
+    final static double MUTATION_RATE = 0.4;     // probability of mutation
     final static double CROSSOVER_RATE = 0.7;     // probability of crossover
 
     private KPMPInstance instance;
@@ -38,26 +39,28 @@ public class GeneticAlgorithm {
     public KPMPSolution improve() {
         Population pop = new Population(POP_SIZE);
         pop.generatePopulation(instance,originalEdgePartitioning);
+        System.out.println("Population generated");
         pop.evaluate();
+
+        Random m_rand;
 
         List<Individual> nextGeneration;
 
         // current population
+        Individual bestIndividual = new Individual(pop.findBestIndividual());
         System.out.print("Total Fitness = " + pop.getTotalFitness());
-        System.out.println(" ; Best Fitness = " +
-                pop.findBestIndividual().getFitnessValue());
+        System.out.println(" ; Best Fitness = " + bestIndividual.getFitnessValue());
 
         // main loop
         int count;
-        for (int iter = 0; iter < Main.iterationMultiplier; iter++) {
+        for (int iter = 0; iter < Main.iterationMultiplier && ((System.nanoTime() - Main.START) / 1000000) < (Main.secondsBeforeStop * 1000); iter++) {
             m_rand = new Random(Double.doubleToLongBits(Math.random()));
             nextGeneration = new ArrayList<>(POP_SIZE);
             count = 0;
 
             // Elitism
-            //TODO spare re-calculation of crossings
             for (int i = 0; i < ELITISM_K; ++i) {
-                nextGeneration.add(pop.findBestIndividual());
+                nextGeneration.add(new Individual(pop.findBestIndividual()));
                 count++;
             }
 
@@ -70,7 +73,17 @@ public class GeneticAlgorithm {
                 List<Individual> children = new ArrayList<>(2);
                 // Crossover
                 if (m_rand.nextDouble() < CROSSOVER_RATE) {
+                    // return only the 2 best ones of the family
                     children = pop.crossover(mother, father);
+                    List<Individual> family = new ArrayList<>();
+                    family.add(mother);
+                    family.add(father);
+                    family.add(children.get(0));
+                    family.add(children.get(1));
+                    family.sort(Comparator.comparingDouble(Individual::getFitnessValue));
+                    children = new ArrayList<>(2);
+                    children.add(family.get(2));
+                    children.add(family.get(3));
                 } else {
                     children.add(mother);
                     children.add(father);
@@ -93,14 +106,26 @@ public class GeneticAlgorithm {
 
             // reevaluate current population
             pop.evaluate();
-            System.out.print("Total Fitness = " + pop.getTotalFitness());
-            System.out.println(" ; Best Fitness = " +
-                    pop.findBestIndividual().getFitnessValue());
+
+            Individual bestIndividualOfPopulation = pop.findBestIndividual();
+            if (bestIndividual.getFitnessValue() < bestIndividualOfPopulation.getFitnessValue()) {
+                bestIndividual = new Individual(bestIndividualOfPopulation);
+                System.out.print("Total Fitness = " + pop.getTotalFitness());
+                System.out.println(" ; Best Fitness = " + bestIndividual.getFitnessValue());
+                int i = bestIndividual.getNumberOfCrossings();
+                int j = new KPMPSolutionChecker().getCrossingNumber(bestIndividual.getGenes());
+                //assert (i == j);
+                if (bestIndividual.getNumberOfCrossings() <= Main.lowerBound) {
+                    break;
+                }
+            }
+
+
         }
 
         // best indiv
-        Individual bestIndiv = pop.findBestIndividual();
+        //Individual bestIndiv = pop.findBestIndividual();
 
-        return bestIndiv.getGenes();
+        return bestIndividual.getGenes();
     }
 }

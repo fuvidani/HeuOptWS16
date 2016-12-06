@@ -1,5 +1,6 @@
 package at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,6 +20,12 @@ public class KPMPSolution implements Cloneable {
         this.spineOrder = spineOrder;
         this.edgePartition = edgePartition;
         this.numberOfPages = numberOfPages;
+    }
+
+    public KPMPSolution(KPMPSolution solution) {
+        this.spineOrder = solution.getSpineOrder().stream().collect(Collectors.toCollection(ArrayList::new));
+        this.edgePartition = solution.getEdgePartition().stream().map(KPMPSolutionWriter.PageEntry::clone).collect(Collectors.toCollection(ArrayList::new));
+        this.numberOfPages = solution.getNumberOfPages();
     }
 
     public List<Integer> getSpineOrder() {

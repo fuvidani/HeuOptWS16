@@ -33,6 +33,7 @@ public class Main {
     public static int crossingsBeforeLocalSearch;
     public static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.GA;
     public static int maxCrossingNumber;
+    public static final double lowerBound = 0;
 
     private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
     private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
@@ -49,10 +50,10 @@ public class Main {
         calculateAvgCrossingsBeforeLocalSearch(instanceIndex);*/
         try {
             while (testRuns < 1) {
-                int instanceCounter = 4;
-                while (instanceCounter != 5) {
+                int instanceCounter = 2;
+                while (instanceCounter != 3) {
                     if (instanceCounter < 6) {
-                        iterationMultiplier = 1000;
+                        iterationMultiplier = 2000;
                     } else if (instanceCounter == 6) {
                         iterationMultiplier = 500;
                     } else {

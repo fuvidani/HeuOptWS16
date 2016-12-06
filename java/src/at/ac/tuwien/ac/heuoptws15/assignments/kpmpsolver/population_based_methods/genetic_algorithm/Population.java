@@ -110,8 +110,8 @@ public class Population {
             int index = m_rand.nextInt(m_population.size());
             participants.add(m_population.get(index));
         }
-        participants.sort(Comparator.comparingInt(Individual::getFitnessValue));
-        return participants.get(participants.size() - 1);
+        participants.sort(Comparator.comparingDouble(Individual::getNumberOfCrossings));
+        return participants.get(0);
     }
 
     public Individual findBestIndividual() {
@@ -181,10 +181,10 @@ public class Population {
         // child1 edge partition
         List<KPMPSolutionWriter.PageEntry> child1EdgePartition = new ArrayList<>();
         for (int i = 0; i < randPointForEdgePartition; i++) {
-            child1EdgePartition.add(mother.getGenes().getEdgePartition().get(i));
+            child1EdgePartition.add(mother.getGenes().getEdgePartition().get(i).clone());
         }
         for (int i = randPointForEdgePartition; i < father.getGenes().getEdgePartition().size(); i++) {
-            child1EdgePartition.add(father.getGenes().getEdgePartition().get(i));
+            child1EdgePartition.add(father.getGenes().getEdgePartition().get(i).clone());
         }
         child1.setGenes(new KPMPSolution(child1SpineOrder,child1EdgePartition,mother.getGenes().getNumberOfPages()));
 
@@ -203,14 +203,16 @@ public class Population {
         // child2 edge partition
         List<KPMPSolutionWriter.PageEntry> child2EdgePartition = new ArrayList<>();
         for (int i = 0; i < randPointForEdgePartition; i++) {
-            child2EdgePartition.add(father.getGenes().getEdgePartition().get(i));
+            child2EdgePartition.add(father.getGenes().getEdgePartition().get(i).clone());
         }
         for (int i = randPointForEdgePartition; i < mother.getGenes().getEdgePartition().size(); i++) {
-            child2EdgePartition.add(mother.getGenes().getEdgePartition().get(i));
+            child2EdgePartition.add(mother.getGenes().getEdgePartition().get(i).clone());
         }
         child2.setGenes(new KPMPSolution(child2SpineOrder,child2EdgePartition,mother.getGenes().getNumberOfPages()));
 
         List<Individual> children = new ArrayList<>();
+        child1.evaluate();
+        child2.evaluate();
         children.add(child1);
         children.add(child2);
 

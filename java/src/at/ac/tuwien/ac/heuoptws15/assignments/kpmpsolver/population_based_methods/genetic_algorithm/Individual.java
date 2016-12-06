@@ -22,12 +22,20 @@ public class Individual implements Cloneable {
     private KPMPSolution genes;
     //private int[] genes = new int[SIZE];
     private int numberOfCrossings;
-    private int fitnessValue;
+    private double fitnessValue;
+    private boolean needsEvaluation = true;
 
     public Individual() {
     }
 
-    public int getFitnessValue() {
+    public Individual(Individual individual) {
+        this.genes = new KPMPSolution(individual.getGenes());
+        this.numberOfCrossings = individual.getNumberOfCrossings();
+        this.fitnessValue = individual.getFitnessValue();
+        this.needsEvaluation = individual.needsEvaluation();
+    }
+
+    public double getFitnessValue() {
         return fitnessValue;
     }
 
@@ -44,33 +52,70 @@ public class Individual implements Cloneable {
     }
 
     public void setNumberOfCrossings(int numberOfCrossings) {
+        this.needsEvaluation = false;
         this.numberOfCrossings = numberOfCrossings;
         this.fitnessValue = Main.maxCrossingNumber - numberOfCrossings;
+       /* if (numberOfCrossings == Main.lowerBound){
+            int j = new KPMPSolutionChecker().getCrossingNumber(genes);
+            assert (numberOfCrossings == j);
+            this.fitnessValue = 1;
+        }else {
+            double lowerBound;
+            if (Main.lowerBound == 0.0){
+                lowerBound = 1;
+            }else {
+                lowerBound = Main.lowerBound;
+            }
+            double x = numberOfCrossings / lowerBound;
+            double a = Math.log(x);
+            double b = Math.log(2);
+            double i = a / b;
+            this.fitnessValue = Math.max(0, 1 - i);
+        }*/
+    }
+
+    public boolean needsEvaluation() {
+        return needsEvaluation;
     }
 
     public Individual clone() {
-        return new Individual() {{
-            setGenes(genes.clone());
-            setNumberOfCrossings(numberOfCrossings);
-        }};
+        /*try {
+            Individual individual = (Individual)super.clone();
+            individual.genes
+        }catch (CloneNotSupportedException e){
+            e.printStackTrace();
+        }*/
+        return new Individual(this);
     }
 
     public void mutate() {
         // TODO calculate only difference of crossings to avoid performance overhead
-        Random rand = new Random();
-        int pageIndex = rand.nextInt(genes.getNumberOfPages());
+        Random rand = new Random(Double.doubleToLongBits(Math.random()));
         int edgeIndex = rand.nextInt(genes.getEdgePartition().size());
         List<KPMPSolutionWriter.PageEntry> edgePartition = genes.getEdgePartition();
         KPMPSolutionWriter.PageEntry edgeToMutate = edgePartition.get(edgeIndex);
+        int pageIndex;
+        do {
+            pageIndex = rand.nextInt(genes.getNumberOfPages());
+        } while (pageIndex == edgeToMutate.page);
+        KPMPSolutionChecker checker = new KPMPSolutionChecker();
+        int originalCrossings = checker.getCrossingNumberOfEdge(genes.getSpineOrder(), edgePartition, edgeToMutate.page, edgeToMutate);
         edgeToMutate.page = pageIndex;
         edgePartition.set(edgeIndex,edgeToMutate);
+        int newCrossings = checker.getCrossingNumberOfEdge(genes.getSpineOrder(), edgePartition, edgeToMutate.page, edgeToMutate);
         genes.setEdgePartition(edgePartition);
+        int newTotalCrossings = numberOfCrossings - originalCrossings + newCrossings;
+        //assert (checker.getCrossingNumber(genes) == newTotalCrossings);
+        //setNumberOfCrossings(newTotalCrossings);
+        needsEvaluation = true;
+        evaluate();
     }
 
-    public int evaluate() {
-        int crossings = new KPMPSolutionChecker().getCrossingNumber(genes);
-        this.setNumberOfCrossings(crossings);
-
+    public double evaluate() {
+        if (needsEvaluation) {
+            int crossings = new KPMPSolutionChecker().getCrossingNumber(genes);
+            this.setNumberOfCrossings(crossings);
+        }
         return fitnessValue;
     }
 }

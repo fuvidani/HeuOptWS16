@@ -15,9 +15,26 @@ public class KPMPSolutionWriter {
 			this.page = page;
 		}
 
+		/*public Object clone() throws CloneNotSupportedException{
+			PageEntry entry = (PageEntry)super.clone();
+			entry.a = a;
+			entry.b = b;
+			entry.page = page;
+			return entry;
+		}*/
+
 		@Override
 		public PageEntry clone() {
-			return new PageEntry(this.a,this.b,this.page);
+			try {
+				PageEntry entry = (PageEntry) super.clone();
+				entry.a = a;
+				entry.b = b;
+				entry.page = page;
+				return entry;
+			} catch (CloneNotSupportedException e) {
+				e.printStackTrace();
+			}
+			return null;
 		}
 
 
