@@ -19,10 +19,7 @@ import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolution;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolutionChecker;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolutionWriter;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static java.util.stream.Collectors.toCollection;
 
@@ -30,7 +27,7 @@ public class Population {
     private Random m_rand = new Random();  // random-number generator
     private List<Individual> m_population;
     private int totalFitness;
-    private int POP_SIZE;
+    private final int POP_SIZE;
 
     public Population(int size) {
         m_population = new ArrayList<>();
@@ -38,7 +35,7 @@ public class Population {
     }
 
     public void setPopulation(List<Individual> newPop) {
-        this.m_population = newPop.stream().map(Individual::clone).collect(toCollection(ArrayList::new));
+        this.m_population = Collections.unmodifiableList(newPop.stream().map(Individual::clone).collect(toCollection(ArrayList::new)));
     }
 
     public List<Individual> getPopulation() {
@@ -55,44 +52,6 @@ public class Population {
 
 
     public Individual rouletteWheelSelection() {
-        /*
-        * fs = [fitness(i) for i in population]
-        sum_fs = sum(fs)
-        max_fs = max(fs)
-        min_fs = min(fs)
-        p = random()*sum_fs
-        t = max_fs + min_fs
-        chosen = population[0]
-        for i in population:
-            if MAXIMIZATION:
-                 p -= fitness(i)
-            elseif MINIMIZATION:
-                p -= (t - fitness(i))
-            f p < 0:
-                chosen = i
-            break
-        return chosen */
-        /*int max = 0;
-        int min = Integer.MAX_VALUE;
-        for (int i = 0; i < POP_SIZE;i++){
-            int value = m_population.get(i).getFitnessValue();
-            if (value > max){
-                max = value;
-            }
-            if (value < min){
-                min = value;
-            }
-        }
-        int t = max + min;
-
-        final int maxF = max;
-        List<Integer> inverseInts = new ArrayList<>(m_population.size());
-        int inversTotalFitness = 0;
-        for (Individual individual : m_population){
-            int fitness = maxF - individual.getFitnessValue();
-            inverseInts.add(fitness);
-            inversTotalFitness += fitness;
-        }*/
         m_rand = new Random(Double.doubleToLongBits(Math.random()));
         double randNum = m_rand.nextDouble() * totalFitness;
         int idx;
@@ -105,13 +64,13 @@ public class Population {
 
     public Individual tournamentSelection() {
         m_rand = new Random(Double.doubleToLongBits(Math.random()));
-        int numberOfParticipants = (int) Math.ceil(POP_SIZE * 0.5);
+        int numberOfParticipants = (int) Math.ceil(POP_SIZE * 0.3);
         List<Individual> participants = new ArrayList<>(numberOfParticipants);
         for (int i = 0; i < numberOfParticipants; i++) {
             int index = m_rand.nextInt(m_population.size());
             participants.add(m_population.get(index));
         }
-        participants.sort(Comparator.comparingDouble(Individual::getNumberOfCrossings));
+        participants.sort(Comparator.comparingInt(Individual::getNumberOfCrossings));
         return participants.get(0);
     }
 
@@ -299,6 +258,7 @@ public class Population {
             individual.setGenes(solution);
             m_population.add(individual);
         }
+        m_population = Collections.unmodifiableList(m_population);
     }
 
     public int getTotalFitness() {

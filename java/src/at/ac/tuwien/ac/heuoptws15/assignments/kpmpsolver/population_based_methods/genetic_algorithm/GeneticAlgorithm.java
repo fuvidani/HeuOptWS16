@@ -1,14 +1,18 @@
 package at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm;
 
 import at.ac.tuwien.ac.Main;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.callable.IGASlaveCallable;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.callable.Slave;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPInstance;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolution;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolutionChecker;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolutionWriter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
 /**
  * <h4>About this class</h4>
@@ -21,10 +25,10 @@ import java.util.Random;
  */
 public class GeneticAlgorithm {
 
-    final static int ELITISM_K = 5;
-    final static int POP_SIZE = 100 + ELITISM_K;  // population size
+    final static int ELITISM_K = 12;
+    final static int POP_SIZE = 10000 + ELITISM_K;  // population size
     //final static int MAX_ITER = 2000;             // max number of iterations
-    final static double MUTATION_RATE = 0.9;     // probability of mutation
+    final static double MUTATION_RATE = 0.8;     // probability of mutation
     final static double CROSSOVER_RATE = 0.7;     // probability of crossover
 
     private KPMPInstance instance;
@@ -41,8 +45,6 @@ public class GeneticAlgorithm {
         System.out.println("Population generated");
         pop.evaluate();
 
-        Random m_rand;
-
         List<Individual> nextGeneration;
 
         // current population
@@ -50,10 +52,19 @@ public class GeneticAlgorithm {
         System.out.print("Total Fitness = " + pop.getTotalFitness());
         System.out.println(" ; Best Fitness = " + bestIndividual.getFitnessValue());
 
+        int cores = Runtime.getRuntime().availableProcessors();
+        int distribution = (POP_SIZE - ELITISM_K) / cores;
+        List<IGASlaveCallable> callableList = new ArrayList<>(cores);
+        for (int i = 0; i < cores; i++) {
+            IGASlaveCallable slave = new Slave(CROSSOVER_RATE, MUTATION_RATE, ELITISM_K);
+            slave.setAmountOfIndividualsToCareFor(distribution);
+            callableList.add(slave);
+        }
+
         // main loop
         int count;
+        ExecutorService executorService;
         for (int iter = 0; iter < Main.iterationMultiplier && ((System.nanoTime() - Main.START) / 1000000) < (Main.secondsBeforeStop * 1000); iter++) {
-            m_rand = new Random(Double.doubleToLongBits(Math.random()));
             nextGeneration = new ArrayList<>(POP_SIZE);
             count = 0;
 
@@ -62,58 +73,41 @@ public class GeneticAlgorithm {
                 nextGeneration.add(new Individual(pop.findBestIndividual()));
                 count++;
             }
+            executorService = Executors.newFixedThreadPool(cores);
 
-            // build new Population
-            while (count < POP_SIZE) {
-                // Selection
-                Individual mother = pop.tournamentSelection();
-                Individual father = pop.tournamentSelection();
-
-                List<Individual> children = new ArrayList<>(2);
-                // Crossover
-                if (m_rand.nextDouble() < CROSSOVER_RATE) {
-                    // return only the 2 best ones of the family
-                    children = pop.recombination(mother, father);
-                    /*List<Individual> family = new ArrayList<>();
-                    family.add(mother);
-                    family.add(father);
-                    family.add(children.get(0));
-                    family.add(children.get(1));
-                    family.sort(Comparator.comparingDouble(Individual::getFitnessValue));
-                    children = new ArrayList<>(2);
-                    children.add(family.get(2));
-                    children.add(family.get(3));*/
-                } else {
-                    children.add(mother);
-                    children.add(father);
+            int index = 0;
+            List<FutureTask<List<Individual>>> slaves = new ArrayList<>();
+            for (IGASlaveCallable callable : callableList) {
+                callable.setAmountOfIndividualsToCareFor(distribution);
+                Population population = new Population(distribution);
+                List<Individual> individuals = new ArrayList<>(distribution);
+                for (int j = index; j < index + distribution; j++) {
+                    individuals.add(pop.getPopulation().get(j));
                 }
-
-                // Mutation
-                if (m_rand.nextDouble() < MUTATION_RATE) {
-                    children.get(0).mutate();
-                }
-                if (m_rand.nextDouble() < MUTATION_RATE) {
-                    children.get(1).mutate();
-                }
-
-                // add to new population
-                nextGeneration.add(children.get(0));
-                nextGeneration.add(children.get(1));
-                count += 2;
+                population.setPopulation(individuals);
+                index += distribution;
+                callable.setCurrentPopulation(population);
+                slaves.add(new FutureTask<>(callable));
             }
+
+            for (FutureTask<List<Individual>> slave : slaves) {
+                executorService.execute(slave);
+            }
+            for (FutureTask<List<Individual>> slave : slaves) {
+                try {
+                    nextGeneration.addAll(slave.get());
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+
             pop.setPopulation(nextGeneration);
-
-            // reevaluate current population
-            pop.evaluate();
-
+            executorService.shutdown();
             Individual bestIndividualOfPopulation = pop.findBestIndividual();
             if (bestIndividual.getFitnessValue() < bestIndividualOfPopulation.getFitnessValue()) {
                 bestIndividual = new Individual(bestIndividualOfPopulation);
                 System.out.print("Total Fitness = " + pop.getTotalFitness());
                 System.out.println(" ; Best Fitness = " + bestIndividual.getFitnessValue() + " ; Crossings: " + bestIndividual.getNumberOfCrossings());
-                int i = bestIndividual.getNumberOfCrossings();
-                int j = new KPMPSolutionChecker().getCrossingNumber(bestIndividual.getGenes());
-                //assert (i == j);
                 if (bestIndividual.getNumberOfCrossings() <= Main.lowerBound) {
                     break;
                 }
@@ -121,9 +115,6 @@ public class GeneticAlgorithm {
 
 
         }
-
-        // best indiv
-        //Individual bestIndiv = pop.findBestIndividual();
 
         return bestIndividual.getGenes();
     }
