@@ -16,6 +16,7 @@ import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.impl.KPMPSpineOrderRandomDFSHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPInstance;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolution;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolutionChecker;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolutionWriter;
 
 import java.util.ArrayList;
@@ -104,7 +105,7 @@ public class Population {
 
     public Individual tournamentSelection() {
         m_rand = new Random(Double.doubleToLongBits(Math.random()));
-        int numberOfParticipants = POP_SIZE / 10;
+        int numberOfParticipants = (int) Math.ceil(POP_SIZE * 0.5);
         List<Individual> participants = new ArrayList<>(numberOfParticipants);
         for (int i = 0; i < numberOfParticipants; i++) {
             int index = m_rand.nextInt(m_population.size());
@@ -134,34 +135,10 @@ public class Population {
         Individual child2 = new Individual();
 
         // sort edges
-        father.getGenes().getEdgePartition().sort(new Comparator<KPMPSolutionWriter.PageEntry>() {
-            @Override
-            public int compare(KPMPSolutionWriter.PageEntry o1, KPMPSolutionWriter.PageEntry o2) {
-                return o1.a - o2.a;
-            }
-        });
-        father.getGenes().getEdgePartition().sort(new Comparator<KPMPSolutionWriter.PageEntry>() {
-            @Override
-            public int compare(KPMPSolutionWriter.PageEntry o1, KPMPSolutionWriter.PageEntry o2) {
-                return o1.b - o2.b;
-            }
-        });
-        mother.getGenes().getEdgePartition().sort(new Comparator<KPMPSolutionWriter.PageEntry>() {
-            @Override
-            public int compare(KPMPSolutionWriter.PageEntry o1, KPMPSolutionWriter.PageEntry o2) {
-                return o1.a - o2.a;
-            }
-        });
-        mother.getGenes().getEdgePartition().sort(new Comparator<KPMPSolutionWriter.PageEntry>() {
-            @Override
-            public int compare(KPMPSolutionWriter.PageEntry o1, KPMPSolutionWriter.PageEntry o2) {
-                return o1.b - o2.b;
-            }
-        });
-
-/*        for (int i = 0; i < mother.getGenes().getEdgePartition().size(); i++) {
-            System.out.println(mother.getGenes().getEdgePartition().get(i) + "\t" + father.getGenes().getEdgePartition().get(i));
-        }*/
+        father.getGenes().getEdgePartition().sort(Comparator.comparingInt(o4 -> o4.a));
+        father.getGenes().getEdgePartition().sort(Comparator.comparingInt(o3 -> o3.b));
+        mother.getGenes().getEdgePartition().sort(Comparator.comparingInt(o2 -> o2.a));
+        mother.getGenes().getEdgePartition().sort(Comparator.comparingInt(o -> o.b));
 
         int randPointForSpineOrder = m_rand.nextInt(mother.getGenes().getSpineOrder().size() - 1) + 1;
         int randPointForEdgePartition = m_rand.nextInt(mother.getGenes().getEdgePartition().size() - 1) + 1;
@@ -213,6 +190,93 @@ public class Population {
         List<Individual> children = new ArrayList<>();
         child1.evaluate();
         child2.evaluate();
+        children.add(child1);
+        children.add(child2);
+
+        return children;
+    }
+
+    public List<Individual> recombination(Individual mother, Individual father) {
+        Individual child1 = new Individual();
+        Individual child2 = new Individual();
+
+        //List<Integer> newSpineOrderChild1 = father.getGenes().getSpineOrder().stream().collect(Collectors.toCollection(ArrayList::new));
+        //List<Integer> newSpineOrderChild2 = mother.getGenes().getSpineOrder().stream().collect(Collectors.toCollection(ArrayList::new));
+
+        int randPointForSpineOrder = m_rand.nextInt(mother.getGenes().getSpineOrder().size() - 1) + 1;
+
+        // child1 spine order
+        List<Integer> newSpineOrderChild1 = new ArrayList<>();
+        List<Integer> fatherSpineOrderCopy = father.getGenes().getSpineOrder().stream().collect(toCollection(ArrayList::new));
+        for (int i = 0; i < randPointForSpineOrder; i++) {
+            final int value = mother.getGenes().getSpineOrder().get(i);
+            newSpineOrderChild1.add(value);
+            fatherSpineOrderCopy.remove(new Integer(value));
+        }
+        for (int i = 0; i < fatherSpineOrderCopy.size(); i++) {
+            newSpineOrderChild1.add(fatherSpineOrderCopy.get(i));
+        }
+
+        // child2 spine order
+        List<Integer> newSpineOrderChild2 = new ArrayList<>();
+        List<Integer> motherSpineOrderCopy = mother.getGenes().getSpineOrder().stream().collect(toCollection(ArrayList::new));
+        for (int i = 0; i < randPointForSpineOrder; i++) {
+            final int vertex = father.getGenes().getSpineOrder().get(i);
+            newSpineOrderChild2.add(vertex);
+            motherSpineOrderCopy.remove(new Integer(vertex));
+        }
+        for (int i = 0; i < motherSpineOrderCopy.size(); i++) {
+            newSpineOrderChild2.add(motherSpineOrderCopy.get(i));
+        }
+
+
+        father.getGenes().getEdgePartition().sort(Comparator.comparingInt(o4 -> o4.a));
+        father.getGenes().getEdgePartition().sort(Comparator.comparingInt(o3 -> o3.b));
+        mother.getGenes().getEdgePartition().sort(Comparator.comparingInt(o2 -> o2.a));
+        mother.getGenes().getEdgePartition().sort(Comparator.comparingInt(o -> o.b));
+
+        List<KPMPSolutionWriter.PageEntry> edgePartitionChild1 = new ArrayList<>();
+        List<KPMPSolutionWriter.PageEntry> edgePartitionChild2 = new ArrayList<>();
+
+        int totalCrossingChild1 = 0;
+        int totalCrossingChild2 = 0;
+        KPMPSolutionChecker checker = new KPMPSolutionChecker();
+        for (int i = 0; i < father.getGenes().getEdgePartition().size(); i++) {
+            KPMPSolutionWriter.PageEntry motherEdge = mother.getGenes().getEdgePartition().get(i);
+            KPMPSolutionWriter.PageEntry fatherEdge = father.getGenes().getEdgePartition().get(i);
+            edgePartitionChild1.add(i, motherEdge.clone());
+            edgePartitionChild2.add(i, motherEdge.clone());
+            int motherCrossings = checker.getCrossingNumberOfEdge(newSpineOrderChild1, edgePartitionChild1, motherEdge.page, motherEdge);
+            int motherCrossings2 = checker.getCrossingNumberOfEdge(newSpineOrderChild2, edgePartitionChild2, motherEdge.page, motherEdge);
+            edgePartitionChild1.remove(i);
+            edgePartitionChild2.remove(i);
+            edgePartitionChild1.add(i, fatherEdge.clone());
+            edgePartitionChild2.add(i, fatherEdge.clone());
+            int fatherCrossings = checker.getCrossingNumberOfEdge(newSpineOrderChild1, edgePartitionChild1, fatherEdge.page, fatherEdge);
+            int fatherCrossings2 = checker.getCrossingNumberOfEdge(newSpineOrderChild2, edgePartitionChild2, fatherEdge.page, fatherEdge);
+            if (motherCrossings < fatherCrossings) {
+                edgePartitionChild1.remove(i);
+                edgePartitionChild1.add(i, motherEdge.clone());
+                totalCrossingChild1 += motherCrossings;
+            } else {
+                totalCrossingChild1 += fatherCrossings;
+            }
+            if (motherCrossings2 < fatherCrossings2) {
+                edgePartitionChild2.remove(i);
+                edgePartitionChild2.add(i, motherEdge.clone());
+                totalCrossingChild2 += motherCrossings;
+            } else {
+                totalCrossingChild2 += fatherCrossings;
+            }
+
+        }
+        child1.setGenes(new KPMPSolution(newSpineOrderChild1, edgePartitionChild1, father.getGenes().getNumberOfPages()));
+        child2.setGenes(new KPMPSolution(newSpineOrderChild2, edgePartitionChild2, father.getGenes().getNumberOfPages()));
+        child1.setNumberOfCrossings(totalCrossingChild1);
+        child2.setNumberOfCrossings(totalCrossingChild2);
+        //assert (checker.getCrossingNumber(child1.getGenes()) == totalCrossingChild1);
+
+        List<Individual> children = new ArrayList<>();
         children.add(child1);
         children.add(child2);
 

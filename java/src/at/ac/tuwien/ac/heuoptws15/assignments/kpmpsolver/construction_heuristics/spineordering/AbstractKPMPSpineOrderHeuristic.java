@@ -5,6 +5,7 @@ import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolutionCheck
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolutionWriter;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static java.util.stream.Collectors.toCollection;
@@ -50,7 +51,7 @@ public abstract class AbstractKPMPSpineOrderHeuristic implements KPMPSpineOrderH
         spineOrder.add(nodeIndex);
 
         List<Integer> sortedNeighbours = instance.getAdjacencyList().get(nodeIndex);
-        sortedNeighbours.sort(((o1, o2) -> o1 - o2));
+        sortedNeighbours.sort((Comparator.comparingInt(o -> o)));
 
         for (Integer neighbourNode : sortedNeighbours) {
             if (!discoveredNodes.contains(neighbourNode)) {

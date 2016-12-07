@@ -89,7 +89,6 @@ public class Individual implements Cloneable {
     }
 
     public void mutate() {
-        // TODO calculate only difference of crossings to avoid performance overhead
         Random rand = new Random(Double.doubleToLongBits(Math.random()));
         int edgeIndex = rand.nextInt(genes.getEdgePartition().size());
         List<KPMPSolutionWriter.PageEntry> edgePartition = genes.getEdgePartition();
@@ -104,11 +103,31 @@ public class Individual implements Cloneable {
         edgePartition.set(edgeIndex,edgeToMutate);
         int newCrossings = checker.getCrossingNumberOfEdge(genes.getSpineOrder(), edgePartition, edgeToMutate.page, edgeToMutate);
         genes.setEdgePartition(edgePartition);
-        int newTotalCrossings = numberOfCrossings - originalCrossings + newCrossings;
-        //assert (checker.getCrossingNumber(genes) == newTotalCrossings);
-        //setNumberOfCrossings(newTotalCrossings);
-        needsEvaluation = true;
-        evaluate();
+        int newTotalCrossings = numberOfCrossings - (originalCrossings - newCrossings);
+        setNumberOfCrossings(newTotalCrossings);
+        /*Random rand = new Random(Double.doubleToLongBits(Math.random()));
+        int edgeIndex = rand.nextInt(genes.getEdgePartition().size());
+        List<KPMPSolutionWriter.PageEntry> edgePartition = genes.getEdgePartition();
+        KPMPSolutionWriter.PageEntry edgeToMutate = edgePartition.get(edgeIndex);
+        KPMPSolutionChecker checker = new KPMPSolutionChecker();
+        int bestPageIndex = edgeToMutate.page;
+        int bestCrossings = checker.getCrossingNumberOfEdge(genes.getSpineOrder(), edgePartition, edgeToMutate.page, edgeToMutate);
+        int originalCrossings = bestCrossings;
+        for (int i = 0; i < genes.getNumberOfPages(); i++){
+            if (bestPageIndex != i){
+                edgeToMutate.page = i;
+                int crossings = checker.getCrossingNumberOfEdge(genes.getSpineOrder(), edgePartition, i, edgeToMutate);
+                if (crossings < bestCrossings){
+                    bestCrossings = crossings;
+                    bestPageIndex = i;
+                }else {
+                    edgeToMutate.page = bestPageIndex;
+                }
+            }
+        }
+        genes.setEdgePartition(edgePartition);
+        int newTotalCrossings = numberOfCrossings - (originalCrossings - bestCrossings);
+        setNumberOfCrossings(newTotalCrossings);*/
     }
 
     public double evaluate() {
