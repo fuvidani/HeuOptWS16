@@ -20,4 +20,6 @@ public interface IGASlaveCallable extends Callable<List<Individual>> {
 
     void setAmountOfIndividualsToCareFor(final int size);
 
+    void adjustMutationRate(final double mutationRate);
+
 }

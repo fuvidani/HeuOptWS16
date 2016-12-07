@@ -26,10 +26,11 @@ import java.util.concurrent.FutureTask;
 public class GeneticAlgorithm {
 
     final static int ELITISM_K = 12;
-    final static int POP_SIZE = 10000 + ELITISM_K;  // population size
+    final static int POP_SIZE = 3000 + ELITISM_K;  // population size
     //final static int MAX_ITER = 2000;             // max number of iterations
-    final static double MUTATION_RATE = 0.8;     // probability of mutation
+    final static double MUTATION_RATE = 0.7;     // probability of mutation
     final static double CROSSOVER_RATE = 0.7;     // probability of crossover
+    final int maxIterationsWithoutImprovement = (int) (Main.iterationMultiplier * 0.1);
 
     private KPMPInstance instance;
     private List<KPMPSolutionWriter.PageEntry> originalEdgePartitioning;
@@ -63,10 +64,16 @@ public class GeneticAlgorithm {
 
         // main loop
         int count;
+        int iterationsWithoutImprovement = 0;
         ExecutorService executorService;
         for (int iter = 0; iter < Main.iterationMultiplier && ((System.nanoTime() - Main.START) / 1000000) < (Main.secondsBeforeStop * 1000); iter++) {
             nextGeneration = new ArrayList<>(POP_SIZE);
             count = 0;
+            if (iterationsWithoutImprovement >= maxIterationsWithoutImprovement) {
+                for (IGASlaveCallable callable : callableList) {
+                    callable.adjustMutationRate(1.0);
+                }
+            }
 
             // Elitism
             for (int i = 0; i < ELITISM_K; ++i) {
@@ -111,6 +118,14 @@ public class GeneticAlgorithm {
                 if (bestIndividual.getNumberOfCrossings() <= Main.lowerBound) {
                     break;
                 }
+                if (iterationsWithoutImprovement >= maxIterationsWithoutImprovement) {
+                    for (IGASlaveCallable callable : callableList) {
+                        callable.adjustMutationRate(MUTATION_RATE);
+                    }
+                }
+                iterationsWithoutImprovement = 0;
+            } else {
+                iterationsWithoutImprovement++;
             }
 
 

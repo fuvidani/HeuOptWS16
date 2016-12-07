@@ -50,8 +50,8 @@ public class Main {
         calculateAvgCrossingsBeforeLocalSearch(instanceIndex);*/
         try {
             while (testRuns < 1) {
-                int instanceCounter = 3;
-                while (instanceCounter != 4) {
+                int instanceCounter = 7;
+                while (instanceCounter != 8) {
                     if (instanceCounter < 6) {
                         iterationMultiplier = 2000;
                     } else if (instanceCounter == 6) {

@@ -25,7 +25,7 @@ public class Slave implements IGASlaveCallable {
     private Population population;
     private int amountOfIndividualsToCareFor;
     private final double crossOverRate;
-    private final double mutationRate;
+    private double mutationRate;
     private Random random;
     private List<Individual> newGenerationSubset;
     private final int elitism;
@@ -45,6 +45,11 @@ public class Slave implements IGASlaveCallable {
     public void setAmountOfIndividualsToCareFor(final int size) {
         this.amountOfIndividualsToCareFor = size;
         newGenerationSubset = new ArrayList<>(size);
+    }
+
+    @Override
+    public void adjustMutationRate(double mutationRate) {
+        this.mutationRate = mutationRate;
     }
 
 
