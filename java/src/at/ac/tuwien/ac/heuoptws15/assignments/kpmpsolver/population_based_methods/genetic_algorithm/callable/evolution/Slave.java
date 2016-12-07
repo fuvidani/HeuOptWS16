@@ -1,4 +1,4 @@
-package at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.callable;
+package at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.callable.evolution;
 
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.Individual;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.Population;
@@ -29,11 +29,13 @@ public class Slave implements IGASlaveCallable {
     private Random random;
     private List<Individual> newGenerationSubset;
     private final int elitism;
+    private boolean includeNodeSwap;
 
     public Slave(double crossOverRate, double mutationRate, int elitism) {
         this.crossOverRate = crossOverRate;
         this.mutationRate = mutationRate;
         this.elitism = elitism;
+        this.includeNodeSwap = false;
     }
 
     @Override
@@ -50,6 +52,11 @@ public class Slave implements IGASlaveCallable {
     @Override
     public void adjustMutationRate(double mutationRate) {
         this.mutationRate = mutationRate;
+    }
+
+    @Override
+    public void setNodeSwapMutation(boolean includeNodeSwap) {
+        this.includeNodeSwap = includeNodeSwap;
     }
 
 
@@ -81,10 +88,10 @@ public class Slave implements IGASlaveCallable {
 
             // Mutation
             if (random.nextDouble() < mutationRate) {
-                children.get(0).mutate();
+                children.get(0).mutate(includeNodeSwap);
             }
             if (random.nextDouble() < mutationRate) {
-                children.get(1).mutate();
+                children.get(1).mutate(includeNodeSwap);
             }
 
             // add to new population

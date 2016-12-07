@@ -1,8 +1,8 @@
 package at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm;
 
 import at.ac.tuwien.ac.Main;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.callable.IGASlaveCallable;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.callable.Slave;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.callable.evolution.IGASlaveCallable;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.callable.evolution.Slave;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPInstance;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolution;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolutionWriter;
@@ -25,13 +25,11 @@ import java.util.concurrent.FutureTask;
  */
 public class GeneticAlgorithm {
 
-    final static int ELITISM_K = 12;
-    final static int POP_SIZE = 3000 + ELITISM_K;  // population size
-    //final static int MAX_ITER = 2000;             // max number of iterations
-    final static double MUTATION_RATE = 0.7;     // probability of mutation
-    final static double CROSSOVER_RATE = 0.7;     // probability of crossover
-    final int maxIterationsWithoutImprovement = (int) (Main.iterationMultiplier * 0.1);
-
+    private final static int ELITISM_K = 16;
+    private final static int POP_SIZE = 104 + ELITISM_K;  // population size
+    private final static double MUTATION_RATE = 0.7;     // probability of mutation
+    private final static double CROSSOVER_RATE = 0.7;     // probability of crossover
+    private final int maxIterationsWithoutImprovement = (int) (Main.iterationMultiplier * 0.05);
     private KPMPInstance instance;
     private List<KPMPSolutionWriter.PageEntry> originalEdgePartitioning;
 
@@ -45,6 +43,7 @@ public class GeneticAlgorithm {
         pop.generatePopulation(instance,originalEdgePartitioning);
         System.out.println("Population generated");
         pop.evaluate();
+        System.out.println("Individuals evaluated, starting evolution now.");
 
         List<Individual> nextGeneration;
 
@@ -66,13 +65,17 @@ public class GeneticAlgorithm {
         int count;
         int iterationsWithoutImprovement = 0;
         ExecutorService executorService;
+        boolean highMutationON = false;
         for (int iter = 0; iter < Main.iterationMultiplier && ((System.nanoTime() - Main.START) / 1000000) < (Main.secondsBeforeStop * 1000); iter++) {
             nextGeneration = new ArrayList<>(POP_SIZE);
             count = 0;
-            if (iterationsWithoutImprovement >= maxIterationsWithoutImprovement) {
+            if (iterationsWithoutImprovement >= maxIterationsWithoutImprovement && !highMutationON) {
                 for (IGASlaveCallable callable : callableList) {
                     callable.adjustMutationRate(1.0);
+                    callable.setNodeSwapMutation(true);
                 }
+                System.out.println("High Mutation rate & node swap ON");
+                highMutationON = true;
             }
 
             // Elitism
@@ -121,7 +124,10 @@ public class GeneticAlgorithm {
                 if (iterationsWithoutImprovement >= maxIterationsWithoutImprovement) {
                     for (IGASlaveCallable callable : callableList) {
                         callable.adjustMutationRate(MUTATION_RATE);
+                        callable.setNodeSwapMutation(false);
                     }
+                    System.out.println("High Mutation rate & node swap RESET");
+                    highMutationON = false;
                 }
                 iterationsWithoutImprovement = 0;
             } else {

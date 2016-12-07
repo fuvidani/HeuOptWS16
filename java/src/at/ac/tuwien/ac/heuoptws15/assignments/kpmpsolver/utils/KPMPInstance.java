@@ -17,8 +17,29 @@ public class KPMPInstance {
 	private KPMPInstance() {
 		
 	}
-	
-	public static KPMPInstance readInstance(String path) throws FileNotFoundException {
+
+    public KPMPInstance(KPMPInstance instance) {
+        this.K = instance.K;
+        this.numVertices = instance.numVertices;
+        List<List<Integer>> list = new ArrayList<>();
+        instance.adjacencyList.forEach(list1 -> list.add(list1.stream().collect(Collectors.toCollection(ArrayList::new))));
+        this.adjacencyList = list;
+        //this.adjacencyList = instance.adjacencyList.stream().collect(Collectors.toCollection(ArrayList::new));
+        this.adjacencyMatrix = deepCopy(instance.adjacencyMatrix);
+    }
+
+    private boolean[][] deepCopy(boolean[][] original) {
+        if (original == null) {
+            return null;
+        }
+        final boolean[][] result = new boolean[original.length][];
+        for (int i = 0; i < original.length; i++) {
+            result[i] = Arrays.copyOf(original[i], original[i].length);
+        }
+        return result;
+    }
+
+    public static KPMPInstance readInstance(String path) throws FileNotFoundException {
 		KPMPInstance inst = new KPMPInstance();
 		Scanner s = new Scanner(new File(path));
 		

@@ -10,16 +10,18 @@ package at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_metho
  * @since 04.12.2016
  */
 
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.edgepartitioning.KPMPEdgePartitionHeuristic;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.edgepartitioning.impl.KPMPEdgePartitionRandomHeuristic;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.KPMPSpineOrderHeuristic;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.impl.KPMPSpineOrderRandomDFSHeuristic;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.callable.generation.SolutionGenerationCallable;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.callable.generation.SolutionGeneratorSlave;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPInstance;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolution;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolutionChecker;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolutionWriter;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
 import static java.util.stream.Collectors.toCollection;
 
@@ -35,7 +37,7 @@ public class Population {
     }
 
     public void setPopulation(List<Individual> newPop) {
-        this.m_population = Collections.unmodifiableList(newPop.stream().map(Individual::clone).collect(toCollection(ArrayList::new)));
+        this.m_population = newPop.stream().map(Individual::clone).collect(toCollection(ArrayList::new));
     }
 
     public List<Individual> getPopulation() {
@@ -243,7 +245,7 @@ public class Population {
     }
 
     public void generatePopulation(KPMPInstance instance, List<KPMPSolutionWriter.PageEntry> originalEdgePartitioning) {
-        KPMPSpineOrderHeuristic spineOrderHeuristic = new KPMPSpineOrderRandomDFSHeuristic();
+       /* KPMPSpineOrderHeuristic spineOrderHeuristic = new KPMPSpineOrderRandomDFSHeuristic();
         KPMPEdgePartitionHeuristic edgePartitionHeuristic = new KPMPEdgePartitionRandomHeuristic();
         for (int i = 0; i < POP_SIZE; i++) {
             KPMPSolution solution = new KPMPSolution();
@@ -258,6 +260,28 @@ public class Population {
             individual.setGenes(solution);
             m_population.add(individual);
         }
+        m_population = Collections.unmodifiableList(m_population);*/
+        int cores = Runtime.getRuntime().availableProcessors();
+        int distribution = POP_SIZE / cores;
+        ExecutorService executorService = Executors.newFixedThreadPool(cores);
+        List<FutureTask<List<Individual>>> slaves = new ArrayList<>();
+        for (int i = 0; i < cores; i++) {
+            SolutionGenerationCallable slave = new SolutionGeneratorSlave();
+            slave.setBaseInstance(instance, originalEdgePartitioning);
+            slave.setNumberOfSolutionsToGenerate(distribution);
+            slaves.add(new FutureTask<>(slave));
+        }
+        for (FutureTask<List<Individual>> slave : slaves) {
+            executorService.execute(slave);
+        }
+        for (FutureTask<List<Individual>> slave : slaves) {
+            try {
+                m_population.addAll(slave.get());
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+        executorService.shutdown();
         m_population = Collections.unmodifiableList(m_population);
     }
 

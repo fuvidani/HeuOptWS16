@@ -67,7 +67,7 @@ public class Individual implements Cloneable {
         return new Individual(this);
     }
 
-    public void mutate() {
+    public void mutate(boolean includeNodeSwap) {
         Random rand = new Random(Double.doubleToLongBits(Math.random()));
         int edgeIndex = rand.nextInt(genes.getEdgePartition().size());
         List<KPMPSolutionWriter.PageEntry> edgePartition = genes.getEdgePartition();
@@ -77,18 +77,22 @@ public class Individual implements Cloneable {
             pageIndex = rand.nextInt(genes.getNumberOfPages());
         } while (pageIndex == edgeToMutate.page);
         KPMPSolutionChecker checker = new KPMPSolutionChecker();
-        //      int originalCrossings = checker.getCrossingNumberOfEdge(genes.getSpineOrder(), edgePartition, edgeToMutate.page, edgeToMutate);
+        int originalCrossings = checker.getCrossingNumberOfEdge(genes.getSpineOrder(), edgePartition, edgeToMutate.page, edgeToMutate);
         edgeToMutate.page = pageIndex;
         edgePartition.set(edgeIndex,edgeToMutate);
-//        int newCrossings = checker.getCrossingNumberOfEdge(genes.getSpineOrder(), edgePartition, edgeToMutate.page, edgeToMutate);
+        int newCrossings = checker.getCrossingNumberOfEdge(genes.getSpineOrder(), edgePartition, edgeToMutate.page, edgeToMutate);
         genes.setEdgePartition(edgePartition);
-        List<Integer> originalSpineOrder = genes.getSpineOrder().stream().collect(Collectors.toCollection(ArrayList::new));
-        int randomNodeIndex1 = rand.nextInt(originalSpineOrder.size());
-        int randomNodeIndex2 = rand.nextInt(originalSpineOrder.size());
-        Collections.swap(originalSpineOrder, randomNodeIndex1, randomNodeIndex2);
-        genes.setSpineOrder(originalSpineOrder);
-        needsEvaluation = true;
-        evaluate();
+        if (includeNodeSwap) {
+            List<Integer> originalSpineOrder = genes.getSpineOrder().stream().collect(Collectors.toCollection(ArrayList::new));
+            int randomNodeIndex1 = rand.nextInt(originalSpineOrder.size());
+            int randomNodeIndex2 = rand.nextInt(originalSpineOrder.size());
+            Collections.swap(originalSpineOrder, randomNodeIndex1, randomNodeIndex2);
+            genes.setSpineOrder(originalSpineOrder);
+            needsEvaluation = true;
+            evaluate();
+        } else {
+            numberOfCrossings = numberOfCrossings - (originalCrossings - newCrossings);
+        }
     }
 
     public double evaluate() {

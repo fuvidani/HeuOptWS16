@@ -1,4 +1,4 @@
-package at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.callable;
+package at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.callable.evolution;
 
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.Individual;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.Population;
@@ -21,5 +21,7 @@ public interface IGASlaveCallable extends Callable<List<Individual>> {
     void setAmountOfIndividualsToCareFor(final int size);
 
     void adjustMutationRate(final double mutationRate);
+
+    void setNodeSwapMutation(boolean includeNodeSwap);
 
 }

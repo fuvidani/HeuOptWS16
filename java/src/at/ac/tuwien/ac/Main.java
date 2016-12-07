@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class Main {
 
-    public static final int secondsBeforeStop = 840;   // 840 ~ 14 minutes
+    public static final int secondsBeforeStop = 1800;   // 840 ~ 14 minutes
     public static long START;
     public static int iterationMultiplier;
     public static int crossingsBeforeLocalSearch;
@@ -35,10 +35,10 @@ public class Main {
     public static int maxCrossingNumber;
     public static final double lowerBound = 0;
 
-    private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
-    private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
-    //private static String inputPath = "E:\\HeuOptWS16\\instances\\";
-    //private static String outputPath = "E:\\HeuOptWS16\\solutions\\";
+    //private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
+    //private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
+    private static String inputPath = "E:\\HeuOptWS16\\instances\\";
+    private static String outputPath = "E:\\HeuOptWS16\\solutions\\";
     //private static String inputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\";
     //private static String outputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\solutions\\";
     private static int testRuns = 0;
@@ -50,8 +50,8 @@ public class Main {
         calculateAvgCrossingsBeforeLocalSearch(instanceIndex);*/
         try {
             while (testRuns < 1) {
-                int instanceCounter = 7;
-                while (instanceCounter != 8) {
+                int instanceCounter = 10;
+                while (instanceCounter != 11) {
                     if (instanceCounter < 6) {
                         iterationMultiplier = 2000;
                     } else if (instanceCounter == 6) {
