@@ -54,19 +54,48 @@ public class Population {
 
 
     public Individual rouletteWheelSelection() {
-        m_rand = new Random(Double.doubleToLongBits(Math.random()));
-        double randNum = m_rand.nextDouble() * totalFitness;
-        int idx;
-        for (idx = 0; idx < POP_SIZE && randNum > 0; ++idx) {
-            randNum -= -m_population.get(idx).getFitnessValue();
+        /*m_rand = new Random(Double.doubleToLongBits(Math.random()));
+        double weight_sum = 0;
+        for (Individual individual : m_population){
+            weight_sum += individual.getFitnessValue()/totalFitness;
         }
-        return m_population.get(idx - 1);
+        double randNum = m_rand.nextDouble() * weight_sum;
+        int idx;
+        for (idx = 0; idx < POP_SIZE; idx++) {
+            randNum -= m_population.get(idx).getFitnessValue()/totalFitness;
+            if (randNum <= 0){
+                return m_population.get(idx);
+            }
+        }
+        return m_population.get(m_population.size()- 1);*/
+        m_rand = new Random(Double.doubleToLongBits(Math.random()));
+        int alpha = 2;
+        int beta = 0;
+        int SP = 0;
+        double weight_sum = 0;
+        for (int i = 0; i < m_population.size(); i++) {
+            weight_sum += 2 - SP + (2 * (SP - 1) * ((i - 1) / (m_population.size() - 1)));
+        }
+        double randNum = m_rand.nextDouble() * weight_sum;
+        int idx;
+        for (idx = 0; idx < POP_SIZE; idx++) {
+            randNum -= 2 - SP + (2 * (SP - 1) * ((idx - 1) / (m_population.size() - 1)));
+            if (randNum <= 0) {
+                return m_population.get(idx);
+            }
+        }
+        return m_population.get(m_population.size() - 1);
 
+    }
+
+    private double getLinearRankingProbability(int alpha, int beta, int rank, int n) {
+        double j = (beta - alpha) / (n - 1);
+        return (alpha + rank * j) / n;
     }
 
     public Individual tournamentSelection() {
         m_rand = new Random(Double.doubleToLongBits(Math.random()));
-        int numberOfParticipants = (int) Math.ceil(POP_SIZE * 0.3);
+        int numberOfParticipants = (int) Math.ceil(POP_SIZE * 0.7);
         List<Individual> participants = new ArrayList<>(numberOfParticipants);
         for (int i = 0; i < numberOfParticipants; i++) {
             int index = m_rand.nextInt(m_population.size());

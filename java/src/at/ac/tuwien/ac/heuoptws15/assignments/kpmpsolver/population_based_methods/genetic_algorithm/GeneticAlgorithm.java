@@ -25,10 +25,12 @@ import java.util.concurrent.FutureTask;
  */
 public class GeneticAlgorithm {
 
-    private final static int ELITISM_K = 16;
-    private final static int POP_SIZE = 104 + ELITISM_K;  // population size
-    private final static double MUTATION_RATE = 0.7;     // probability of mutation
+    private final static int ELITISM_K = 0;
+    private final static int POP_SIZE = 8 + ELITISM_K;  // population size
+    private final static double MUTATION_RATE = 0.5;     // probability of mutation
     private final static double CROSSOVER_RATE = 0.7;     // probability of crossover
+    public static final double FAMILY_ELITISM_RATE = 0.6;   // probability to choose only the best 2 individuals of a family
+    public static final double NODE_SWAP_RATE = 0.3;    // probability that mutation includes node swap
     private final int maxIterationsWithoutImprovement = (int) (Main.iterationMultiplier * 0.05);
     private KPMPInstance instance;
     private List<KPMPSolutionWriter.PageEntry> originalEdgePartitioning;
@@ -50,7 +52,7 @@ public class GeneticAlgorithm {
         // current population
         Individual bestIndividual = new Individual(pop.findBestIndividual());
         System.out.print("Total Fitness = " + pop.getTotalFitness());
-        System.out.println(" ; Best Fitness = " + bestIndividual.getFitnessValue());
+        System.out.println(" ; Best Fitness = " + bestIndividual.getFitnessValue() + "; Crossings: " + bestIndividual.getNumberOfCrossings());
 
         int cores = Runtime.getRuntime().availableProcessors();
         int distribution = (POP_SIZE - ELITISM_K) / cores;
@@ -58,6 +60,7 @@ public class GeneticAlgorithm {
         for (int i = 0; i < cores; i++) {
             IGASlaveCallable slave = new Slave(CROSSOVER_RATE, MUTATION_RATE, ELITISM_K);
             slave.setAmountOfIndividualsToCareFor(distribution);
+            //slave.setNodeSwapMutation(true);
             callableList.add(slave);
         }
 
@@ -66,6 +69,7 @@ public class GeneticAlgorithm {
         int iterationsWithoutImprovement = 0;
         ExecutorService executorService;
         boolean highMutationON = false;
+        executorService = Executors.newFixedThreadPool(cores);
         for (int iter = 0; iter < Main.iterationMultiplier && ((System.nanoTime() - Main.START) / 1000000) < (Main.secondsBeforeStop * 1000); iter++) {
             nextGeneration = new ArrayList<>(POP_SIZE);
             count = 0;
@@ -83,7 +87,7 @@ public class GeneticAlgorithm {
                 nextGeneration.add(new Individual(pop.findBestIndividual()));
                 count++;
             }
-            executorService = Executors.newFixedThreadPool(cores);
+
 
             int index = 0;
             List<FutureTask<List<Individual>>> slaves = new ArrayList<>();
@@ -95,6 +99,7 @@ public class GeneticAlgorithm {
                     individuals.add(pop.getPopulation().get(j));
                 }
                 population.setPopulation(individuals);
+                population.evaluate();
                 index += distribution;
                 callable.setCurrentPopulation(population);
                 slaves.add(new FutureTask<>(callable));
@@ -112,7 +117,8 @@ public class GeneticAlgorithm {
             }
 
             pop.setPopulation(nextGeneration);
-            executorService.shutdown();
+            pop.evaluate();
+            //executorService.shutdown();
             Individual bestIndividualOfPopulation = pop.findBestIndividual();
             if (bestIndividual.getFitnessValue() < bestIndividualOfPopulation.getFitnessValue()) {
                 bestIndividual = new Individual(bestIndividualOfPopulation);
@@ -136,7 +142,7 @@ public class GeneticAlgorithm {
 
 
         }
-
+        executorService.shutdown();
         return bestIndividual.getGenes();
     }
 }

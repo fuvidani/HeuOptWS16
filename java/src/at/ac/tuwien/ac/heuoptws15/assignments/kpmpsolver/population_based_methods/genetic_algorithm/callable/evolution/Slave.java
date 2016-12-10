@@ -1,5 +1,6 @@
 package at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.callable.evolution;
 
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.GeneticAlgorithm;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.Individual;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.Population;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolution;
@@ -74,6 +75,7 @@ public class Slave implements IGASlaveCallable {
             this.random = new Random(Double.doubleToLongBits(Math.random()));
 
             // Selection
+            //population.getPopulation().sort(Comparator.comparingInt(Individual::getNumberOfCrossings));
             Individual mother = population.tournamentSelection();
             Individual father = population.tournamentSelection();
             List<Individual> children = new ArrayList<>(2);
@@ -81,6 +83,15 @@ public class Slave implements IGASlaveCallable {
             // Crossover
             if (random.nextDouble() < crossOverRate) {
                 children = crossover(mother, father);
+                if (random.nextDouble() < GeneticAlgorithm.FAMILY_ELITISM_RATE) {
+                    List<Individual> family = new ArrayList<>(4);
+                    family.add(mother);
+                    family.add(father);
+                    family.addAll(children);
+                    family.sort(Comparator.comparingInt(Individual::getNumberOfCrossings));
+                    children.add(0, family.get(0));
+                    children.add(1, family.get(1));
+                }
             } else {
                 children.add(mother);
                 children.add(father);

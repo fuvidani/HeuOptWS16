@@ -27,13 +27,13 @@ import java.util.List;
  */
 public class Main {
 
-    public static final int secondsBeforeStop = 1800;   // 840 ~ 14 minutes
+    public static final int secondsBeforeStop = 1020;   // 840 ~ 14 minutes
     public static long START;
     public static int iterationMultiplier;
     public static int crossingsBeforeLocalSearch;
     public static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.GA;
     public static int maxCrossingNumber;
-    public static final double lowerBound = 0;
+    public static double lowerBound = 0;
 
     //private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
     //private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
@@ -50,8 +50,12 @@ public class Main {
         calculateAvgCrossingsBeforeLocalSearch(instanceIndex);*/
         try {
             while (testRuns < 1) {
-                int instanceCounter = 10;
-                while (instanceCounter != 11) {
+                int instanceCounter = 6;
+                while (instanceCounter != 7) {
+                    lowerBound = 0;
+                    if (instanceCounter == 1) {
+                        lowerBound = 9;
+                    }
                     if (instanceCounter < 6) {
                         iterationMultiplier = 2000;
                     } else if (instanceCounter == 6) {
@@ -78,6 +82,7 @@ public class Main {
                     }
                     KPMPSolution initialSolution = new KPMPSolution(spineOrder, edgePart, instance.getK());
                     maxCrossingNumber = new KPMPSolutionChecker().getCrossingNumber(initialSolution);
+                    System.out.println("Upper-bound: " + maxCrossingNumber + " crossings; Lower-bound: " + lowerBound + " crossings.");
                     KPMPSolver kpmpSolver = new KPMPSolver(instance, edgePart, 0);
                     if (heuristicStrategy != HeuristicStrategy.GA) {
                         switch (heuristicStrategy) {

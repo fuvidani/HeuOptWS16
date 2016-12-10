@@ -26,6 +26,7 @@ public class Individual implements Cloneable {
     private int numberOfCrossings;
     private double fitnessValue;
     private boolean needsEvaluation = true;
+    private final double DOUBLE_EDGE_MOVE_PROB = 0.3;
 
     public Individual() {
     }
@@ -69,6 +70,7 @@ public class Individual implements Cloneable {
 
     public void mutate(boolean includeNodeSwap) {
         Random rand = new Random(Double.doubleToLongBits(Math.random()));
+        KPMPSolutionChecker checker = new KPMPSolutionChecker();
         int edgeIndex = rand.nextInt(genes.getEdgePartition().size());
         List<KPMPSolutionWriter.PageEntry> edgePartition = genes.getEdgePartition();
         KPMPSolutionWriter.PageEntry edgeToMutate = edgePartition.get(edgeIndex);
@@ -76,13 +78,29 @@ public class Individual implements Cloneable {
         do {
             pageIndex = rand.nextInt(genes.getNumberOfPages());
         } while (pageIndex == edgeToMutate.page);
-        KPMPSolutionChecker checker = new KPMPSolutionChecker();
-        int originalCrossings = checker.getCrossingNumberOfEdge(genes.getSpineOrder(), edgePartition, edgeToMutate.page, edgeToMutate);
+        int originalCrossings1 = checker.getCrossingNumberOfEdge(genes.getSpineOrder(), edgePartition, edgeToMutate.page, edgeToMutate);
         edgeToMutate.page = pageIndex;
         edgePartition.set(edgeIndex,edgeToMutate);
-        int newCrossings = checker.getCrossingNumberOfEdge(genes.getSpineOrder(), edgePartition, edgeToMutate.page, edgeToMutate);
+        int newCrossings1 = checker.getCrossingNumberOfEdge(genes.getSpineOrder(), edgePartition, edgeToMutate.page, edgeToMutate);
+        if (rand.nextDouble() < DOUBLE_EDGE_MOVE_PROB) {
+            int edgeIndex2 = rand.nextInt(genes.getEdgePartition().size());
+            KPMPSolutionWriter.PageEntry edgeToMutate2 = edgePartition.get(edgeIndex2);
+            int pageIndex2;
+            do {
+                pageIndex2 = rand.nextInt(genes.getNumberOfPages());
+            } while (edgeToMutate2.page == pageIndex2);
+            int originalCrossings2 = checker.getCrossingNumberOfEdge(genes.getSpineOrder(), edgePartition, edgeToMutate2.page, edgeToMutate2);
+            edgeToMutate2.page = pageIndex2;
+            edgePartition.set(edgeIndex2, edgeToMutate2);
+            int newCrossings2 = checker.getCrossingNumberOfEdge(genes.getSpineOrder(), edgePartition, edgeToMutate2.page, edgeToMutate2);
+            numberOfCrossings = numberOfCrossings - ((originalCrossings1 + originalCrossings2) - (newCrossings1 + newCrossings2));
+            setNumberOfCrossings(numberOfCrossings);
+        } else {
+            numberOfCrossings = numberOfCrossings - (originalCrossings1 - newCrossings1);
+            setNumberOfCrossings(numberOfCrossings);
+        }
         genes.setEdgePartition(edgePartition);
-        if (includeNodeSwap) {
+        if (rand.nextDouble() < GeneticAlgorithm.NODE_SWAP_RATE) {
             List<Integer> originalSpineOrder = genes.getSpineOrder().stream().collect(Collectors.toCollection(ArrayList::new));
             int randomNodeIndex1 = rand.nextInt(originalSpineOrder.size());
             int randomNodeIndex2 = rand.nextInt(originalSpineOrder.size());
@@ -90,8 +108,6 @@ public class Individual implements Cloneable {
             genes.setSpineOrder(originalSpineOrder);
             needsEvaluation = true;
             evaluate();
-        } else {
-            numberOfCrossings = numberOfCrossings - (originalCrossings - newCrossings);
         }
     }
 
