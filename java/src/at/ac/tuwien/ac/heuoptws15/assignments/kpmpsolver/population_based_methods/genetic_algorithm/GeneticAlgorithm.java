@@ -25,13 +25,12 @@ import java.util.concurrent.FutureTask;
  */
 public class GeneticAlgorithm {
 
-    private final static int ELITISM_K = 0;
-    private final static int POP_SIZE = 8 + ELITISM_K;  // population size
+    private final static int ELITISM_K = 8;
+    private final static int POP_SIZE = 4000 + ELITISM_K;  // population size
     private final static double MUTATION_RATE = 0.5;     // probability of mutation
     private final static double CROSSOVER_RATE = 0.7;     // probability of crossover
     public static final double FAMILY_ELITISM_RATE = 0.6;   // probability to choose only the best 2 individuals of a family
-    public static final double NODE_SWAP_RATE = 0.3;    // probability that mutation includes node swap
-    private final int maxIterationsWithoutImprovement = (int) (Main.iterationMultiplier * 0.05);
+    public static final double NODE_SWAP_RATE = 0.4;    // probability that mutation includes node swap
     private KPMPInstance instance;
     private List<KPMPSolutionWriter.PageEntry> originalEdgePartitioning;
 
@@ -65,27 +64,14 @@ public class GeneticAlgorithm {
         }
 
         // main loop
-        int count;
-        int iterationsWithoutImprovement = 0;
         ExecutorService executorService;
-        boolean highMutationON = false;
         executorService = Executors.newFixedThreadPool(cores);
         for (int iter = 0; iter < Main.iterationMultiplier && ((System.nanoTime() - Main.START) / 1000000) < (Main.secondsBeforeStop * 1000); iter++) {
             nextGeneration = new ArrayList<>(POP_SIZE);
-            count = 0;
-            if (iterationsWithoutImprovement >= maxIterationsWithoutImprovement && !highMutationON) {
-                for (IGASlaveCallable callable : callableList) {
-                    callable.adjustMutationRate(1.0);
-                    callable.setNodeSwapMutation(true);
-                }
-                System.out.println("High Mutation rate & node swap ON");
-                highMutationON = true;
-            }
 
             // Elitism
             for (int i = 0; i < ELITISM_K; ++i) {
                 nextGeneration.add(new Individual(pop.findBestIndividual()));
-                count++;
             }
 
 
@@ -127,17 +113,6 @@ public class GeneticAlgorithm {
                 if (bestIndividual.getNumberOfCrossings() <= Main.lowerBound) {
                     break;
                 }
-                if (iterationsWithoutImprovement >= maxIterationsWithoutImprovement) {
-                    for (IGASlaveCallable callable : callableList) {
-                        callable.adjustMutationRate(MUTATION_RATE);
-                        callable.setNodeSwapMutation(false);
-                    }
-                    System.out.println("High Mutation rate & node swap RESET");
-                    highMutationON = false;
-                }
-                iterationsWithoutImprovement = 0;
-            } else {
-                iterationsWithoutImprovement++;
             }
 
 
