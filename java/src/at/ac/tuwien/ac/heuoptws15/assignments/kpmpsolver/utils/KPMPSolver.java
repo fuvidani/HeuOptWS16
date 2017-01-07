@@ -7,6 +7,8 @@ import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.edgepartitioning.impl.KPMPEdgePartitionCFLHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.KPMPSpineOrderHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.impl.KPMPSpineOrderDFSHeuristic;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.hybrid.memetic.HybridAlgorithm;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.hybrid.memetic.impl.MemeticAlgorithm;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.KPMPLocalSearch;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.StepFunction;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.GeneticAlgorithm;
@@ -66,6 +68,10 @@ public class KPMPSolver {
         KPMPSolution solution = new KPMPSolution();
         if (Main.heuristicStrategy == HeuristicStrategy.GA) {
             solution = new GeneticAlgorithm(instance,originalEdgePartition).improve();
+        } else if (Main.heuristicStrategy == HeuristicStrategy.HYBRID) {
+            HybridAlgorithm hybridAlgorithm = new MemeticAlgorithm();
+            hybridAlgorithm.registerLocalSearch(localSearch,stepFunction);
+            solution = hybridAlgorithm.improve(instance,originalEdgePartition);
         } else {
             if (heuristicType == HeuristicType.SEPARATED) {
                 List<Integer> calculatedSpineOrder = spineOrderHeuristic.calculateSpineOrder(instance,originalEdgePartition,originalNumberOfCrossings,false);

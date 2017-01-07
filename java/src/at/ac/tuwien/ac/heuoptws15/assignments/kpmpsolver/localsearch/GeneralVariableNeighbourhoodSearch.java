@@ -89,4 +89,14 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
     public String getAbbreviation() {
         return "GVNS";
     }
+
+    @Override
+    public void setCrossingNumber(int crossingNumber) {
+
+    }
+
+    @Override
+    public int getCrossingNumber() {
+        return 0;
+    }
 }

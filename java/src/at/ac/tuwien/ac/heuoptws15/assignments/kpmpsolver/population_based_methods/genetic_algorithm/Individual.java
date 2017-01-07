@@ -118,4 +118,8 @@ public class Individual implements Cloneable {
         }
         return fitnessValue;
     }
+
+    public void setNeedsEvaluation(boolean needsEvaluation) {
+        this.needsEvaluation = needsEvaluation;
+    }
 }

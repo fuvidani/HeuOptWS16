@@ -114,6 +114,8 @@ public class SingleEdgeMove extends AbstractKPMPLocalSearch {
         if (crossingsOnNewPage < crossingsOnOriginalPage) {
             bestSolution = generatedSolution;
             numberOfIterationsWithoutImprovement = 0;
+
+            crossingNumber = crossingNumber - (crossingsOnOriginalPage - crossingsOnNewPage);
         }
         return numberOfIterations >= bestSolution.getEdgePartition().size() * bestSolution.getNumberOfPages() || numberOfIterationsWithoutImprovement >=  Main.iterationMultiplier || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
     }
@@ -177,6 +179,10 @@ public class SingleEdgeMove extends AbstractKPMPLocalSearch {
             bestSolution = generatedSolution;
             index = 0;
             pageCounter = 0;
+
+            crossingNumber = crossingNumber - (crossingsOnOriginalPage - crossingsOnNewPage);
+
+            //assert(crossingNumber == new KPMPSolutionChecker().getCrossingNumber(bestSolution));
         }
         if (index == bestSolution.getEdgePartition().size() && pageCounter != bestSolution.getNumberOfPages() - 1) {
             index = 0;

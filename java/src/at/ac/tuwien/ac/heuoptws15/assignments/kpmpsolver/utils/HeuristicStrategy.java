@@ -15,7 +15,8 @@ public enum HeuristicStrategy {
     DETERMINISTIC("deterministic_gvns" + File.separator),
     SEMI_RANDOM("semi_random" + File.separator),
     RANDOM("random_gvns" + File.separator),
-    GA("ga" + File.separator);
+    GA("ga" + File.separator),
+    HYBRID("hybrid" + File.separator);
 
     private String folderPath;
 

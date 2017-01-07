@@ -25,11 +25,18 @@ public abstract class AbstractKPMPLocalSearch implements KPMPLocalSearch {
     protected int bestCrossingNumber;
     protected int numberOfIterationsWithoutImprovement;
     protected Random random;
+    protected int crossingNumber = -1;
 
     @Override
     public KPMPSolution improveSolution(KPMPSolution currentSolution, StepFunction stepFunction) {
         bestSolution = currentSolution;
-        bestCrossingNumber = new KPMPSolutionChecker().getCrossingNumber(currentSolution);
+        if (crossingNumber == -1) {
+            bestCrossingNumber = new KPMPSolutionChecker().getCrossingNumber(currentSolution);
+            crossingNumber = bestCrossingNumber;
+        } else {
+            bestCrossingNumber = crossingNumber;
+        }
+
         this.stepFunction = stepFunction;
         numberOfIterationsWithoutImprovement = 0;
         return performLocalSearch();
@@ -64,6 +71,16 @@ public abstract class AbstractKPMPLocalSearch implements KPMPLocalSearch {
     public void initSearch(KPMPSolution bestSolution) {
         this.bestSolution = bestSolution;
         beforeSearch();
+    }
+
+    @Override
+    public void setCrossingNumber(int crossingNumber) {
+        this.crossingNumber = crossingNumber;
+    }
+
+    @Override
+    public int getCrossingNumber() {
+        return this.crossingNumber;
     }
 
     /**

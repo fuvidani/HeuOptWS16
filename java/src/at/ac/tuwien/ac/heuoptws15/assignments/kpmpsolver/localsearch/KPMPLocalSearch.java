@@ -35,4 +35,7 @@ public interface KPMPLocalSearch {
      */
     String getAbbreviation();
 
+    void setCrossingNumber(int crossingNumber);
+
+    int getCrossingNumber();
 }
