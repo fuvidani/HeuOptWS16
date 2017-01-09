@@ -2,7 +2,9 @@ package at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.hybrid.memetic.impl;
 
 import at.ac.tuwien.ac.Main;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.hybrid.memetic.HybridAlgorithm;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.hybrid.memetic.LocalSearchCallable;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.KPMPLocalSearch;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.neighbourhoods.SingleEdgeMove;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.StepFunction;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.Individual;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.Population;
@@ -15,10 +17,7 @@ import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolutionWrite
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.*;
 
 /**
  * <h4>About this class</h4>
@@ -30,11 +29,12 @@ import java.util.concurrent.FutureTask;
  * @since 07.01.2017
  */
 public class MemeticAlgorithm implements HybridAlgorithm {
+
     private KPMPLocalSearch localSearch;
     private Random random;
 
-    private final static int ELITISM_K = 0;
-    private final static int POP_SIZE = 8 + ELITISM_K;  // population size
+    private final static int ELITISM_K = 8;
+    private final static int POP_SIZE = 24 + ELITISM_K;  // population size
     private final static double MUTATION_RATE = 0.5;     // probability of mutation
     private final static double CROSSOVER_RATE = 0.7;     // probability of crossover
     public static final double FAMILY_ELITISM_RATE = 0.6;   // probability to choose only the best 2 individuals of a family
@@ -45,20 +45,18 @@ public class MemeticAlgorithm implements HybridAlgorithm {
     @Override
     public KPMPSolution improve(KPMPInstance instance, List<KPMPSolutionWriter.PageEntry> originalEdgePartitioning) {
         this.random = new Random(Double.doubleToLongBits(Math.random()));
-
+        boolean firstRun = true;
         if (localSearch != null) {
             Population pop = new Population(POP_SIZE);
             pop.generatePopulation(instance,originalEdgePartitioning);
             System.out.println("Population generated");
 
-            for (Individual i : pop.getPopulation()) {
-                if (random.nextDouble() < LOCAL_SEARCH_RATE) {
-                    i.setGenes(localSearch.improveSolution(i.getGenes(),stepFunction));
-                    i.setNumberOfCrossings(localSearch.getCrossingNumber());
-                }
+            final int cores = Runtime.getRuntime().availableProcessors();
+            final int distribution = (POP_SIZE - ELITISM_K) / cores;
+            ExecutorService executorService;
+            executorService = Executors.newFixedThreadPool(cores);
 
-                localSearch.setCrossingNumber(-1);
-            }
+            performLocalSearch(executorService, cores, distribution, pop.getPopulation());
 
             System.out.println("local search done");
 
@@ -72,8 +70,7 @@ public class MemeticAlgorithm implements HybridAlgorithm {
             System.out.print("Total Fitness = " + pop.getTotalFitness());
             System.out.println(" ; Best Fitness = " + bestIndividual.getFitnessValue() + "; Crossings: " + bestIndividual.getNumberOfCrossings());
 
-            int cores = Runtime.getRuntime().availableProcessors();
-            int distribution = (POP_SIZE - ELITISM_K) / cores;
+
             List<IGASlaveCallable> callableList = new ArrayList<>(cores);
             for (int i = 0; i < cores; i++) {
                 IGASlaveCallable slave = new Slave(CROSSOVER_RATE, MUTATION_RATE, ELITISM_K);
@@ -83,8 +80,7 @@ public class MemeticAlgorithm implements HybridAlgorithm {
             }
 
             // main loop
-            ExecutorService executorService;
-            executorService = Executors.newFixedThreadPool(cores);
+
             for (int iter = 0; iter < Main.iterationMultiplier && ((System.nanoTime() - Main.START) / 1000000) < (Main.secondsBeforeStop * 1000); iter++) {
                 nextGeneration = new ArrayList<>(POP_SIZE);
 
@@ -121,27 +117,30 @@ public class MemeticAlgorithm implements HybridAlgorithm {
                     }
                 }
 
-                for (Individual i : nextGeneration) {
-                    if (random.nextDouble() < LOCAL_SEARCH_RATE) {
-                        i.setGenes(localSearch.improveSolution(i.getGenes(),stepFunction));
-                        i.setNumberOfCrossings(localSearch.getCrossingNumber());
-                    }
-
-                    localSearch.setCrossingNumber(-1);
-                }
-
-                System.out.println("local search done");
+                performLocalSearch(executorService, cores, distribution, nextGeneration);
+                System.out.println("2. local search done");
 
                 pop.setPopulation(nextGeneration);
                 pop.evaluate();
-                //executorService.shutdown();
                 Individual bestIndividualOfPopulation = pop.findBestIndividual();
-                if (bestIndividual.getFitnessValue() <= bestIndividualOfPopulation.getFitnessValue()) {
-                    bestIndividual = new Individual(bestIndividualOfPopulation);
-                    System.out.print("Total Fitness = " + pop.getTotalFitness());
-                    System.out.println(" ; Best Fitness = " + bestIndividual.getFitnessValue() + " ; Crossings: " + bestIndividual.getNumberOfCrossings());
-                    if (bestIndividual.getNumberOfCrossings() <= Main.lowerBound) {
-                        break;
+                if (firstRun) {
+                    firstRun = false;
+                    if (bestIndividual.getFitnessValue() <= bestIndividualOfPopulation.getFitnessValue()) {
+                        bestIndividual = new Individual(bestIndividualOfPopulation);
+                        System.out.print("Total Fitness = " + pop.getTotalFitness());
+                        System.out.println(" ; Best Fitness = " + bestIndividual.getFitnessValue() + " ; Crossings: " + bestIndividual.getNumberOfCrossings());
+                        if (bestIndividual.getNumberOfCrossings() <= Main.lowerBound) {
+                            break;
+                        }
+                    }
+                } else {
+                    if (bestIndividual.getFitnessValue() < bestIndividualOfPopulation.getFitnessValue()) {
+                        bestIndividual = new Individual(bestIndividualOfPopulation);
+                        System.out.print("Total Fitness = " + pop.getTotalFitness());
+                        System.out.println(" ; Best Fitness = " + bestIndividual.getFitnessValue() + " ; Crossings: " + bestIndividual.getNumberOfCrossings());
+                        if (bestIndividual.getNumberOfCrossings() <= Main.lowerBound) {
+                            break;
+                        }
                     }
                 }
 
@@ -152,6 +151,36 @@ public class MemeticAlgorithm implements HybridAlgorithm {
         }
 
         throw new IllegalArgumentException("localsearch null");
+    }
+
+    private void performLocalSearch(ExecutorService executorService, int cores, int distribution, List<Individual> population) {
+        List<LocalSearchCallable> localSearchCallableList = new ArrayList<>(cores);
+        for (int i = 0; i < cores; i++) {
+            LocalSearchCallable slave = new LocalSearchSlave();
+            slave.registerLocalSearch(new SingleEdgeMove(), stepFunction);
+            localSearchCallableList.add(slave);
+        }
+
+        int index = 0;
+        //final List<FutureTask<List<Individual>>> tasks = new ArrayList<>();
+        for (LocalSearchCallable callable : localSearchCallableList) {
+            List<Individual> individuals = new ArrayList<>(distribution);
+            for (int j = index; j < index + distribution; j++) {
+                individuals.add(population.get(j));
+            }
+            index += distribution;
+            callable.setIndividualsToOptimize(individuals);
+            //tasks.add(new FutureTask<>(callable));
+        }
+
+        try {
+            List<Future<List<Individual>>> list = executorService.invokeAll(localSearchCallableList);
+            for (Future<List<Individual>> future : list) {
+                future.get();
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

@@ -117,7 +117,7 @@ public class SingleEdgeMove extends AbstractKPMPLocalSearch {
 
             crossingNumber = crossingNumber - (crossingsOnOriginalPage - crossingsOnNewPage);
         }
-        return numberOfIterations >= bestSolution.getEdgePartition().size() * bestSolution.getNumberOfPages() || numberOfIterationsWithoutImprovement >=  Main.iterationMultiplier || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
+        return numberOfIterations >= bestSolution.getEdgePartition().size() * bestSolution.getNumberOfPages() || numberOfIterationsWithoutImprovement >= Main.iterationMultiplier || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000) || numberOfIterations >= Main.localSearchIterationLimit;
     }
 
     /**
@@ -188,7 +188,7 @@ public class SingleEdgeMove extends AbstractKPMPLocalSearch {
             index = 0;
             pageCounter++;
         }
-        return ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000) || index == bestSolution.getEdgePartition().size() && pageCounter == bestSolution.getNumberOfPages() - 1;
+        return ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000) || index == bestSolution.getEdgePartition().size() && pageCounter == bestSolution.getNumberOfPages() - 1 || numberOfIterations >= Main.localSearchIterationLimit;
     }
 
     @Override

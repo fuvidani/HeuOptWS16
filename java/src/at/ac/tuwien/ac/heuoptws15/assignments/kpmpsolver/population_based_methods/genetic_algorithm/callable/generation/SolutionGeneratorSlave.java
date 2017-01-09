@@ -2,8 +2,6 @@ package at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_metho
 
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.edgepartitioning.KPMPEdgePartitionHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.edgepartitioning.impl.KPMPEdgePartitionCFLHeuristic;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.edgepartitioning.impl.KPMPEdgePartitionRandomCFLHeuristic;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.edgepartitioning.impl.KPMPEdgePartitionRandomHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.KPMPSpineOrderHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.impl.KPMPSpineOrderRandomDFSHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.Individual;
@@ -47,7 +45,7 @@ public class SolutionGeneratorSlave implements SolutionGenerationCallable {
         List<Individual> result = new ArrayList<>(solutionsToGenerate);
         for (int i = 0; i < solutionsToGenerate; i++) {
             spineOrderHeuristic = new KPMPSpineOrderRandomDFSHeuristic();
-            edgePartitionHeuristic = new KPMPEdgePartitionRandomCFLHeuristic();
+            edgePartitionHeuristic = new KPMPEdgePartitionCFLHeuristic();
             KPMPSolution solution = new KPMPSolution();
             KPMPInstance instance1 = new KPMPInstance(instance);
             List<KPMPSolutionWriter.PageEntry> edgePartitioning1 = edgePartitioning.stream().map(KPMPSolutionWriter.PageEntry::clone).collect(Collectors.toCollection(ArrayList::new));

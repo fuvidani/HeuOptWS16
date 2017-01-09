@@ -5,11 +5,9 @@ import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.edgepartitioning.impl.KPMPEdgePartitionRandomHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.impl.KPMPSpineOrderDFSHeuristic;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.construction_heuristics.spineordering.impl.KPMPSpineOrderRandomDFSHeuristic;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.GeneralVariableNeighbourhoodSearch;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.KPMPLocalSearch;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.neighbourhoods.SingleEdgeMove;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.BestImprovementStepFunction;
-import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.RandomStepFunction;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.StepFunction;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.*;
 
@@ -32,6 +30,7 @@ public class Main {
     public static final int secondsBeforeStop = 1020;   // 840 ~ 14 minutes
     public static long START;
     public static int iterationMultiplier;
+    public static int localSearchIterationLimit = Integer.MAX_VALUE;
     public static int crossingsBeforeLocalSearch;
     public static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.HYBRID;
     public static int maxCrossingNumber;
@@ -39,10 +38,10 @@ public class Main {
 
     //private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
     //private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
-    //private static String inputPath = "E:\\HeuOptWS16\\instances\\";
-    //private static String outputPath = "E:\\HeuOptWS16\\solutions\\";
-    private static String inputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\";
-    private static String outputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\solutions\\";
+    private static String inputPath = "E:\\HeuOptWS16\\instances\\";
+    private static String outputPath = "E:\\HeuOptWS16\\solutions\\";
+    //private static String inputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\instances\\";
+    //private static String outputPath = "C:\\Development\\workspaces\\TU\\HOT\\assignment1\\HeuOptWS16\\solutions\\";
     private static int testRuns = 0;
 
     public static void main(String[] args) {
@@ -52,18 +51,20 @@ public class Main {
         calculateAvgCrossingsBeforeLocalSearch(instanceIndex);*/
         try {
             while (testRuns < 1) {
-                int instanceCounter = 1;
-                while (instanceCounter != 3) {
+                int instanceCounter = 10;
+                while (instanceCounter != 11) {
                     lowerBound = 0;
                     if (instanceCounter == 1) {
                         lowerBound = 9;
                     }
                     if (instanceCounter < 6) {
-                        iterationMultiplier = 2000;
+                        iterationMultiplier = 4000;
                     } else if (instanceCounter == 6) {
                         iterationMultiplier = 500;
+                        localSearchIterationLimit = 100;
                     } else {
                         iterationMultiplier = 1000;
+                        localSearchIterationLimit = 1000;
                     }
                     KPMPInstance instance = KPMPInstance.readInstance(inputPath + "automatic-" + instanceCounter + ".txt");
                     System.out.println("Test Instance " + instanceCounter + " - K: " + instance.getK() + ", Vertices: " + instance.getNumVertices());
