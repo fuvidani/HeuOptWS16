@@ -16,7 +16,6 @@ import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.utils.KPMPSolutionWrite
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.*;
 
 /**
@@ -31,11 +30,10 @@ import java.util.concurrent.*;
 public class MemeticAlgorithm implements HybridAlgorithm {
 
     private KPMPLocalSearch localSearch;
-    private Random random;
 
     private final static int ELITISM_K = 8;
-    private final static int POP_SIZE = 24 + ELITISM_K;  // population size
-    private final static double MUTATION_RATE = 0.5;     // probability of mutation
+    private final static int POP_SIZE = 2000 + ELITISM_K;  // population size
+    private final static double MUTATION_RATE = 0.6;     // probability of mutation
     private final static double CROSSOVER_RATE = 0.7;     // probability of crossover
     public static final double FAMILY_ELITISM_RATE = 0.6;   // probability to choose only the best 2 individuals of a family
     public static final double NODE_SWAP_RATE = 0.4;    // probability that mutation includes node swap
@@ -44,7 +42,6 @@ public class MemeticAlgorithm implements HybridAlgorithm {
 
     @Override
     public KPMPSolution improve(KPMPInstance instance, List<KPMPSolutionWriter.PageEntry> originalEdgePartitioning) {
-        this.random = new Random(Double.doubleToLongBits(Math.random()));
         boolean firstRun = true;
         if (localSearch != null) {
             Population pop = new Population(POP_SIZE);
@@ -52,6 +49,7 @@ public class MemeticAlgorithm implements HybridAlgorithm {
             System.out.println("Population generated");
 
             final int cores = Runtime.getRuntime().availableProcessors();
+            //final int cores = 4;
             final int distribution = (POP_SIZE - ELITISM_K) / cores;
             ExecutorService executorService;
             executorService = Executors.newFixedThreadPool(cores);

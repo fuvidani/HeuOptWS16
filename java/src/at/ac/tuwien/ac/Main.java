@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class Main {
 
-    public static final int secondsBeforeStop = 1020;   // 840 ~ 14 minutes
+    public static final int secondsBeforeStop = 1080;   // 840 ~ 14 minutes, 1500 ~ 25 minutes, 1080 ~ 18 minutes
     public static long START;
     public static int iterationMultiplier;
     public static int localSearchIterationLimit = Integer.MAX_VALUE;
@@ -51,8 +51,8 @@ public class Main {
         calculateAvgCrossingsBeforeLocalSearch(instanceIndex);*/
         try {
             while (testRuns < 1) {
-                int instanceCounter = 10;
-                while (instanceCounter != 11) {
+                int instanceCounter = 1;
+                while (instanceCounter != 6) {
                     lowerBound = 0;
                     if (instanceCounter == 1) {
                         lowerBound = 9;
@@ -61,10 +61,10 @@ public class Main {
                         iterationMultiplier = 4000;
                     } else if (instanceCounter == 6) {
                         iterationMultiplier = 500;
-                        localSearchIterationLimit = 100;
+                        localSearchIterationLimit = 1000;
                     } else {
                         iterationMultiplier = 1000;
-                        localSearchIterationLimit = 1000;
+                        localSearchIterationLimit = 2000;
                     }
                     KPMPInstance instance = KPMPInstance.readInstance(inputPath + "automatic-" + instanceCounter + ".txt");
                     System.out.println("Test Instance " + instanceCounter + " - K: " + instance.getK() + ", Vertices: " + instance.getNumVertices());
