@@ -1,0 +1,119 @@
+\documentclass[11pt]{article}
+\usepackage{outline}
+\usepackage{pmgraph}
+\usepackage{listings}
+\usepackage[utf8]{inputenc}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{caption}
+\usepackage{mathtools}
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\title{Programming Assignment 5\\ \vspace{10px} \large Heuristic Optimization Techniques}
+\author{David Molnar, 1326891\\ Daniel Füvesi, 1326576\\Gruppe 9}
+\date{\today}
+%--------------------Make usable space all of page
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\topmargin}{0in}
+\setlength{\headsep}{-.25in}
+\setlength{\textwidth}{6.5in}
+\setlength{\textheight}{8.5in}
+%--------------------Indention
+\setlength{\parindent}{0.5cm}
+\algdef{SE}[DOWHILE]{Do}{doWhile}{\algorithmicdo}[1]{\algorithmicwhile\ #1}
+\algdef{SE}[VARIABLES]{Variables}{EndVariables}
+{\algorithmicvariables}
+{\algorithmicend\ \algorithmicvariables}
+\algnewcommand{\algorithmicvariables}{\textbf{Global variables}}
+
+
+\begin{document}
+\lstset{language=Java}
+%--------------------Title Page
+\maketitle
+ 
+%--------------------Begin Outline
+\section{Hybrid Metaheuristic}
+\subsection{Memetic Algorithm}
+\hspace{0.5cm}In this assignment we implemented a combination of the previous genetic algorithm and a local search. The implementation consists of the steps similar to the presented ones in the lecture. After the population is generated, we perform a local search on the individuals. Only after that the population is evaluated and passed onto the genetic part of the algorithm. Here, no changes has been made - depending on the many probability parameters individuals are selected, crossed over and mutated. At the end of each iteration we perform a local search on the new generation as well.
+\begin{algorithm}
+	\caption{Memetic Algorithm for KPMP}\label{euclid}
+	\begin{algorithmic}[1]
+		\Variables
+		\State $population\_size$, $elitism\_size$, $mutation\_rate$, $crossover\_rate$, $loca\_search\_rate$, $node\_swap\_rate$, $family\_elitism\_rate$
+		\EndVariables
+		\Require KPMP Instance, Type of LocalSearch, Stepfunction
+		\Ensure KPMPSolution that is at least as good as the input
+		\Function{improve}{ }
+		\State $\textit{population} \gets $generatePopulation($size$, $instance$)
+		\State performLocalSearch($population$)
+		\State evaluatePopulation($population$)
+		\While{...}
+		\State // genetic part, obtain $nextGeneration$
+		\State performLocalSearch($nextGeneration$)
+		\State evaluatePopulation($nextGeneration$)
+		\EndWhile
+		\Return $\textit{best solution}$
+		\EndFunction
+		
+		%\algstore{myalg}
+	\end{algorithmic}
+\end{algorithm}
+\subsection{Local search}
+\hspace{0.5cm}For the local search we decided to use an already existing one. For performance reasons we went with the \textit{Single-Edge-Move} (S-E-M) neighbourhood along with the best-improvement stepfunction. Reminder: the S-E-M neighbourhood consists of all solutions where 2 solutions differ in the page number of an edge (i.e. an edge is moved to another page). In order to maintain a fair balance between diversity and accuracy, not necessarily every individual gets locally optimized. This means that in the \textit{performLocalSearch()} method an individual is only improved by the S-E-M if a random number is greater than \textbf{0.8} (adjustable parameter). 
+
+\section{Performance Improvement}
+\hspace{0.5cm}Beside the multithreaded construction of initial solutions and the genetic part we also implemented the local search using multithreading. Since individuals do not affect each other, it is a suitable case for parallelization. The population gets divided by the number of (virtual) cores so that every thread cares for a portion doing its local search. The crossing numbers are incrementally calculated during the local search so that a subsequent invocation of \textit{evaluatePopulation()} in the genetic algorithm does not re-compute crossings unnecessarily.
+
+
+\section{Experimental Setup}
+\hspace{0.5cm}The algorithm has been implemented in Java without external libraries; tested on 2 Windows 10 PCs, both having 8GB RAM and a CPU of Intel Core i7 870 (4 cores, 2.93GHz) and Intel Core i7 3630QM (4 cores, 2.4GHz) respectively. All instances received an average CPU time limit of 20 minutes. This time varies depending on the size of the instance. In our opinion the construction time should not be considered, therefore we increase the limit with the time that has been spent on generating the initial population resulting in an appr. 15 min time limit within the memetic algorithm.  If the running time exceeds the limit (checked on each iteration), the current best solution is returned. 
+
+\section{Results}
+\hspace{0.5cm}We already realized in the last assignment that the population size (= diversity) is a huge trade-off and influences the result especially in our case having only an 8-core CPU. The goal of our memetic algorithm would be to take the best from both worlds: having a wide range of possible solutions that are being optimized on their own "hill". Light instances, where hundreds or even thousands of initial solutions can be quickly generated perfectly exploit our intended purpose. Unfortunately, we could not reach a significant improvement in the results for instances 6, 8, 9 and 10. A second reason for that (beside diversity-accuracy paradigm) is the unefficient way our algorithm handles node swaps. Swapping two nodes has a greater (positive or negative) impact on a solution than a relocationing of an edge. This means that there should be almost as many node swaps as edge moves. However, due to our inefficient calculation of node changes we are bound to restrict the occurrence of these node swaps.\\
+
+\subsection{Results using Randomized Construction Heuristic}
+
+\begin{tabular}{l*{6}{c}r}
+	Instance & Avg. Crossings B4 GA & Best Crossings & Avg. Crossings & Time & Runs \\
+	\hline
+	automatic-1 & 18 & 9 & 9 & 520 ms & 15 \\
+	automatic-2 & 6 & 0 & 0 & 675 ms & 15 \\
+	automatic-3 & 285 & 28 & 40 & 118'487 ms & 15 \\
+	automatic-4 & 3 & 0 & 0 & 10856 ms & 15 \\
+	automatic-5 & 24 & 0 & 0.9 & 9166 ms & 15 \\
+	automatic-6 & 5'751'426 & 5'745'556 & 5'750'425 & full time & 5 \\
+	automatic-7 & 6'710 & 4'976 & 5'985 & full time & 5 \\
+	automatic-8 & 734'630 & 686'880 & 695'613 & full time & 5  \\
+	automatic-9 & 147'709 & 131'267 & 139'318 & full time & 5 \\
+	automatic-10 & 69'754 & 57'290 & 59'747 & full time & 5  \\
+\end{tabular}
+
+\subsection{Best paramter models}
+
+\begin{tabular}{l*{6}{c}r}
+	Instance & population size & elite size & mutation rate & crossover rate & family elitism rate & ns rate \\
+	\hline
+	automatic-1 & 120 & 8 & 0.7 & 0.7 & 0.6 & 0.2 \\
+	automatic-2 & 80 & 8 & 0.8 & 0.7 & 0.6 & 0.2 \\
+	automatic-3 & 4000 & 8 & 0.5 & 0.7 & 0.6 & 0.4 \\
+	automatic-4 & 80 & 8 & 0.6 & 0.7 & 0.6 & 0.7 \\
+	automatic-5 & 400 & 8 & 0.9 & 0.7 & 0.8 & 0.2 \\
+	automatic-6 & 8 & 0 & 0.5 & 0.7 & 0.6 & 0.2 \\
+	automatic-7 & 56 & 8 & 0.5 & 0.7 & 0.6 & 0.2 \\
+	automatic-8 & 16 & 8 & 0.5 & 0.7 & 0.6 & 0.2 \\
+	automatic-9 & 16 & 8 & 0.5 & 0.7 & 0.6 & 0.2 \\
+	automatic-10 & 16 & 8 & 0.5 & 0.7 & 0.6 & 0.2 \\
+\end{tabular}
+
+
+
+
+\end{document}
