@@ -45,6 +45,11 @@ public class SolutionGeneratorSlave implements SolutionGenerationCallable {
         List<Individual> result = new ArrayList<>(solutionsToGenerate);
         for (int i = 0; i < solutionsToGenerate; i++) {
             spineOrderHeuristic = new KPMPSpineOrderRandomDFSHeuristic();
+           /* if (solutionsToGenerate > 1 && i < solutionsToGenerate/2) {
+                edgePartitionHeuristic = new KPMPEdgePartitionRandomCFLHeuristic();
+            }else {
+                edgePartitionHeuristic = new KPMPEdgePartitionCFLHeuristic();
+            }*/
             edgePartitionHeuristic = new KPMPEdgePartitionCFLHeuristic();
             KPMPSolution solution = new KPMPSolution();
             KPMPInstance instance1 = new KPMPInstance(instance);
@@ -59,6 +64,7 @@ public class SolutionGeneratorSlave implements SolutionGenerationCallable {
             individual.setGenes(solution);
             result.add(individual);
         }
+
         return result;
     }
 

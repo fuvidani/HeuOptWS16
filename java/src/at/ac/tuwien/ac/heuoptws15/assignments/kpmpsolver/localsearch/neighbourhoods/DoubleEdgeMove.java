@@ -137,7 +137,7 @@ public class DoubleEdgeMove extends AbstractKPMPLocalSearch {
             bestSolution = generatedSolution;
             numberOfIterationsWithoutImprovement = 0;
         }
-        return numberOfIterationsWithoutImprovement >= bestSolution.getEdgePartition().size() || numberOfIterationsWithoutImprovement >=  Main.iterationMultiplier || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
+        return numberOfIterations >= Main.localSearchIterationLimit || numberOfIterationsWithoutImprovement >= bestSolution.getEdgePartition().size() || numberOfIterationsWithoutImprovement >= Main.iterationMultiplier || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
     }
 
     /**
@@ -208,13 +208,16 @@ public class DoubleEdgeMove extends AbstractKPMPLocalSearch {
             firstIndex = 0;
             secondIndex = 1;
             pageCounter = 0;
+            crossingNumber = crossingNumber - ((firstCrossingsOnOriginalPage + secondCrossingsOnOriginalPage) - (firstCrossingsOnNewPage + secondCrossingsOnNewPage));
+            //int a = new KPMPSolutionChecker().getCrossingNumber(bestSolution);
+            // assert(crossingNumber == a);
         }
         if (secondIndex == bestSolution.getEdgePartition().size() && pageCounter != bestSolution.getNumberOfPages() - 1) {
             firstIndex = 0;
             secondIndex = 1;
             pageCounter++;
         }
-        return ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000) || secondIndex == bestSolution.getEdgePartition().size() && pageCounter == bestSolution.getNumberOfPages() - 1;
+        return ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000) || secondIndex == bestSolution.getEdgePartition().size() && pageCounter == bestSolution.getNumberOfPages() - 1 || numberOfIterations >= Main.localSearchIterationLimit;
 
     }
 

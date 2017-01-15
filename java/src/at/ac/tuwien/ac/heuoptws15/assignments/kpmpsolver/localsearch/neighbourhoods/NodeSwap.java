@@ -126,7 +126,7 @@ public class NodeSwap extends AbstractKPMPLocalSearch {
             bestSolution = generatedSolution;
             numberOfIterationsWithoutImprovement = 0;
         }
-        return numberOfIterationsWithoutImprovement >=  Main.iterationMultiplier || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
+        return numberOfIterations >= Main.localSearchIterationLimit || numberOfIterationsWithoutImprovement >= Main.iterationMultiplier || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
     }
 
     /**
@@ -181,12 +181,13 @@ public class NodeSwap extends AbstractKPMPLocalSearch {
         int crossingNumber = new KPMPSolutionChecker().getCrossingNumber(generatedSolution);
         if (crossingNumber < localBestCrossingNumber) {
             localBestCrossingNumber = crossingNumber;
+            super.crossingNumber = localBestCrossingNumber;
             bestSolution = generatedSolution;
             firstIndex = 0;
             secondIndex = 1;
             numberOfIterations = 0;
         }
-        return numberOfIterations == maxNumberOfIterations || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
+        return numberOfIterations == maxNumberOfIterations || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000) || numberOfIterations >= Main.localSearchIterationLimit;
 
         /*int crossingNumber = new KPMPSolutionChecker().getCrossingNumber(generatedSolution);
         if (crossingNumber < localBestCrossingNumber){

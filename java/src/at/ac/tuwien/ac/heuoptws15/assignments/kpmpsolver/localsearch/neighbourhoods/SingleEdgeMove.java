@@ -117,7 +117,7 @@ public class SingleEdgeMove extends AbstractKPMPLocalSearch {
 
             crossingNumber = crossingNumber - (crossingsOnOriginalPage - crossingsOnNewPage);
         }
-        return numberOfIterations >= bestSolution.getEdgePartition().size() * bestSolution.getNumberOfPages() || numberOfIterationsWithoutImprovement >= Main.iterationMultiplier || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000) || numberOfIterations >= Main.localSearchIterationLimit;
+        return numberOfIterations >= Main.localSearchIterationLimit || numberOfIterations >= bestSolution.getEdgePartition().size() * bestSolution.getNumberOfPages() || numberOfIterationsWithoutImprovement >= Main.iterationMultiplier || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000) || numberOfIterations >= Main.localSearchIterationLimit;
     }
 
     /**

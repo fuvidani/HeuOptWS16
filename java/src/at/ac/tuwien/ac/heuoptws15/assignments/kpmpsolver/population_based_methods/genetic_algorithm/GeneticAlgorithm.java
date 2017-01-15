@@ -29,7 +29,7 @@ public class GeneticAlgorithm {
     private final static int POP_SIZE = 4000 + ELITISM_K;  // population size
     private final static double MUTATION_RATE = 0.5;     // probability of mutation
     private final static double CROSSOVER_RATE = 0.7;     // probability of crossover
-    public static final double FAMILY_ELITISM_RATE = 0.6;   // probability to choose only the best 2 individuals of a family
+    public static final double FAMILY_ELITISM_RATE = 0.4;   // probability to choose only the best 2 individuals of a family
     public static final double NODE_SWAP_RATE = 0.7;    // probability that mutation includes node swap
     private KPMPInstance instance;
     private List<KPMPSolutionWriter.PageEntry> originalEdgePartitioning;

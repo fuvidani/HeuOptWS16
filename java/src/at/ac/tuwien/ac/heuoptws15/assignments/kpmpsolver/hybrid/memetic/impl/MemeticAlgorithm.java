@@ -4,6 +4,7 @@ import at.ac.tuwien.ac.Main;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.hybrid.memetic.HybridAlgorithm;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.hybrid.memetic.LocalSearchCallable;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.KPMPLocalSearch;
+import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.neighbourhoods.DoubleEdgeMove;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.neighbourhoods.SingleEdgeMove;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.localsearch.stepfunction.StepFunction;
 import at.ac.tuwien.ac.heuoptws15.assignments.kpmpsolver.population_based_methods.genetic_algorithm.Individual;
@@ -32,7 +33,7 @@ public class MemeticAlgorithm implements HybridAlgorithm {
     private KPMPLocalSearch localSearch;
 
     private final static int ELITISM_K = 8;
-    private final static int POP_SIZE = 2000 + ELITISM_K;  // population size
+    private final static int POP_SIZE = 16 + ELITISM_K;  // population size
     private final static double MUTATION_RATE = 0.6;     // probability of mutation
     private final static double CROSSOVER_RATE = 0.7;     // probability of crossover
     public static final double FAMILY_ELITISM_RATE = 0.6;   // probability to choose only the best 2 individuals of a family
@@ -54,7 +55,7 @@ public class MemeticAlgorithm implements HybridAlgorithm {
             ExecutorService executorService;
             executorService = Executors.newFixedThreadPool(cores);
 
-            performLocalSearch(executorService, cores, distribution, pop.getPopulation());
+            performLocalSearch(executorService, cores, distribution, pop.getPopulation(), 0);
 
             System.out.println("local search done");
 
@@ -115,7 +116,7 @@ public class MemeticAlgorithm implements HybridAlgorithm {
                     }
                 }
 
-                performLocalSearch(executorService, cores, distribution, nextGeneration);
+                performLocalSearch(executorService, cores, distribution, nextGeneration, iter);
                 System.out.println("2. local search done");
 
                 pop.setPopulation(nextGeneration);
@@ -151,11 +152,15 @@ public class MemeticAlgorithm implements HybridAlgorithm {
         throw new IllegalArgumentException("localsearch null");
     }
 
-    private void performLocalSearch(ExecutorService executorService, int cores, int distribution, List<Individual> population) {
+    private void performLocalSearch(ExecutorService executorService, int cores, int distribution, List<Individual> population, int iteration) {
         List<LocalSearchCallable> localSearchCallableList = new ArrayList<>(cores);
         for (int i = 0; i < cores; i++) {
             LocalSearchCallable slave = new LocalSearchSlave();
-            slave.registerLocalSearch(new SingleEdgeMove(), stepFunction);
+            if (iteration > 0 && iteration % 10 == 0) {
+                slave.registerLocalSearch(new DoubleEdgeMove(), stepFunction);
+            } else {
+                slave.registerLocalSearch(new SingleEdgeMove(), stepFunction);
+            }
             localSearchCallableList.add(slave);
         }
 

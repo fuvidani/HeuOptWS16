@@ -170,7 +170,7 @@ public class DoubleNodeSwap extends AbstractKPMPLocalSearch {
             bestSolution = generatedSolution;
             numberOfIterationsWithoutImprovement = 0;
         }
-        return numberOfIterationsWithoutImprovement >=  Main.iterationMultiplier || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
+        return numberOfIterations >= Main.localSearchIterationLimit || numberOfIterationsWithoutImprovement >= Main.iterationMultiplier || ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
     }
 
     /**

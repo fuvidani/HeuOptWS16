@@ -41,6 +41,9 @@ public class LocalSearchSlave implements LocalSearchCallable {
         Random random = new Random(Double.doubleToLongBits(Math.random()));
         for (Individual i : individuals) {
             if (random.nextDouble() < LOCAL_SEARCH_RATE) {
+                if (!i.needsEvaluation()) {
+                    localSearch.setCrossingNumber(i.getNumberOfCrossings());
+                }
                 i.setGenes(localSearch.improveSolution(i.getGenes(), stepFunction));
                 i.setNumberOfCrossings(localSearch.getCrossingNumber());
             }

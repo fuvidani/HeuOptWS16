@@ -16,26 +16,34 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
 
     private List<AbstractKPMPLocalSearch> neighbourhoods_K;
     private List<AbstractKPMPLocalSearch> neighbourhoods_I;
+    private int crossingNumber;
+    private long GVNS_start;
 
     public GeneralVariableNeighbourhoodSearch() {
-        this.neighbourhoods_K = new ArrayList<>();
+
+    }
+
+    private void initialize() {
+        this.neighbourhoods_K = new ArrayList<>(3);
         this.neighbourhoods_K.add(new SingleEdgeMove());
         this.neighbourhoods_K.add(new NodeEdgeMove());
         this.neighbourhoods_K.add(new DoubleNodeSwap());
 
-        this.neighbourhoods_I = new ArrayList<>();
+        this.neighbourhoods_I = new ArrayList<>(3);
         this.neighbourhoods_I.add(new SingleEdgeMove());
         this.neighbourhoods_I.add(new NodeSwap());
         this.neighbourhoods_I.add(new DoubleEdgeMove());
-
     }
 
     @Override
     public KPMPSolution improveSolution(KPMPSolution initialSolution, StepFunction stepFunction) {
+        initialize();
+        GVNS_start = System.nanoTime();
         KPMPSolution bestSolution = initialSolution;
         KPMPSolutionChecker solutionChecker = new KPMPSolutionChecker();
         int crossingNumberOfBestSolution = solutionChecker.getCrossingNumber(bestSolution);
         int runCounter = 0;
+        crossingNumber = crossingNumberOfBestSolution;
         Main.crossingsBeforeLocalSearch = crossingNumberOfBestSolution;
         int runsWithoutImprovement = 0;
         do {
@@ -73,7 +81,7 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
             }
             runCounter++;
         } while (runsWithoutImprovement < 2000 && !runTimeLimitExceeded());
-
+        crossingNumber = crossingNumberOfBestSolution;
         return bestSolution;
     }
 
@@ -82,7 +90,8 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
     }
 
     private boolean runTimeLimitExceeded(){
-        return ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
+        // return ((System.nanoTime() - Main.START) / 1000000) >= (Main.secondsBeforeStop * 1000);
+        return ((System.nanoTime() - GVNS_start) / 1000000000) >= (Main.GVNS_time_limit_seconds);
     }
 
     @Override
@@ -97,6 +106,6 @@ public class GeneralVariableNeighbourhoodSearch implements KPMPLocalSearch {
 
     @Override
     public int getCrossingNumber() {
-        return 0;
+        return crossingNumber;
     }
 }

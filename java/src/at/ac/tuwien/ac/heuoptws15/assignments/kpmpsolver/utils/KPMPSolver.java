@@ -86,7 +86,7 @@ public class KPMPSolver {
                 solution.setEdgePartition(combinedHeuristic.calculateEdgePartition(instance,null,0));
                 solution.setSpineOrder(combinedHeuristic.getSpineOrder());
             }
-            solution = localSearch.improveSolution(solution, stepFunction);
+            //solution = localSearch.improveSolution(solution, stepFunction);
         }
 
         return solution;

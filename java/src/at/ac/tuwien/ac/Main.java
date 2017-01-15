@@ -35,6 +35,9 @@ public class Main {
     public static final HeuristicStrategy heuristicStrategy = HeuristicStrategy.HYBRID;
     public static int maxCrossingNumber;
     public static double lowerBound = 0;
+    public static double GVNS_time_limit_seconds = 30;
+    public static double localSearchNodeSwap_iterationLimit = Integer.MAX_VALUE;
+    public static double constructionMultiplier = 100;
 
     //private static String inputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/instances/";
     //private static String outputPath = "/Users/daniefuvesi/University/Masterstudium/1. Semester/Heuristic Optimization Techniques/Assignment 1/HeuOptWS16/solutions/";
@@ -51,20 +54,24 @@ public class Main {
         calculateAvgCrossingsBeforeLocalSearch(instanceIndex);*/
         try {
             while (testRuns < 1) {
-                int instanceCounter = 1;
-                while (instanceCounter != 6) {
+                int instanceCounter = 10;
+                while (instanceCounter != 11) {
                     lowerBound = 0;
                     if (instanceCounter == 1) {
                         lowerBound = 9;
                     }
                     if (instanceCounter < 6) {
+                        localSearchIterationLimit = 2000;
                         iterationMultiplier = 4000;
                     } else if (instanceCounter == 6) {
+                        constructionMultiplier = 2;
                         iterationMultiplier = 500;
                         localSearchIterationLimit = 1000;
                     } else {
+                        constructionMultiplier = 8;
                         iterationMultiplier = 1000;
-                        localSearchIterationLimit = 2000;
+                        localSearchIterationLimit = 3000;
+                        localSearchNodeSwap_iterationLimit = 100;
                     }
                     KPMPInstance instance = KPMPInstance.readInstance(inputPath + "automatic-" + instanceCounter + ".txt");
                     System.out.println("Test Instance " + instanceCounter + " - K: " + instance.getK() + ", Vertices: " + instance.getNumVertices());
@@ -104,7 +111,7 @@ public class Main {
                         }
                         StepFunction stepFunction = new BestImprovementStepFunction();
                         KPMPLocalSearch localSearch = new SingleEdgeMove();
-                        kpmpSolver.setHeuristicType(KPMPSolver.HeuristicType.COMBINED);
+                        kpmpSolver.setHeuristicType(KPMPSolver.HeuristicType.SEPARATED);
                         kpmpSolver.registerLocalSearchImplementation(localSearch);
                         kpmpSolver.registerStepFunction(stepFunction);
                     }
