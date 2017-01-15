@@ -67,7 +67,7 @@
 	\end{algorithmic}
 \end{algorithm}
 \subsection{Local search}
-\hspace{0.5cm}For the local search we decided to use an already existing one. For performance reasons we went with the \textit{Single-Edge-Move} (S-E-M) neighbourhood along with the best-improvement stepfunction. Reminder: the S-E-M neighbourhood consists of all solutions where 2 solutions differ in the page number of an edge (i.e. an edge is moved to another page). In order to maintain a fair balance between diversity and accuracy, not necessarily every individual gets locally optimized. This means that in the \textit{performLocalSearch()} method an individual is only improved by the S-E-M if a random number is greater than \textbf{0.8} (adjustable parameter). 
+\hspace{0.5cm}For the local search we decided to use an already existing one. For performance reasons we went with the \textit{Single-Edge-Move} (S-E-M) neighbourhood along with the best-improvement stepfunction. Reminder: the S-E-M neighbourhood consists of all solutions where 2 solutions differ in the page number of an edge (i.e. an edge is moved to another page). In order to maintain a fair balance between diversity and accuracy, not necessarily every individual gets locally optimized. This means that in the \textit{performLocalSearch()} method an individual is only improved by the S-E-M if a random number is less than \textbf{0.8} (adjustable parameter). 
 
 \section{Performance Improvement}
 \hspace{0.5cm}Beside the multithreaded construction of initial solutions and the genetic part we also implemented the local search using multithreading. Since individuals do not affect each other, it is a suitable case for parallelization. The population gets divided by the number of (virtual) cores so that every thread cares for a portion doing its local search. The crossing numbers are incrementally calculated during the local search so that a subsequent invocation of \textit{evaluatePopulation()} in the genetic algorithm does not re-compute crossings unnecessarily.
@@ -82,18 +82,18 @@
 \subsection{Results using Randomized Construction Heuristic}
 
 \begin{tabular}{l*{6}{c}r}
-	Instance & Avg. Crossings B4 GA & Best Crossings & Avg. Crossings & Time & Runs \\
+	Instance & Avg. Crossings B4 GA & Best Crossings & Avg. Crossings & Avg. Time & Runs \\
 	\hline
-	automatic-1 & 18 & 9 & 9 & 520 ms & 15 \\
-	automatic-2 & 6 & 0 & 0 & 675 ms & 15 \\
-	automatic-3 & 285 & 28 & 40 & 118'487 ms & 15 \\
-	automatic-4 & 3 & 0 & 0 & 10856 ms & 15 \\
-	automatic-5 & 24 & 0 & 0.9 & 9166 ms & 15 \\
-	automatic-6 & 5'751'426 & 5'745'556 & 5'750'425 & full time & 5 \\
-	automatic-7 & 6'710 & 4'976 & 5'985 & full time & 5 \\
-	automatic-8 & 734'630 & 686'880 & 695'613 & full time & 5  \\
-	automatic-9 & 147'709 & 131'267 & 139'318 & full time & 5 \\
-	automatic-10 & 69'754 & 57'290 & 59'747 & full time & 5  \\
+	automatic-1 & 17 & 9 & 9 & 190 ms & 15 \\
+	automatic-2 & 7 & 0 & 0 & 799 ms & 15 \\
+	automatic-3 & 280 & 20 & 24 & 110'114 ms & 15 \\
+	automatic-4 & 3 & 0 & 0 & 4'631 ms & 15 \\
+	automatic-5 & 30 & 0 & 0.4 & 14'548 ms & 15 \\
+	automatic-6 & 5'749'611 & 5'665'556 & 5'700'145 & full time & 5 \\
+	automatic-7 & 7'458 & 5'545 & 5'985 & full time & 5 \\
+	automatic-8 & 744'648 & 684'987 & 694'012 & full time & 5  \\
+	automatic-9 & 140'215 & 129'487 & 139'121 & full time & 5 \\
+	automatic-10 & 69'245 & 52'265 & 58'879 & full time & 5  \\
 \end{tabular}
 
 \subsection{Best paramter models}
@@ -101,16 +101,16 @@
 \begin{tabular}{l*{6}{c}r}
 	Instance & population size & elite size & mutation rate & crossover rate & family elitism rate & ns rate \\
 	\hline
-	automatic-1 & 120 & 8 & 0.7 & 0.7 & 0.6 & 0.2 \\
-	automatic-2 & 80 & 8 & 0.8 & 0.7 & 0.6 & 0.2 \\
-	automatic-3 & 4000 & 8 & 0.5 & 0.7 & 0.6 & 0.4 \\
+	automatic-1 & 120 & 8 & 0.7 & 0.7 & 0.6 & 0.5 \\
+	automatic-2 & 80 & 8 & 0.8 & 0.7 & 0.6 & 0.5 \\
+	automatic-3 & 2400 & 8 & 0.5 & 0.7 & 0.6 & 0.4 \\
 	automatic-4 & 80 & 8 & 0.6 & 0.7 & 0.6 & 0.7 \\
 	automatic-5 & 400 & 8 & 0.9 & 0.7 & 0.8 & 0.2 \\
 	automatic-6 & 8 & 0 & 0.5 & 0.7 & 0.6 & 0.2 \\
-	automatic-7 & 56 & 8 & 0.5 & 0.7 & 0.6 & 0.2 \\
-	automatic-8 & 16 & 8 & 0.5 & 0.7 & 0.6 & 0.2 \\
-	automatic-9 & 16 & 8 & 0.5 & 0.7 & 0.6 & 0.2 \\
-	automatic-10 & 16 & 8 & 0.5 & 0.7 & 0.6 & 0.2 \\
+	automatic-7 & 64 & 8 & 0.5 & 0.7 & 0.5 & 0.8 \\
+	automatic-8 & 16 & 8 & 0.5 & 0.7 & 0.4 & 0.7 \\
+	automatic-9 & 16 & 8 & 0.5 & 0.7 & 0.4 & 0.7 \\
+	automatic-10 & 16 & 8 & 0.5 & 0.7 & 0.4 & 0.2 \\
 \end{tabular}
 
 
